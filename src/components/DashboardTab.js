@@ -666,13 +666,13 @@ export default function DashboardTab({
           </div>
 
           <div className="space-y-2.5 flex-1 max-h-[160px] overflow-y-auto pr-1 scrollbar-thin">
-            {myNotifications.length === 0 ? (
+            {notifications.length === 0 ? (
               <div className="text-center py-6 text-xs text-slate-400 italic flex flex-col items-center justify-center gap-2 select-none">
                 <ShieldCheck className="h-7 w-7 text-indigo-500/30" />
                 <span>Zero pending alerts</span>
               </div>
             ) : (
-              myNotifications.map(n => (
+              notifications.map(n => (
                 <div key={n._id} className="rounded-xl border border-indigo-100/40 bg-indigo-50/5 p-2.5 text-[10px] dark:border-indigo-950/40 dark:bg-indigo-950/10">
                   <div className="font-bold text-slate-700 dark:text-slate-350">
                     {n.actor} <span className="font-semibold text-slate-500 dark:text-slate-400">{n.message}</span>
