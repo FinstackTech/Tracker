@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
 import { 
-  Plus, Trash2, Edit2, List, Columns, Search, Filter, Check, ArrowRight, Eye, ChevronDown, ChevronRight, Calendar as CalendarIcon, Sparkles, Tag, ShieldAlert, Activity, Sparkle
+  Plus, Trash2, Edit2, List, Columns, Search, Filter, Check, ArrowRight, Eye, ChevronDown, ChevronRight, Calendar as CalendarIcon, Sparkles, Tag, ShieldAlert, Activity, Sparkle, User
 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -654,7 +654,7 @@ export default function TaskTrackerTab({
                                   className="inline-flex items-center gap-1.5 rounded px-2.5 py-0.5 text-[10px] font-extrabold border cursor-pointer"
                                 >
                                   <div className="h-4 w-4 rounded-full bg-white/60 flex items-center justify-center text-[8px] font-black uppercase">
-                                    {task.owner ? task.owner.charAt(0) : '?'}
+                                    {task.owner ? task.owner.charAt(0) : <User className="h-2.5 w-2.5 text-slate-500" />}
                                   </div>
                                   {task.owner || 'Assign...'}
                                 </button>
