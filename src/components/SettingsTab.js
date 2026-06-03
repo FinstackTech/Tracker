@@ -66,13 +66,15 @@ const DiscordIcon = (props) => (
 export default function SettingsTab({ 
   activeUser, 
   activeProject, 
+  setActiveProject,
   epics = [], 
   setEpics, 
   currentUser,
   userProfiles = [],
   setUserProfiles,
   projects = [],
-  setProjects
+  setProjects,
+  view = 'webhooks'
 }) {
   const [epicName, setEpicName] = useState('');
   const [epicColor, setEpicColor] = useState('#4f46e5');
@@ -301,10 +303,11 @@ export default function SettingsTab({
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in-30 duration-200">
       
       {/* ─── WEBHOOK CONFIGURATION FORM ─── */}
-      <div className="apple-card p-6">
+      {view === 'webhooks' && (
+        <div className="apple-card p-6">
         
         <div className="flex items-center justify-between mb-6 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
           <div className="flex items-center gap-2.5">
@@ -672,9 +675,11 @@ Settings updated successfully!
 
         </form>
       </div>
+      )}
 
       {/* ─── EMPLOYEE & USER REGISTRY CARD ─── */}
-      <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-850 dark:bg-slate-900">
+      {view === 'users' && (
+        <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-850 dark:bg-slate-900">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
           <Users className="h-5 w-5 text-indigo-500" />
           <div>
@@ -809,9 +814,37 @@ Settings updated successfully!
           </div>
         )}
       </div>
+      )}
 
-      {/* ─── PROJECT REGISTRY CARD ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      {/* ─── PROJECTS PORTFOLIO VIEW ─── */}
+      {view === 'projects' && (
+        <>
+          {/* Active selected project banner */}
+          {activeProject ? (
+            <div className="rounded-2xl border border-indigo-150 bg-indigo-50/50 p-5 dark:border-indigo-950/20 dark:bg-indigo-950/20 mb-6 flex items-center justify-between shadow-sm">
+              <div>
+                <span className="text-[10px] font-black text-indigo-550 dark:text-indigo-400 uppercase tracking-widest leading-none">Active Selected Workspace Project</span>
+                <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider mt-1.5 flex items-center gap-2">
+                  <span className="font-mono bg-indigo-100 dark:bg-indigo-900/60 px-2 py-0.5 rounded text-indigo-700 dark:text-indigo-300 text-xs">{activeProject.code}</span>
+                  <span>{activeProject.name}</span>
+                </h4>
+              </div>
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Active Project Selected" />
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-amber-150 bg-amber-50/50 p-5 dark:border-amber-955/20 dark:bg-amber-955/20 mb-6 flex items-center gap-3">
+              <Lock className="h-5 w-5 text-amber-500 shrink-0" />
+              <div>
+                <span className="text-[10px] font-black text-amber-600 dark:text-amber-405 uppercase tracking-widest leading-none">No Active Project Selected</span>
+                <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider mt-1.5">
+                  Please select or register a project below to activate workspace tracking
+                </h4>
+              </div>
+            </div>
+          )}
+
+          {/* ─── PROJECT REGISTRY CARD ─── */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
           <FolderKanban className="h-5 w-5 text-indigo-500" />
           <div>
@@ -842,11 +875,12 @@ Settings updated successfully!
                 className={`p-4 rounded-2xl border transition-all flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150 relative overflow-hidden ${
                   isActive 
                     ? 'border-indigo-200 bg-indigo-50/15 dark:border-indigo-900/50 dark:bg-indigo-950/20 shadow-sm shadow-indigo-50/50 dark:shadow-none' 
-                    : 'border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white dark:hover:bg-slate-900/30 hover:border-slate-200/80 dark:hover:border-slate-800'
+                    : 'border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white dark:hover:bg-slate-900/30 hover:border-slate-200/80 dark:hover:border-slate-800 cursor-pointer'
                 }`}
+                onClick={() => { if (!isActive && setActiveProject) setActiveProject(proj); }}
               >
                 {isActive && (
-                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-600 dark:bg-indigo-400" />
+                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-650 dark:bg-indigo-400" />
                 )}
                 
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -854,30 +888,43 @@ Settings updated successfully!
                     <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 text-xs tracking-wider uppercase">
                       {proj.code}
                     </span>
-                    <h5 className="text-xs font-bold text-slate-850 dark:text-slate-205 mt-1 leading-snug truncate" title={proj.name}>
+                    <h5 className="text-xs font-bold text-slate-855 dark:text-slate-205 mt-1 leading-snug truncate" title={proj.name}>
                       {proj.name}
                     </h5>
                   </div>
                   {isActive && (
-                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
+                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-405 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
                       Active Selected
                     </span>
                   )}
                 </div>
 
                 <div className="flex items-center justify-between border-t border-slate-100/60 dark:border-slate-800/60 pt-3 mt-3 text-xs">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-450 truncate">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-455 truncate">
                     <Users className="h-3.5 w-3.5 text-slate-400" />
                     <span className="truncate max-w-[120px]">{proj.client}</span>
                   </div>
                   
-                  <span className={`inline-block px-1.5 py-0.5 text-[8.5px] font-black rounded uppercase tracking-wide border ${
-                    proj.type === 'maintenance' 
-                      ? 'bg-amber-50/50 text-amber-700 border-amber-205/65 dark:bg-amber-955/15 dark:text-amber-400 dark:border-amber-950/20' 
-                      : 'bg-blue-50/50 text-blue-700 border-blue-200/50 dark:bg-blue-955/15 dark:text-blue-400 dark:border-blue-950/20'
-                  }`}>
-                    {proj.type === 'maintenance' ? 'SLA support' : 'Implementation'}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {!isActive && setActiveProject && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveProject(proj);
+                        }}
+                        className="text-[9px] bg-indigo-55/80 hover:bg-indigo-650 hover:text-white dark:bg-indigo-950/40 dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-650 dark:text-indigo-400 px-2 py-0.5 rounded font-extrabold cursor-pointer transition-all uppercase tracking-wider border border-indigo-100/50 dark:border-indigo-900/40"
+                      >
+                        Activate Project
+                      </button>
+                    )}
+                    <span className={`inline-block px-1.5 py-0.5 text-[8.5px] font-black rounded uppercase tracking-wide border ${
+                      proj.type === 'maintenance' 
+                        ? 'bg-amber-50/50 text-amber-705 border-amber-205/65 dark:bg-amber-955/15 dark:text-amber-400 dark:border-amber-950/20' 
+                        : 'bg-blue-50/50 text-blue-700 border-blue-200/50 dark:bg-blue-955/15 dark:text-blue-400 dark:border-blue-950/20'
+                    }`}>
+                      {proj.type === 'maintenance' ? 'SLA support' : 'Implementation'}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -1103,9 +1150,13 @@ Settings updated successfully!
           )}
         </div>
       </div>
+      </>
+      )}
 
       {/* ─── MODEL CONTEXT PROTOCOL (MCP) CARD ─── */}
-      <div className="apple-card p-6 mt-6">
+      {view === 'webhooks' && (
+        <>
+          <div className="apple-card p-6 mt-6">
         <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
@@ -1318,6 +1369,8 @@ Settings updated successfully!
           </div>
         </div>
       </div>
+      </>
+      )}
 
     </div>
   );

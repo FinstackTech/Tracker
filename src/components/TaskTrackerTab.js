@@ -249,7 +249,7 @@ export default function TaskTrackerTab({
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!confirm("Are you sure you want to delete this task initiative?")) return;
+    if (!confirm("Are you sure you want to delete this task?")) return;
     try {
       const response = await fetch(`/api/tasks?id=${taskId}`, {
         method: 'DELETE'
@@ -520,7 +520,7 @@ export default function TaskTrackerTab({
       {viewMode === 'list' && (
         <div className="apple-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs text-slate-600 dark:text-slate-300">
+            <table className="w-full min-w-[1000px] border-collapse text-left text-xs text-slate-600 dark:text-slate-300">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 font-bold text-slate-400 dark:border-slate-850 dark:bg-slate-950/40">
                   <th className="px-4 py-3 min-w-[280px]">Initiative</th>
@@ -742,25 +742,42 @@ export default function TaskTrackerTab({
                             </td>
 
                             {/* Actions column */}
-                            <td className="px-4 py-3 text-center flex items-center justify-center gap-2">
-                              <button
-                                onClick={() => onSelectItem(task, 'task')}
-                                className="opacity-0 group-hover:opacity-100 text-indigo-500 hover:text-indigo-750 transition-all p-1"
-                                title="Open Details Side Drawer"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                              
-                              <button
-                                onClick={() => handleDeleteTask(task._id)}
-                                className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-600 transition-all p-1"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => onSelectItem(task, 'task')}
+                                  className="text-slate-400 hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  title="View Task Details"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => onSelectItem(task, 'task')}
+                                  className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  title="Edit Task"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTask(task._id)}
+                                  className="text-slate-400 hover:text-rose-650 dark:hover:text-rose-500 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  title="Delete Task"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
                       })}
+
+                      {!isCollapsed && catTasks.length === 0 && (
+                        <tr className="border-b border-slate-100 dark:border-slate-850">
+                          <td colSpan="10" className="px-4 py-4 text-center text-slate-400 italic text-xs bg-slate-50/5">
+                            No initiatives in this category.
+                          </td>
+                        </tr>
+                      )}
 
                       {!isReadOnly && !isCollapsed && (
                         <tr className="bg-slate-50/10 border-b border-slate-100 dark:border-slate-850">

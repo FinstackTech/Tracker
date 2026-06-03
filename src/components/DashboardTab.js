@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell
 } from 'recharts';
 import { 
-  TrendingUp, Users, CheckCircle, AlertTriangle, DollarSign,
+  TrendingUp, Users, User, CheckCircle, AlertTriangle, DollarSign,
   Briefcase, Activity, Landmark, Bell, Download, Printer, CalendarRange, Clock, ShieldCheck
 } from 'lucide-react';
 import { useState } from 'react';
@@ -45,6 +45,20 @@ export default function DashboardTab({
   const inProgressTasks = activeTasks.filter(t => t.status === 'in-progress' || t.status === 'in-sit' || t.status === 'in-uat').length;
   const openTasks = totalTasks - completedTasks;
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  const totalAssignedTasks = activeTasks.filter(t => t.owner && t.owner.trim() !== '').length;
+  const myAssignedTasks = activeTasks.filter(t => t.owner && activeUser && t.owner.toLowerCase() === activeUser.toLowerCase()).length;
+  const pendingOrBlockedTasks = activeTasks.filter(t => t.blocked || t.status === 'on-hold').length;
+  const dueDateAlertsCount = activeTasks.filter(t => {
+    if (t.status === 'done' || !t.dueDate) return false;
+    const due = new Date(t.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3;
+  }).length;
 
   // ─── 2. COMPUTE WORKLOAD DATA (for Recharts) ───
   const workloadMap = {};
@@ -272,6 +286,84 @@ export default function DashboardTab({
           </div>
         </div>
       ))}
+
+      {/* ─── TASK ASSIGNMENT & ALERTS OVERVIEW ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        {/* KPI: Total Assigned */}
+        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-650" />
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{totalAssignedTasks}</h3>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-650 dark:bg-blue-955/40 dark:text-blue-400">
+              <Users className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Across all members</p>
+        </div>
+
+        {/* KPI: My Assigned */}
+        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 to-violet-500" />
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{myAssignedTasks}</h3>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-400">
+              <User className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold uppercase mt-3 tracking-wide">Assigned to {activeUser}</p>
+        </div>
+
+        {/* KPI: In Progress */}
+        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-amber-400 to-orange-500" />
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">In Progress Tasks</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{inProgressTasks}</h3>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-650 dark:bg-amber-955/40 dark:text-amber-400">
+              <Activity className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Active Dev / SIT / UAT</p>
+        </div>
+
+        {/* KPI: Blocked / Pending */}
+        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-rose-500 to-red-500" />
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Pending / Blocked</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-650 dark:bg-rose-955/40 dark:text-rose-450">
+              <AlertTriangle className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Blocked or On Hold</p>
+        </div>
+
+        {/* KPI: Due Alerts */}
+        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-pink-500 to-rose-500" />
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Due Date Alerts</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-50 text-pink-650 dark:bg-pink-950/40 dark:text-pink-400">
+              <Clock className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-rose-650 dark:text-rose-400 font-bold uppercase mt-3 tracking-wide">Due in &lt;= 3 days / overdue</p>
+        </div>
+      </div>
 
       {/* ─── KPI METRICS BOARD ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

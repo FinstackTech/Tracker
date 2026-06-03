@@ -390,6 +390,8 @@ export default function Home() {
 
   const sidebarMenu = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'projects', label: 'Projects Portfolio', icon: Briefcase },
+    { id: 'users', label: 'Users Registry', icon: User },
     { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
     { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
     { id: 'planner', label: 'Project Planner', icon: CalendarRange },
@@ -634,7 +636,7 @@ export default function Home() {
         </div>
 
         {/* Menu Nav */}
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 pr-2 py-4 space-y-1 overflow-y-auto">
           {sidebarMenu.map((item) => {
             const MenuIcon = item.icon;
             const isActive = activeTab === item.id;
@@ -646,17 +648,14 @@ export default function Home() {
                   setActiveTab(item.id);
                   setSelectedItem(null);
                 }}
-                className={`w-full flex items-center rounded-xl px-3 py-2.5 transition-all text-xs font-bold relative group hover:scale-[1.02] active:scale-[0.98] duration-150 cursor-pointer ${
+                className={`w-full flex items-center rounded-r-xl py-2.5 pl-3 pr-4 transition-all text-xs font-bold relative group duration-150 cursor-pointer border-l-4 ${
                   isActive 
-                    ? 'bg-gradient-to-r from-indigo-650 to-indigo-550 text-white shadow-sm' 
-                    : 'text-slate-550 hover:bg-slate-50 hover:text-indigo-650 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-indigo-400'
+                    ? 'bg-indigo-50 border-indigo-600 text-indigo-600 dark:bg-indigo-950/20 dark:border-indigo-400 dark:text-indigo-400' 
+                    : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/40 dark:hover:text-slate-205'
                 }`}
                 title={sidebarCollapsed ? item.label : undefined}
               >
-                {isActive && (
-                  <span className="absolute left-1 top-2 bottom-2 w-1 bg-white rounded-r" />
-                )}
-                <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'}`} />
+                <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'}`} />
                 {!sidebarCollapsed && <span className="transition-transform group-hover:translate-x-0.5">{item.label}</span>}
               </button>
             );
@@ -848,10 +847,11 @@ export default function Home() {
             />
           )}
 
-          {activeTab === 'settings' && (
+          {activeTab === 'projects' && (
             <SettingsTab 
               activeUser={activeUser} 
               activeProject={activeProject}
+              setActiveProject={setActiveProject}
               epics={epics}
               setEpics={setEpics}
               currentUser={currentUser}
@@ -859,6 +859,39 @@ export default function Home() {
               setUserProfiles={setUserProfiles}
               projects={projects}
               setProjects={setProjects}
+              view="projects"
+            />
+          )}
+
+          {activeTab === 'users' && (
+            <SettingsTab 
+              activeUser={activeUser} 
+              activeProject={activeProject}
+              setActiveProject={setActiveProject}
+              epics={epics}
+              setEpics={setEpics}
+              currentUser={currentUser}
+              userProfiles={userProfiles}
+              setUserProfiles={setUserProfiles}
+              projects={projects}
+              setProjects={setProjects}
+              view="users"
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <SettingsTab 
+              activeUser={activeUser} 
+              activeProject={activeProject}
+              setActiveProject={setActiveProject}
+              epics={epics}
+              setEpics={setEpics}
+              currentUser={currentUser}
+              userProfiles={userProfiles}
+              setUserProfiles={setUserProfiles}
+              projects={projects}
+              setProjects={setProjects}
+              view="webhooks"
             />
           )}
 
