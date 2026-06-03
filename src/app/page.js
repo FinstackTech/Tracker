@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { 
   Layers, Briefcase, Plus, FolderPlus, X, Columns, LayoutDashboard, CheckSquare, 
-  AlertCircle, Calendar, Landmark, Settings, Bell, ChevronLeft, ChevronRight, User, Globe, LogOut
+  AlertCircle, Calendar, Landmark, Settings, Bell, ChevronLeft, ChevronRight, User, Globe, LogOut,
+  CalendarRange, FileText
 } from 'lucide-react';
 import DashboardTab from '@/components/DashboardTab';
 import TaskTrackerTab from '@/components/TaskTrackerTab';
@@ -12,6 +13,8 @@ import DailyTrackerTab from '@/components/DailyTrackerTab';
 import LeaveTrackerTab from '@/components/LeaveTrackerTab';
 import FinanceHubTab from '@/components/FinanceHubTab';
 import SettingsTab from '@/components/SettingsTab';
+import PlannerTab from '@/components/PlannerTab';
+import DocManagerTab from '@/components/DocManagerTab';
 import DetailsDrawer from '@/components/DetailsDrawer';
 import { ThemeBackdrop } from '@/components/ThemeBackdrop';
 
@@ -389,6 +392,8 @@ export default function Home() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
     { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
+    { id: 'planner', label: 'Project Planner', icon: CalendarRange },
+    { id: 'docs', label: 'Document Vault', icon: FileText },
     { id: 'daily', label: 'Daily standup', icon: Columns },
     { id: 'leaves', label: 'Leave Tracker', icon: Calendar },
     { id: 'finance', label: 'Finance Hub', icon: Landmark },
@@ -407,49 +412,83 @@ export default function Home() {
     );
   }
 
-  if (!isLoggedIn) {
+   if (!isLoggedIn) {
     return (
       <div className="relative flex h-screen w-screen items-center justify-center overflow-hidden font-sans bg-slate-50 dark:bg-slate-950">
         <ThemeBackdrop />
-        <div className="relative z-10 w-full max-w-sm apple-card p-8 animate-in zoom-in-95 duration-200">
-          <div className="flex flex-col items-center mb-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-md shadow-indigo-200/50 dark:shadow-none mb-3">
+        
+        {/* Decorative dynamic background blobs */}
+        <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-gradient-to-br from-indigo-500/20 to-violet-500/0 blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-gradient-to-tl from-purple-500/10 to-indigo-500/0 blur-3xl" />
+
+        <div className="relative z-10 w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 dark:bg-slate-900/75 dark:border-slate-800/80 shadow-[0_20px_50px_rgba(99,102,241,0.06)] animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center mb-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 shadow-lg shadow-indigo-200/50 dark:shadow-none mb-3.5 hover:scale-105 active:scale-95 transition-transform duration-200">
               <Layers className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-wider">
-              Finstack Platform
+            <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+              Finstack PPM
             </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Unified PPM & Delivery Hub</p>
+            <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider mt-1.5">Unified Project Portfolio & Delivery Hub</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs">
+          <form onSubmit={handleLogin} className="space-y-5 text-xs">
+            
+            {/* Clickable Profile Card Selector Grid */}
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-450 mb-1.5">
+              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-450 mb-2.5 text-center">
                 Select Workspace Profile
               </label>
-              <select
-                value={loginUserName}
-                onChange={e => setLoginUserName(e.target.value)}
-                className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2.5 outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-950 dark:text-slate-300 font-bold cursor-pointer"
-              >
-                {userProfiles.map(p => (
-                  <option key={p.name} value={p.name}>
-                    {p.name} ({p.role})
-                  </option>
-                ))}
-              </select>
+              
+              <div className="grid grid-cols-5 gap-2 max-h-[140px] overflow-y-auto p-1 scrollbar-thin rounded-2xl border border-slate-100/50 dark:border-slate-850 bg-slate-50/30 dark:bg-slate-950/20">
+                {userProfiles.map(p => {
+                  const isSelected = loginUserName === p.name;
+                  return (
+                    <button
+                      key={p.name}
+                      type="button"
+                      onClick={() => {
+                        setLoginUserName(p.name);
+                        setLoginError('');
+                      }}
+                      className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all border outline-none cursor-pointer ${
+                        isSelected
+                          ? 'bg-white border-indigo-500 scale-[1.03] dark:bg-slate-900 shadow-md shadow-slate-100 dark:shadow-none'
+                          : 'border-transparent hover:bg-slate-100/40 dark:hover:bg-slate-900/10'
+                      }`}
+                    >
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold uppercase transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none'
+                          : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {p.name.charAt(0)}
+                      </div>
+                      <span className="text-[9px] font-extrabold text-slate-700 dark:text-slate-350 truncate w-full text-center mt-1.5">
+                        {p.name}
+                      </span>
+                      <span className="text-[7.5px] text-slate-400 font-semibold truncate w-full text-center scale-90 leading-none">
+                        {p.role}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-450 mb-1.5">
-                Password
-              </label>
+              <div className="flex justify-between items-center mb-1.5 px-0.5">
+                <label className="text-[9px] font-black uppercase tracking-wider text-slate-450">
+                  Password for <span className="text-indigo-600 dark:text-indigo-400 font-black">{loginUserName}</span>
+                </label>
+                <span className="text-[8px] text-slate-400 font-bold lowercase">default is role (e.g. 'admin')</span>
+              </div>
               <input
                 type="password"
-                placeholder="Enter profile password"
+                placeholder="Enter password"
                 value={loginPassword}
                 onChange={e => setLoginPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2.5 outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-950 dark:text-slate-300 font-semibold"
+                className="w-full rounded-xl border border-slate-205 bg-white/70 px-3.5 py-2.5 outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-850 dark:bg-slate-950/60 dark:text-slate-300 font-semibold transition-all"
                 required
               />
             </div>
@@ -462,16 +501,16 @@ export default function Home() {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 py-3 text-xs font-bold text-white shadow-md shadow-indigo-100 dark:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 py-3 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
             >
               Sign In to Workspace
             </button>
           </form>
 
           <div className="mt-6 border-t border-slate-100 dark:border-slate-850 pt-4 text-center">
-            <span className="text-[9px] font-bold text-slate-400 block uppercase">Sandbox Credentials:</span>
-            <code className="block text-[9px] text-indigo-500 mt-1 font-semibold dark:text-indigo-400">
-              Admin (Ilyas): admin | Manager: manager | HR: hr | Employee: user
+            <span className="text-[9px] font-bold text-slate-400 block uppercase">Sandbox Access Guide:</span>
+            <code className="block text-[8px] text-indigo-500 mt-1 font-semibold dark:text-indigo-400">
+              susanth/susanth (User) | lyn/ravi (HR) | ilyas (Admin/admin)
             </code>
           </div>
         </div>
@@ -484,55 +523,56 @@ export default function Home() {
       
       {/* LEFT COLLAPSIBLE SIDEBAR */}
       <aside 
-        className={`flex flex-col border-r border-slate-200 bg-white/85 dark:border-slate-800 dark:bg-slate-950 transition-all duration-200 ${
+        className={`flex flex-col border-r border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/70 transition-all duration-200 ${
           sidebarCollapsed ? 'w-16' : 'w-64'
         }`}
       >
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850 relative">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm">
+              <div className="h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200 dark:shadow-none">
                 N
               </div>
-              <span className="font-bold text-sm text-slate-900 dark:text-white tracking-wide">Workspace PPM</span>
+              <span className="font-bold text-xs text-slate-900 dark:text-white tracking-widest uppercase">Workspace PPM</span>
             </div>
           ) : (
-            <div className="mx-auto h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm">
+            <div className="mx-auto h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white font-black text-sm shadow-sm">
               N
             </div>
           )}
           
           <button 
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded p-1 dark:hover:bg-slate-900 hidden sm:block"
+            className="absolute -right-3.5 top-4.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:bg-slate-50 dark:border-slate-850 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 hidden sm:flex transition-all duration-200 hover:scale-110 active:scale-90"
+            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
-            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {sidebarCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
         </div>
 
         {/* User Card in Left Sidebar */}
         <div className="p-3 border-b border-slate-100 dark:border-slate-850">
           {!sidebarCollapsed ? (
-            <div className="rounded-xl bg-slate-50 border border-slate-150 p-3 dark:bg-slate-950 dark:border-slate-850">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 font-sans">
+            <div className="rounded-xl bg-slate-50/50 border border-slate-150/60 p-3 dark:bg-slate-950/40 dark:border-slate-850/60 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 font-sans border border-indigo-500/20">
                   {currentUser?.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-slate-855 dark:text-slate-200 truncate leading-tight font-sans">{currentUser?.name}</div>
+                  <div className="text-xs font-bold text-slate-850 dark:text-slate-200 truncate leading-tight font-sans">{currentUser?.name}</div>
                   <div className="text-[9px] text-slate-400 truncate leading-none mt-0.5 font-sans">{currentUser?.email}</div>
-                  <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex items-center gap-2 mt-2">
                     <span className={`inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded font-sans ${
-                      (currentUser?.role === 'Admin' || currentUser?.role === 'Head') ? 'bg-rose-100 text-rose-800 dark:bg-rose-955/40 dark:text-rose-450' :
-                      (currentUser?.role === 'Project Manager' || currentUser?.role === 'Project Lead' || currentUser?.role === 'Support Manager' || currentUser?.role === 'Support Lead' || currentUser?.role === 'Manager') ? 'bg-violet-100 text-violet-800 dark:bg-violet-955/40 dark:text-violet-400' :
-                      (currentUser?.role === 'HR' || currentUser?.role === 'Sales') ? 'bg-amber-100 text-amber-805 dark:bg-amber-955/40 dark:text-amber-400' :
-                      'bg-emerald-100 text-emerald-800 dark:bg-emerald-955/40 dark:text-emerald-400'
+                      (currentUser?.role === 'Admin' || currentUser?.role === 'Head') ? 'bg-rose-50 text-rose-700 dark:bg-rose-955/30 dark:text-rose-450 border border-rose-100/30' :
+                      (currentUser?.role === 'Project Manager' || currentUser?.role === 'Project Lead' || currentUser?.role === 'Support Manager' || currentUser?.role === 'Support Lead' || currentUser?.role === 'Manager') ? 'bg-violet-50 text-violet-755 dark:bg-violet-955/30 dark:text-violet-405 border border-violet-100/30' :
+                      (currentUser?.role === 'HR' || currentUser?.role === 'Sales') ? 'bg-amber-50 text-amber-705 dark:bg-amber-955/30 dark:text-amber-400 border border-amber-100/30' :
+                      'bg-emerald-55 text-emerald-700 dark:bg-emerald-955/30 dark:text-emerald-400 border border-emerald-100/30'
                     }`}>
                       {currentUser?.role}
                     </span>
                     <button
                       onClick={handleLogout}
-                      className="text-[8px] font-extrabold uppercase text-slate-400 hover:text-rose-500 cursor-pointer flex items-center gap-0.5"
+                      className="text-[8px] font-extrabold uppercase text-slate-400 hover:text-rose-500 cursor-pointer flex items-center gap-0.5 transition-colors"
                     >
                       <LogOut className="h-2 w-2" />
                       Logout
@@ -544,14 +584,11 @@ export default function Home() {
           ) : (
             <div className="relative group">
               <div 
-                className="mx-auto h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white font-bold uppercase text-xs cursor-pointer select-none font-sans"
+                className="mx-auto h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white font-bold uppercase text-xs cursor-pointer select-none font-sans border border-indigo-500/20 transition-transform duration-200 hover:scale-105"
                 title={`${currentUser?.name} (${currentUser?.role})`}
                 onClick={handleLogout}
               >
                 {currentUser?.name.charAt(0)}
-              </div>
-              <div className="absolute left-14 top-1 scale-0 group-hover:scale-100 transition-all bg-slate-900 text-white rounded text-[9px] font-bold py-1 px-2 z-55 whitespace-nowrap shadow-xl">
-                Click to Sign Out
               </div>
             </div>
           )}
@@ -563,7 +600,7 @@ export default function Home() {
             <div className="relative">
               <button 
                 onClick={() => { setShowProjSelect(!showProjSelect); setShowUserSelect(false); }}
-                className="w-full flex items-center justify-between rounded-xl bg-slate-50 border border-slate-150 px-3 py-2 text-left hover:bg-slate-100 dark:bg-slate-950 dark:border-slate-850"
+                className="w-full flex items-center justify-between rounded-xl bg-slate-50/50 border border-slate-150/60 px-3 py-2 text-left hover:bg-slate-100/70 dark:bg-slate-950/40 dark:border-slate-850/60 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-2 truncate">
                   <Briefcase className="h-4 w-4 text-indigo-500 shrink-0" />
@@ -572,16 +609,16 @@ export default function Home() {
                     <div className="text-xs font-bold text-slate-850 dark:text-slate-200 mt-0.5 truncate">{activeProject?.name}</div>
                   </div>
                 </div>
-                <span className="text-[9px] text-slate-400 shrink-0">▼</span>
+                <span className="text-[9px] text-slate-400 shrink-0 transition-transform duration-200" style={{ transform: showProjSelect ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
               </button>
 
               {showProjSelect && (
-                <div className="absolute left-0 right-0 mt-2 z-50 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-850 dark:bg-slate-950">
+                <div className="absolute left-0 right-0 mt-2 z-50 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-1.5 shadow-xl dark:border-slate-805 dark:bg-slate-900/95 animate-in slide-in-from-top-2 duration-150">
                   {projects.map(proj => (
                     <button
                       key={proj._id}
                       onClick={() => { setActiveProject(proj); setShowProjSelect(false); }}
-                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-650 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-900"
+                      className="w-full text-left rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                     >
                       {proj.name}
                     </button>
@@ -590,7 +627,7 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-indigo-500 border border-slate-200 dark:bg-slate-950 dark:border-slate-850">
+            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-indigo-500 border border-slate-200 dark:bg-slate-950 dark:border-slate-850" title={activeProject?.name}>
               <Briefcase className="h-4 w-4" />
             </div>
           )}
@@ -609,91 +646,22 @@ export default function Home() {
                   setActiveTab(item.id);
                   setSelectedItem(null);
                 }}
-                className={`w-full flex items-center rounded-xl px-3 py-2.5 transition-all text-xs font-bold ${
+                className={`w-full flex items-center rounded-xl px-3 py-2.5 transition-all text-xs font-bold relative group hover:scale-[1.02] active:scale-[0.98] duration-150 cursor-pointer ${
                   isActive 
-                    ? 'bg-indigo-600 text-white shadow-md' 
-                    : 'text-slate-550 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-900'
+                    ? 'bg-gradient-to-r from-indigo-650 to-indigo-550 text-white shadow-sm' 
+                    : 'text-slate-550 hover:bg-slate-50 hover:text-indigo-650 dark:text-slate-400 dark:hover:bg-slate-900/60 dark:hover:text-indigo-400'
                 }`}
                 title={sidebarCollapsed ? item.label : undefined}
               >
-                <MenuIcon className={`h-4.5 w-4.5 shrink-0 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'}`} />
-                {!sidebarCollapsed && <span>{item.label}</span>}
+                {isActive && (
+                  <span className="absolute left-1 top-2 bottom-2 w-1 bg-white rounded-r" />
+                )}
+                <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'}`} />
+                {!sidebarCollapsed && <span className="transition-transform group-hover:translate-x-0.5">{item.label}</span>}
               </button>
             );
           })}
         </nav>
-
-        {/* Sidebar Footer Bell Notifications */}
-        <div className="p-3 border-t border-slate-100 dark:border-slate-850 relative">
-          {!sidebarCollapsed ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="w-full flex items-center justify-between rounded-xl px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 text-xs font-bold text-slate-605 dark:text-slate-350"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Bell className="h-4.5 w-4.5 text-slate-500" />
-                    {unreadNotifCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white">
-                        {unreadNotifCount}
-                      </span>
-                    )}
-                  </div>
-                  <span>Notifications</span>
-                </div>
-              </button>
-
-              {showNotifications && (
-                <div className="absolute bottom-12 left-0 right-0 z-50 rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xl w-64 dark:border-slate-800 dark:bg-slate-950">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 mb-2 dark:border-slate-800">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alert Feed</span>
-                    <button onClick={() => setShowNotifications(false)} className="text-slate-300 hover:text-slate-550">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    {notifications.length === 0 ? (
-                      <div className="text-[10px] text-slate-455 italic text-center py-4">Zero unread alerts.</div>
-                    ) : (
-                      notifications.map(notif => (
-                        <div 
-                          key={notif._id}
-                          onClick={() => {
-                            if (notif.link) {
-                              setActiveTab(notif.link);
-                            }
-                            handleMarkNotificationRead(notif._id);
-                            setShowNotifications(false);
-                          }}
-                          className={`rounded-lg p-2 text-[10px] text-left cursor-pointer border transition-colors ${
-                            notif.read 
-                              ? 'border-slate-100 text-slate-450 bg-slate-50/30' 
-                              : 'border-indigo-100 bg-indigo-50/15 text-indigo-900 font-medium hover:bg-indigo-50/30 dark:border-indigo-950/40 dark:text-indigo-400'
-                          }`}
-                        >
-                          <div>
-                            <strong>{notif.actor}</strong> {notif.message}
-                          </div>
-                          <div className="text-[8px] text-slate-400 mt-1">
-                            {new Date(notif.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="relative mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-150 cursor-pointer dark:bg-slate-950">
-              <Bell className="h-4 w-4 text-slate-550" onClick={() => setShowNotifications(!showNotifications)} />
-              {unreadNotifCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500" />
-              )}
-            </div>
-          )}
-        </div>
 
       </aside>
 
@@ -712,9 +680,72 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Relocated Header Notifications Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-205 bg-slate-50/50 hover:bg-slate-100 text-slate-600 dark:border-slate-850 dark:bg-slate-950/40 dark:text-slate-300 dark:hover:bg-slate-900 transition-all cursor-pointer hover:scale-[1.03]"
+                title="View Notifications"
+              >
+                <Bell className="h-4.5 w-4.5" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white animate-pulse">
+                    {unreadNotifCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2.5 z-55 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl w-80 dark:border-slate-800 dark:bg-slate-950/95 animate-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-850 mb-2 select-none">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Alert Feed</span>
+                    <button 
+                      onClick={() => setShowNotifications(false)} 
+                      className="text-slate-300 hover:text-slate-550 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                    {notifications.length === 0 ? (
+                      <div className="text-[10px] text-slate-400 italic text-center py-6">Zero unread alerts.</div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif._id}
+                          onClick={() => {
+                            if (notif.link) {
+                              setActiveTab(notif.link);
+                            }
+                            handleMarkNotificationRead(notif._id);
+                            setShowNotifications(false);
+                          }}
+                          className={`rounded-xl p-2.5 text-[10px] text-left cursor-pointer border transition-colors ${
+                            notif.read 
+                              ? 'border-slate-100/50 text-slate-400 bg-slate-50/15 dark:border-slate-850/50' 
+                              : 'border-indigo-100 bg-indigo-50/10 text-indigo-900 font-semibold hover:bg-indigo-50/20 dark:border-indigo-950/40 dark:text-indigo-400 dark:bg-indigo-950/10'
+                          }`}
+                        >
+                          <div>
+                            <strong className="text-slate-700 dark:text-slate-200 font-bold">{notif.actor}</strong> {notif.message}
+                          </div>
+                          <div className="text-[8px] text-slate-450 mt-1 flex items-center gap-1">
+                            <Clock className="h-2.5 w-2.5" />
+                            {new Date(notif.createdAt).toLocaleDateString(undefined, {
+                              month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setShowAddProject(true)}
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-350"
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-350 cursor-pointer hover:scale-[1.02] active:scale-95 duration-150"
             >
               <FolderPlus className="h-4 w-4 text-indigo-500" />
               Initialize Project Profile
@@ -766,6 +797,25 @@ export default function Home() {
                 setSelectedItemType(type);
               }}
               activeUser={activeUser}
+            />
+          )}
+
+          {activeTab === 'planner' && (
+            <PlannerTab 
+              activeProject={activeProject}
+              tasks={tasks}
+              epics={epics}
+              onSelectItem={(item, type) => {
+                setSelectedItem(item);
+                setSelectedItemType(type);
+              }}
+            />
+          )}
+
+          {activeTab === 'docs' && (
+            <DocManagerTab 
+              activeProject={activeProject}
+              currentUser={currentUser}
             />
           )}
 

@@ -36,6 +36,14 @@ const HistorySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const AttachmentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  url: { type: String, default: '' },
+  fileType: { type: String, default: 'pdf' },
+  fileSize: { type: String, default: '0 KB' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 // ─── 3. TASK SCHEMA ───
 const TaskSchema = new mongoose.Schema({
   projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
@@ -61,7 +69,8 @@ const TaskSchema = new mongoose.Schema({
   dueDate: { type: String, default: '' },
   comments: [CommentSchema],
   subtasks: [SubtaskSchema],
-  history: [HistorySchema]
+  history: [HistorySchema],
+  attachments: [AttachmentSchema]
 }, { timestamps: true });
 
 // ─── 4. ISSUE SCHEMA ───
@@ -86,7 +95,8 @@ const IssueSchema = new mongoose.Schema({
   dueDate: { type: String, default: '' },
   comments: [CommentSchema],
   subtasks: [SubtaskSchema],
-  history: [HistorySchema]
+  history: [HistorySchema],
+  attachments: [AttachmentSchema]
 }, { timestamps: true });
 
 // ─── 5. DAILY STANDUP / ACTIVITY LOG ───

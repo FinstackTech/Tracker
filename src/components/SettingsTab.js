@@ -1,7 +1,37 @@
 import { useState, useEffect } from 'react';
 import { 
-  Settings, Key, Webhook, Bell, Send, CheckCircle, MessageSquare, AlertCircle, Tag, Trash2, Plus, Lock, FolderKanban, Cpu, GitBranch, Users, MessageCircle, Globe
+  Settings, Key, Webhook, Bell, Send, CheckCircle, MessageSquare, AlertCircle, Tag, Trash2, Plus, Lock, FolderKanban, Cpu, GitBranch, Users, MessageCircle, Globe, Copy, Check
 } from 'lucide-react';
+
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button 
+      type="button" 
+      onClick={handleCopy}
+      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-350 border border-slate-205 dark:border-slate-750 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3 w-3 text-emerald-500 shrink-0" />
+          <span className="text-emerald-500">Copied</span>
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3 text-slate-400 shrink-0" />
+          <span>Copy</span>
+        </>
+      )}
+    </button>
+  );
+};
+
 
 const EPIC_COLORS = [
   { hex: '#64748b', label: 'Slate' },
@@ -302,22 +332,23 @@ export default function SettingsTab({
             <div className="md:col-span-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-slate-150/40 dark:border-slate-800/40 md:pr-4 scrollbar-none">
               
               {[
-                { id: 'teams', label: 'MS Teams', desc: 'Office connector', icon: Webhook, color: 'bg-violet-500', active: !!msTeamsUrl },
-                { id: 'slack', label: 'Slack Webhook', desc: 'Incoming webhook', icon: SlackIcon, color: 'bg-emerald-500', active: !!slackUrl },
-                { id: 'discord', label: 'Discord API', desc: 'Server integrations', icon: DiscordIcon, color: 'bg-indigo-500', active: !!discordUrl },
-                { id: 'telegram', label: 'Telegram Bot', desc: 'Direct message channels', icon: Send, color: 'bg-sky-500', active: !!telegramToken && !!telegramChatId },
-                { id: 'whatsapp', label: 'WhatsApp', desc: 'Outbound trigger messages', icon: MessageCircle, color: 'bg-green-500', active: !!whatsAppToken && !!whatsAppPhone },
-                { id: 'custom', label: 'Custom Hook', desc: 'Custom JSON payload', icon: Globe, color: 'bg-slate-500', active: !!customWebhookUrl }
+                { id: 'teams', label: 'MS Teams', desc: 'Office connector', icon: Webhook, color: 'bg-violet-500', active: !!msTeamsUrl, activeBg: 'bg-violet-50/70 border-violet-200 dark:bg-violet-955/20 dark:border-violet-900/50' },
+                { id: 'slack', label: 'Slack Webhook', desc: 'Incoming webhook', icon: SlackIcon, color: 'bg-emerald-500', active: !!slackUrl, activeBg: 'bg-emerald-50/70 border-emerald-205 dark:bg-emerald-955/20 dark:border-emerald-900/50' },
+                { id: 'discord', label: 'Discord API', desc: 'Server integrations', icon: DiscordIcon, color: 'bg-indigo-500', active: !!discordUrl, activeBg: 'bg-indigo-50/70 border-indigo-200 dark:bg-indigo-955/20 dark:border-indigo-900/50' },
+                { id: 'telegram', label: 'Telegram Bot', desc: 'Direct message channels', icon: Send, color: 'bg-sky-500', active: !!telegramToken && !!telegramChatId, activeBg: 'bg-sky-50/70 border-sky-200 dark:bg-sky-955/20 dark:border-sky-900/50' },
+                { id: 'whatsapp', label: 'WhatsApp', desc: 'Outbound trigger messages', icon: MessageCircle, color: 'bg-green-500', active: !!whatsAppToken && !!whatsAppPhone, activeBg: 'bg-green-50/70 border-green-200 dark:bg-green-955/20 dark:border-green-900/50' },
+                { id: 'custom', label: 'Custom Hook', desc: 'Custom JSON payload', icon: Globe, color: 'bg-slate-550', active: !!customWebhookUrl, activeBg: 'bg-slate-100/70 border-slate-205 dark:bg-slate-900/20 dark:border-slate-800/50' }
               ].map(c => {
                 const Icon = c.icon;
+                const isSelected = activeConnector === c.id;
                 return (
                   <button
                     key={c.id}
                     type="button"
                     onClick={() => setActiveConnector(c.id)}
-                    className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-3 shrink-0 md:shrink border ${
-                      activeConnector === c.id 
-                        ? 'bg-indigo-50/70 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900/50' 
+                    className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-3 shrink-0 md:shrink border hover:scale-[1.02] active:scale-[0.98] duration-150 ${
+                      isSelected 
+                        ? c.activeBg 
                         : 'border-transparent hover:bg-slate-50/50 dark:hover:bg-slate-900/20'
                     }`}
                   >
@@ -331,7 +362,7 @@ export default function SettingsTab({
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400" />
                         )}
                       </div>
-                      <div className="text-[9px] text-slate-400 truncate max-w-[120px] font-medium">{c.desc}</div>
+                      <div className="text-[9px] text-slate-450 truncate max-w-[120px] font-semibold">{c.desc}</div>
                     </div>
                   </button>
                 );
@@ -635,7 +666,7 @@ export default function SettingsTab({
           {saveSuccess && (
             <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold justify-end mt-2 select-none animate-fadeIn">
               <CheckCircle className="h-4 w-4" />
-              Settings updated successfully!
+Settings updated successfully!
             </div>
           )}
 
@@ -643,7 +674,7 @@ export default function SettingsTab({
       </div>
 
       {/* ─── EMPLOYEE & USER REGISTRY CARD ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-850 dark:bg-slate-900">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
           <Users className="h-5 w-5 text-indigo-500" />
           <div>
@@ -654,60 +685,60 @@ export default function SettingsTab({
           </div>
         </div>
 
-        {/* User list table */}
-        <div className="overflow-x-auto mb-6">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase text-slate-400">
-                <th className="pb-2">User / Employee Name</th>
-                <th className="pb-2">Email Address</th>
-                <th className="pb-2">Access Role</th>
-                {isAdmin && <th className="pb-2 text-right">Actions</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {userProfiles.map((p) => (
-                <tr key={p.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
-                  <td className="py-2.5 font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-650 flex items-center justify-center font-bold text-[10px] uppercase">
-                      {p.name.charAt(0)}
+        {/* User list card grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {userProfiles.map((p) => {
+            const isMe = p.name === activeUser;
+            return (
+              <div 
+                key={p.name} 
+                className="p-4 rounded-2xl border border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white hover:border-slate-200/80 dark:hover:bg-slate-900/30 dark:hover:border-slate-800 transition-all flex items-center justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-indigo-50 to-indigo-100 dark:from-slate-800 dark:to-slate-850 border border-indigo-100/50 dark:border-slate-800 text-indigo-650 dark:text-indigo-405 flex items-center justify-center font-black text-xs shrink-0 select-none">
+                    {p.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-slate-805 dark:text-slate-200 flex items-center gap-1.5 leading-snug">
+                      <span className="truncate">{p.name}</span>
+                      {isMe && (
+                        <span className="text-[8px] bg-slate-100 dark:bg-slate-950 text-slate-505 px-1.5 py-0.2 rounded font-extrabold uppercase">You</span>
+                      )}
                     </div>
-                    {p.name} {p.name === activeUser && <span className="text-[9px] bg-slate-100 dark:bg-slate-950 px-1 py-0.2 rounded font-semibold text-slate-500">You</span>}
-                  </td>
-                  <td className="py-2.5 text-slate-500 dark:text-slate-400 font-medium">{p.email || 'N/A'}</td>
-                  <td className="py-2.5">
-                    <span className={`inline-block px-1.5 py-0.5 text-[8px] font-extrabold uppercase rounded border ${
-                      (p.role === 'Admin' || p.role === 'Head') ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-955/20 dark:text-rose-450 dark:border-rose-900/50' :
-                      (p.role === 'Project Manager' || p.role === 'Project Lead' || p.role === 'Support Manager' || p.role === 'Support Lead' || p.role === 'Manager') ? 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-955/20 dark:text-violet-450 dark:border-violet-900/50' :
-                      (p.role === 'HR' || p.role === 'Sales') ? 'bg-amber-50 text-amber-700 border-amber-205 dark:bg-amber-955/20 dark:text-amber-450 dark:border-amber-900/50' :
-                      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-955/20 dark:text-emerald-450 dark:border-emerald-900/50'
-                    }`}>
-                      {p.role}
-                    </span>
-                  </td>
-                  {isAdmin && (
-                    <td className="py-2.5 text-right">
-                      <button
-                        onClick={() => handleDeleteUser(p.name)}
-                        disabled={p.name === activeUser}
-                        className="text-slate-350 hover:text-rose-600 p-1 disabled:opacity-30 cursor-pointer"
-                        title="Remove User Profile"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <div className="text-[9px] text-slate-400 font-medium truncate leading-none mt-0.5">{p.email || 'N/A'}</div>
+                    <div className="mt-2">
+                      <span className={`inline-block px-1.5 py-0.5 text-[8px] font-extrabold uppercase rounded border ${
+                        (p.role === 'Admin' || p.role === 'Head') ? 'bg-rose-50/50 text-rose-700 border-rose-200/50 dark:bg-rose-955/10 dark:text-rose-400 dark:border-rose-955/20' :
+                        (p.role === 'Project Manager' || p.role === 'Project Lead' || p.role === 'Support Manager' || p.role === 'Support Lead' || p.role === 'Manager') ? 'bg-violet-50/50 text-violet-755 border-violet-200/50 dark:bg-violet-955/10 dark:text-violet-405 dark:border-violet-955/20' :
+                        (p.role === 'HR' || p.role === 'Sales') ? 'bg-amber-50/50 text-amber-705 border-amber-205/50 dark:bg-amber-955/10 dark:text-amber-400 dark:border-amber-955/20' :
+                        'bg-emerald-50/50 text-emerald-705 border-emerald-200/50 dark:bg-emerald-955/10 dark:text-emerald-400 dark:border-emerald-955/20'
+                      }`}>
+                        {p.role}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteUser(p.name)}
+                    disabled={isMe}
+                    className="text-slate-350 hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 shrink-0 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                    title="Remove User Profile"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Add User Profile Form (Admin only) */}
         {isAdmin ? (
-          <form onSubmit={handleAddUser} className="bg-slate-50/55 dark:bg-slate-955/20 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
-            <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider mb-3">Add New User Profile</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <form onSubmit={handleAddUser} className="bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
+            <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider mb-3.5">Add New User Profile</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">User Full Name</label>
                 <input
@@ -715,7 +746,7 @@ export default function SettingsTab({
                   placeholder="e.g. John Doe"
                   value={newUserName}
                   onChange={e => setNewUserName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                   required
                 />
               </div>
@@ -726,7 +757,7 @@ export default function SettingsTab({
                   placeholder="e.g. john@company.com"
                   value={newUserEmail}
                   onChange={e => setNewUserEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                   required
                 />
               </div>
@@ -735,7 +766,7 @@ export default function SettingsTab({
                 <select
                   value={newUserRole}
                   onChange={e => setNewUserRole(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
                 >
                   <option value="Admin">Admin</option>
                   <option value="HR">HR</option>
@@ -756,7 +787,7 @@ export default function SettingsTab({
                   placeholder="e.g. user123"
                   value={newUserPassword}
                   onChange={e => setNewUserPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                   required
                 />
               </div>
@@ -764,7 +795,7 @@ export default function SettingsTab({
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4.5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 Add Profile
@@ -772,8 +803,8 @@ export default function SettingsTab({
             </div>
           </form>
         ) : (
-          <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 text-[10px] font-bold text-amber-700 flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-amber-500" />
+          <div className="rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-100 dark:border-amber-900/30 p-3.5 text-[10px] font-bold text-amber-700 flex items-center gap-2">
+            <Lock className="h-4 w-4 text-amber-500" />
             <span>Adding or removing employee user profiles is restricted to Administrators</span>
           </div>
         )}
@@ -796,59 +827,76 @@ export default function SettingsTab({
           <strong className="text-slate-700 dark:text-slate-350 block mb-1">💡 How to add projects in the application:</strong>
           There are two ways to register a project:
           <ul className="list-decimal pl-4 mt-1 space-y-0.5">
-            <li>Click the <strong className="text-indigo-600 dark:text-indigo-400">"Initialize Project Profile"</strong> button in the top-right header of the main workspace.</li>
+            <li>Click the <strong className="text-indigo-650 dark:text-indigo-400 font-bold">"Initialize Project Profile"</strong> button in the top-right header of the main workspace.</li>
             <li>Fill in the inline creator form below (restricted to Administrators & Managers).</li>
           </ul>
         </div>
 
-        {/* Project list table */}
-        <div className="overflow-x-auto mb-6">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase text-slate-400">
-                <th className="pb-2">Code</th>
-                <th className="pb-2">Project Name</th>
-                <th className="pb-2">Client</th>
-                <th className="pb-2">Type</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {projects.map((proj) => (
-                <tr key={proj._id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-900/20 ${proj._id === activeProject?._id ? 'bg-indigo-50/10' : ''}`}>
-                  <td className="py-2.5 font-mono font-bold text-indigo-600 dark:text-indigo-400">{proj.code}</td>
-                  <td className="py-2.5 font-bold text-slate-850 dark:text-slate-200">
-                    {proj.name}
-                    {proj._id === activeProject?._id && (
-                      <span className="ml-1.5 text-[8px] bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.2 rounded font-extrabold uppercase">Active</span>
-                    )}
-                  </td>
-                  <td className="py-2.5 text-slate-500 dark:text-slate-400 font-medium">{proj.client}</td>
-                  <td className="py-2.5">
-                    <span className={`inline-block px-1.5 py-0.5 text-[9px] font-bold rounded uppercase ${
-                      proj.type === 'maintenance' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/20 dark:text-blue-400'
-                    }`}>
-                      {proj.type === 'maintenance' ? 'SLA support' : 'Implementation'}
+        {/* Project list cards grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {projects.map((proj) => {
+            const isActive = proj._id === activeProject?._id;
+            return (
+              <div 
+                key={proj._id} 
+                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150 relative overflow-hidden ${
+                  isActive 
+                    ? 'border-indigo-200 bg-indigo-50/15 dark:border-indigo-900/50 dark:bg-indigo-950/20 shadow-sm shadow-indigo-50/50 dark:shadow-none' 
+                    : 'border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white dark:hover:bg-slate-900/30 hover:border-slate-200/80 dark:hover:border-slate-800'
+                }`}
+              >
+                {isActive && (
+                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-600 dark:bg-indigo-400" />
+                )}
+                
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 text-xs tracking-wider uppercase">
+                      {proj.code}
                     </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <h5 className="text-xs font-bold text-slate-850 dark:text-slate-205 mt-1 leading-snug truncate" title={proj.name}>
+                      {proj.name}
+                    </h5>
+                  </div>
+                  {isActive && (
+                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
+                      Active Selected
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-100/60 dark:border-slate-800/60 pt-3 mt-3 text-xs">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-450 truncate">
+                    <Users className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="truncate max-w-[120px]">{proj.client}</span>
+                  </div>
+                  
+                  <span className={`inline-block px-1.5 py-0.5 text-[8.5px] font-black rounded uppercase tracking-wide border ${
+                    proj.type === 'maintenance' 
+                      ? 'bg-amber-50/50 text-amber-700 border-amber-205/65 dark:bg-amber-955/15 dark:text-amber-400 dark:border-amber-950/20' 
+                      : 'bg-blue-50/50 text-blue-700 border-blue-200/50 dark:bg-blue-955/15 dark:text-blue-400 dark:border-blue-950/20'
+                  }`}>
+                    {proj.type === 'maintenance' ? 'SLA support' : 'Implementation'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Add Project Form (Admin/Manager only) */}
         {isManagerOrAdmin ? (
-          <form onSubmit={handleAddProjectInline} className="bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
-            <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider mb-3">Register New Project</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleAddProjectInline} className="bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
+            <h5 className="text-[10px] font-black text-slate-455 uppercase tracking-wider mb-3.5">Register New Project Profile</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Name</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Full Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Dubai Islamic Bank Integration"
                   value={newProjName}
                   onChange={e => setNewProjName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                   required
                 />
               </div>
@@ -871,7 +919,7 @@ export default function SettingsTab({
                     placeholder="e.g. DIB"
                     value={newProjClient}
                     onChange={e => setNewProjClient(e.target.value)}
-                    className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300"
+                    className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                   />
                 </div>
               </div>
@@ -880,7 +928,7 @@ export default function SettingsTab({
                 <select
                   value={newProjType}
                   onChange={e => setNewProjType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
                 >
                   <option value="delivery">Active Project Delivery (Implementation)</option>
                   <option value="maintenance">SLA Project Maintenance (Ongoing Support)</option>
@@ -891,7 +939,7 @@ export default function SettingsTab({
               <button
                 type="submit"
                 disabled={addingProject}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4.5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 {addingProject ? 'Creating...' : 'Initialize Project'}
@@ -899,15 +947,15 @@ export default function SettingsTab({
             </div>
           </form>
         ) : (
-          <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 text-[10px] font-bold text-amber-700 flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-amber-500" />
+          <div className="rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-100 dark:border-amber-900/30 p-3.5 text-[10px] font-bold text-amber-705 flex items-center gap-2">
+            <Lock className="h-4 w-4 text-amber-500" />
             <span>Adding new project profiles is restricted to Administrators and Managers</span>
           </div>
         )}
       </div>
 
       {/* ─── PROJECT EPIC MANAGEMENT PANEL ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 mt-6">
+      <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-855 dark:bg-slate-900 mt-6">
         <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <FolderKanban className="h-5 w-5 text-indigo-500" />
@@ -946,37 +994,40 @@ export default function SettingsTab({
             } finally {
               setCreatingEpic(false);
             }
-          }} className="space-y-4 mb-6 bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-850">
+          }} className="space-y-4 mb-6 bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
             <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider">Create New Project Epic</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Epic Name</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Epic Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Authentication Gateway"
                   value={epicName}
                   onChange={e => setEpicName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900"
+                  className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-350 font-semibold"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Badge Color Tag</label>
-                <div className="grid grid-cols-5 gap-1.5">
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-2">Badge Color Selector</label>
+                <div className="flex flex-wrap gap-2 pt-0.5">
                   {EPIC_COLORS.map(c => (
                     <button
                       key={c.hex}
                       type="button"
                       onClick={() => setEpicColor(c.hex)}
-                      className={`h-6 rounded-lg text-[9px] font-bold transition-all border ${
+                      className={`h-6.5 w-6.5 rounded-full transition-all flex items-center justify-center border outline-none ${
                         epicColor === c.hex 
-                          ? 'border-slate-850 text-white scale-[1.05]' 
-                          : 'border-slate-200/50 hover:scale-[1.02]'
+                          ? 'ring-2 ring-indigo-500 scale-110 shadow-md border-white dark:border-slate-900' 
+                          : 'border-transparent hover:scale-105'
                       }`}
-                      style={{ backgroundColor: c.hex, color: '#fff', textShadow: '0 1px 1px rgba(0,0,0,0.2)' }}
+                      style={{ backgroundColor: c.hex }}
+                      title={c.label}
                     >
-                      {epicColor === c.hex && "✓"}
+                      {epicColor === c.hex && (
+                        <span className="text-[10px] text-white font-black drop-shadow">✓</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -987,7 +1038,7 @@ export default function SettingsTab({
               <button
                 type="submit"
                 disabled={creatingEpic || !epicName.trim()}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-750 px-4 py-2 text-xs font-bold text-white shadow-sm cursor-pointer"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 {creatingEpic ? "Creating..." : "Save Epic Module"}
@@ -995,7 +1046,7 @@ export default function SettingsTab({
             </div>
           </form>
         ) : (
-          <div className="mb-6 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-3 text-[10px] font-bold text-amber-700 flex items-center gap-1.5">
+          <div className="mb-6 rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 p-3.5 text-[10px] font-bold text-amber-705 flex items-center gap-2">
             <Lock className="h-4 w-4 text-amber-500" />
             <span>Creating Epics is restricted to Admins and Managers.</span>
           </div>
@@ -1054,55 +1105,61 @@ export default function SettingsTab({
       </div>
 
       {/* ─── MODEL CONTEXT PROTOCOL (MCP) CARD ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 mt-6">
-        <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <Cpu className="h-5 w-5 text-indigo-500" />
-          <div>
-            <h4 className="text-sm font-bold text-slate-850 dark:text-slate-105 uppercase tracking-wider">
-              Model Context Protocol (MCP) Node
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5">Expose project tracker data directly to external LLM clients</p>
+      <div className="apple-card p-6 mt-6">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
+              <Cpu className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Model Context Protocol (MCP) Node
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">Expose project tracker data directly to external LLM clients</p>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4 text-xs">
-          <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-850 space-y-2">
-            <p className="font-semibold text-slate-700 dark:text-slate-350">
-              Connection Endpoints:
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wide text-[9px]">Server URL:</span>
-              <code className="col-span-2 bg-slate-100 px-2 py-0.5 rounded text-[11px] font-mono select-all dark:bg-slate-900 text-indigo-650 dark:text-indigo-400 font-semibold break-all">
+        <div className="space-y-5 text-xs">
+          <div className="rounded-2xl bg-slate-50/50 p-4.5 dark:bg-slate-950/15 border border-slate-150/60 dark:border-slate-850/60 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-black text-slate-405 uppercase tracking-wider text-[9.5px]">MCP Connection Node URL</span>
+              <span className="text-[8.5px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-800">
+                JSON-RPC 2.0 HTTP
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-950 px-3.5 py-2.5 rounded-xl border border-slate-150/70 dark:border-slate-850/70">
+              <code className="font-mono text-[10.5px] select-all text-indigo-650 dark:text-indigo-400 font-bold truncate flex-1">
                 http://localhost:3000/api/mcp
               </code>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wide text-[9px]">Protocol version:</span>
-              <span className="col-span-2 font-medium text-slate-550 dark:text-slate-400">JSON-RPC 2.0 HTTP transport</span>
+              <CopyButton text="http://localhost:3000/api/mcp" />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <p className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+          <div className="space-y-2">
+            <p className="font-black text-slate-700 dark:text-slate-305 uppercase tracking-wider text-[10px]">
               Provided Tools Schema:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-550 dark:text-slate-400 font-medium">
-              <li><strong className="text-slate-700 dark:text-slate-350">`get_projects`</strong>: Fetch all project profiles, client tags, and statuses.</li>
-              <li><strong className="text-slate-700 dark:text-slate-350">`get_tasks`</strong>: Retrieve board tasks filtered by `projectId` or `owner`.</li>
-              <li><strong className="text-slate-700 dark:text-slate-350">`get_issues`</strong>: Retrieve ticket issues filtered by `projectId`.</li>
-              <li><strong className="text-slate-700 dark:text-slate-350">`get_daily_standups`</strong>: Query standup entries and employee hours.</li>
-              <li><strong className="text-slate-700 dark:text-slate-350">`get_financials`</strong>: Query revenue and expense items.</li>
+            <ul className="list-disc pl-5 space-y-1.5 text-slate-550 dark:text-slate-400 font-medium">
+              <li><strong className="text-slate-700 dark:text-slate-300">`get_projects`</strong>: Fetch all project profiles, client tags, and statuses.</li>
+              <li><strong className="text-slate-700 dark:text-slate-300">`get_tasks`</strong>: Retrieve board tasks filtered by `projectId` or `owner`.</li>
+              <li><strong className="text-slate-700 dark:text-slate-300">`get_issues`</strong>: Retrieve ticket issues filtered by `projectId`.</li>
+              <li><strong className="text-slate-700 dark:text-slate-300">`get_daily_standups`</strong>: Query standup entries and employee hours.</li>
+              <li><strong className="text-slate-700 dark:text-slate-300">`get_financials`</strong>: Query revenue and expense items.</li>
             </ul>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <p className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
-              Claude Desktop Configuration Setup:
+          <div className="space-y-2.5 pt-3.5 border-t border-slate-150/40 dark:border-slate-800/40">
+            <div className="flex items-center justify-between">
+              <p className="font-black text-slate-750 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+                Claude Desktop Configuration Setup:
+              </p>
+              <CopyButton text={`{\n  "mcpServers": {\n    "ppm-tracker": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "@modelcontextprotocol/server-http",\n        "http://localhost:3000/api/mcp"\n      ]\n    }\n  }\n}`} />
+            </div>
+            <p className="text-[10px] text-slate-400 leading-normal font-medium">
+              Copy the following JSON settings block to your <code className="bg-slate-105 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950 text-slate-655 dark:text-slate-300">claude_desktop_config.json</code> config file (located at <code className="bg-slate-105 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950 text-slate-655 dark:text-slate-300">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows):
             </p>
-            <p className="text-[10px] text-slate-400 leading-normal">
-              Copy the following JSON settings block to your <code className="bg-slate-50 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950">claude_desktop_config.json</code> config file (located at <code className="bg-slate-50 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows):
-            </p>
-            <pre className="bg-slate-950 text-slate-300 p-4 rounded-xl text-[10px] font-mono overflow-x-auto select-all leading-relaxed shadow-sm">
+            <pre className="bg-slate-950 text-slate-300 p-4 rounded-xl text-[10px] font-mono overflow-x-auto select-all leading-relaxed shadow-sm dark:bg-slate-955 border border-slate-850">
 {`{
   "mcpServers": {
     "ppm-tracker": {
@@ -1121,86 +1178,92 @@ export default function SettingsTab({
       </div>
 
       {/* ─── GITEA WEBHOOK INTEGRATION CARD ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 mt-6">
-        <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <GitBranch className="h-5 w-5 text-indigo-500" />
-          <div>
-            <h4 className="text-sm font-bold text-slate-850 dark:text-slate-105 uppercase tracking-wider">
-              Local Gitea Webhook Service
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5">Automate tracker history entries and auto-resolve tasks using Gitea commit pushes</p>
+      <div className="apple-card p-6 mt-6">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
+              <GitBranch className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Local Gitea Webhook Service
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">Automate tracker history entries and auto-resolve tasks using Gitea commit pushes</p>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4 text-xs">
-          <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-850 space-y-2">
-            <p className="font-semibold text-slate-700 dark:text-slate-355">
-              Webhook Configuration Target:
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wide text-[9px]">Payload URL:</span>
-              <code className="col-span-2 bg-slate-100 px-2 py-0.5 rounded text-[11px] font-mono select-all dark:bg-slate-900 text-indigo-650 dark:text-indigo-400 font-semibold break-all">
+          <div className="rounded-2xl bg-slate-50/50 p-4.5 dark:bg-slate-950/15 border border-slate-150/60 dark:border-slate-850/60 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-black text-slate-405 uppercase tracking-wider text-[9.5px]">Webhook Target Payload URL</span>
+              <span className="text-[8.5px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-800">
+                POST application/json
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-950 px-3.5 py-2.5 rounded-xl border border-slate-150/70 dark:border-slate-850/70">
+              <code className="font-mono text-[10.5px] select-all text-indigo-650 dark:text-indigo-400 font-bold truncate flex-1">
                 http://localhost:3000/api/gitea
               </code>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wide text-[9px]">HTTP Method:</span>
-              <span className="col-span-2 font-medium text-slate-550 dark:text-slate-400">POST</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wide text-[9px]">Content Type:</span>
-              <span className="col-span-2 font-medium text-slate-550 dark:text-slate-400">application/json</span>
+              <CopyButton text="http://localhost:3000/api/gitea" />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
+          <div className="space-y-2 pt-2">
+            <p className="font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
               How to Link Commits to Tasks/Issues:
             </p>
             <p className="text-slate-550 dark:text-slate-400 font-medium leading-relaxed">
               Include the database reference ID prefix with `#` in your commit messages. Gitea pushes will auto-log audit histories on matching tickets:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-555 dark:text-slate-400 font-medium">
-              <li><strong className="text-slate-700 dark:text-slate-350">Link only</strong>: Include `#taskId` in your message (e.g. `feat: implement login screen #64821a8d052d...`).</li>
-              <li><strong className="text-slate-700 dark:text-slate-350">Link & Resolve</strong>: Prefix with keywords like `fixes`, `closes`, `resolves` followed by `#taskId` (e.g. `fix: server timeout closes #64821a8d052d...`). This transitions the Task status to <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-900 text-slate-700 dark:text-slate-300">Done</code> or Issue status to <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-900 text-slate-700 dark:text-slate-300">Resolved</code>.</li>
+            <ul className="list-disc pl-5 space-y-1.5 text-slate-550 dark:text-slate-400 font-medium">
+              <li><strong className="text-slate-750 dark:text-slate-300">Link only</strong>: Include `#taskId` in your message (e.g. `feat: implement login screen #64821a8d052d...`).</li>
+              <li><strong className="text-slate-750 dark:text-slate-300">Link & Resolve</strong>: Prefix with keywords like `fixes`, `closes`, `resolves` followed by `#taskId` (e.g. `fix: server timeout closes #64821a8d052d...`). This transitions the Task status to <code className="bg-slate-100 px-1.5 py-0.2 rounded font-mono text-[9px] dark:bg-slate-900 text-slate-700 dark:text-slate-300 border dark:border-slate-850">Done</code> or Issue status to <code className="bg-slate-100 px-1.5 py-0.2 rounded font-mono text-[9px] dark:bg-slate-900 text-slate-700 dark:text-slate-300 border dark:border-slate-850">Resolved</code>.</li>
             </ul>
           </div>
         </div>
       </div>
 
       {/* ─── CHATGPT CUSTOM GPT ACTION CARD ─── */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <MessageSquare className="h-5 w-5 text-indigo-500" />
-          <div>
-            <h4 className="text-sm font-bold text-slate-850 dark:text-slate-105 uppercase tracking-wider">
-              ChatGPT Custom GPT Action
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5">Integrate the workspace API directly into Custom ChatGPT models as custom actions</p>
+      <div className="apple-card p-6 mt-6">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
+              <MessageSquare className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-slate-850 dark:text-slate-105 uppercase tracking-wider">
+                ChatGPT Custom GPT Action
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">Integrate the workspace API directly into Custom ChatGPT models as custom actions</p>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4 text-xs font-sans">
           
-          <div className="text-[10px] bg-indigo-50/20 dark:bg-indigo-950/20 p-4 rounded-xl border border-indigo-100/50 dark:border-indigo-950/50 text-slate-600 dark:text-slate-350 leading-relaxed font-medium space-y-2">
-            <strong className="text-indigo-700 dark:text-indigo-400 block uppercase tracking-wider text-[10px]">🚀 Connecting this Workspace to ChatGPT (Step-by-Step):</strong>
-            <ol className="list-decimal pl-4 space-y-1">
+          <div className="text-[10px] bg-indigo-50/20 dark:bg-indigo-950/20 p-4 rounded-2xl border border-indigo-100/50 dark:border-indigo-950/50 text-slate-600 dark:text-slate-350 leading-relaxed font-medium space-y-2">
+            <strong className="text-indigo-750 dark:text-indigo-450 block uppercase tracking-wider text-[10px]">🚀 Connecting this Workspace to ChatGPT (Step-by-Step):</strong>
+            <ol className="list-decimal pl-4 space-y-1.5">
               <li>Open a local HTTP tunnel using ngrok (or localtunnel) to expose the app to the internet:
-                <code className="block bg-slate-100 text-slate-700 dark:bg-slate-950 dark:text-slate-300 px-2 py-1 rounded font-mono text-[10px] mt-1 select-all w-fit">ngrok http 3000</code>
+                <code className="block bg-slate-100 text-slate-700 dark:bg-slate-950 dark:text-slate-300 px-2 py-1 rounded font-mono text-[10px] mt-1 select-all w-fit border dark:border-slate-850">ngrok http 3000</code>
               </li>
               <li>Go to <strong className="text-slate-805 dark:text-slate-100">chatgpt.com</strong>, click your profile and select <strong className="text-slate-805 dark:text-slate-100">"My GPTs"</strong> -&gt; <strong className="text-slate-850 dark:text-slate-100">"Create a GPT"</strong>.</li>
-              <li>Under the <strong className="text-slate-805 dark:text-slate-100">Configure</strong> tab, scroll down and click <strong className="text-indigo-600 dark:text-indigo-400">"Create new action"</strong>.</li>
+              <li>Under the <strong className="text-slate-805 dark:text-slate-100">Configure</strong> tab, scroll down and click <strong className="text-indigo-600 dark:text-indigo-400 font-bold">"Create new action"</strong>.</li>
               <li>Copy the raw OpenAPI 3.0 schema from the box below and paste it into the <strong className="text-slate-805 dark:text-slate-100">Schema</strong> text area in ChatGPT.</li>
-              <li>Replace the placeholder server URL in ChatGPT (or in the schema box below) with your active ngrok tunnel URL (e.g. <code className="font-mono bg-slate-100 dark:bg-slate-950 px-1 py-0.5 rounded">https://xyz.ngrok-free.app</code>).</li>
+              <li>Replace the placeholder server URL in ChatGPT (or in the schema box below) with your active ngrok tunnel URL (e.g. <code className="font-mono bg-slate-100 dark:bg-slate-950 px-1 py-0.5 rounded border dark:border-slate-850">https://xyz.ngrok-free.app</code>).</li>
             </ol>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-705 dark:text-slate-300 uppercase tracking-wider text-[10px]">OpenAPI 3.0 Integration Schema:</span>
-              <span className="text-[9px] text-slate-400">Schema Route: <code className="bg-slate-50 dark:bg-slate-950 px-1 rounded font-mono">/api/openapi</code></span>
+              <span className="font-black text-slate-705 dark:text-slate-300 uppercase tracking-wider text-[10px]">OpenAPI 3.0 Integration Schema:</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border dark:border-slate-850">/api/openapi</span>
+                <CopyButton text={`{\n  "openapi": "3.0.0",\n  "info": {\n    "title": "PPM Workspace Tracker API",\n    "description": "API for querying tasks, issues, standups, and projects.",\n    "version": "1.0.0"\n  },\n  "servers": [\n    {\n      "url": "YOUR_NGROK_TUNNEL_URL_HERE",\n      "description": "Active tunnel URL"\n    }\n  ],\n  "paths": {\n    "/api/projects": {\n      "get": {\n        "summary": "Fetch all project profiles",\n        "operationId": "getProjects"\n      }\n    },\n    "/api/tasks": {\n      "get": {\n        "summary": "Fetch tasks for a project",\n        "operationId": "getTasks",\n        "parameters": [\n          {\n            "name": "projectId",\n            "in": "query",\n            "required": true,\n            "schema": { "type": "string" }\n          }\n        ]\n      }\n    },\n    "/api/issues": {\n      "get": {\n        "summary": "Fetch issues for a project",\n        "operationId": "getIssues",\n        "parameters": [\n          {\n            "name": "projectId",\n            "in": "query",\n            "required": true,\n            "schema": { "type": "string" }\n          }\n        ]\n      }\n    }\n  }\n}`} />
+              </div>
             </div>
-            <pre className="bg-slate-950 text-slate-300 p-4 rounded-xl text-[10px] font-mono overflow-x-auto select-all leading-relaxed shadow-sm max-h-60">
+            <pre className="bg-slate-950 text-slate-300 p-4 rounded-xl text-[10px] font-mono overflow-x-auto select-all leading-relaxed shadow-sm max-h-60 dark:bg-slate-955 border border-slate-850">
 {`{
   "openapi": "3.0.0",
   "info": {
