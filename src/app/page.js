@@ -18,19 +18,10 @@ import DocManagerTab from '@/components/DocManagerTab';
 import DetailsDrawer from '@/components/DetailsDrawer';
 import { ThemeBackdrop } from '@/components/ThemeBackdrop';
 
-const EMPLOYEES = ["Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi"];
+const EMPLOYEES = ["Superadmin"];
 
 const USER_PROFILES = [
-  { name: "Ilyas", role: "Admin", email: "ilyas@company.com", password: "admin" },
-  { name: "Vijayan", role: "Manager", email: "vijayan@company.com", password: "manager" },
-  { name: "Lyn", role: "HR", email: "lyn@company.com", password: "hr" },
-  { name: "Ravi", role: "HR", email: "ravi@company.com", password: "hr" },
-  { name: "Susanth", role: "Employee", email: "susanth@company.com", password: "user" },
-  { name: "Vishnu", role: "Employee", email: "vishnu@company.com", password: "user" },
-  { name: "Bharath", role: "Employee", email: "bharath@company.com", password: "user" },
-  { name: "Tom", role: "Employee", email: "tom@company.com", password: "user" },
-  { name: "Babu", role: "Employee", email: "babu@company.com", password: "user" },
-  { name: "Irshad", role: "Employee", email: "irshad@company.com", password: "user" }
+  { name: "Superadmin", role: "Admin", email: "superadmin@company.com", password: "admin" }
 ];
 
 export default function Home() {
@@ -73,6 +64,8 @@ export default function Home() {
   
   const [showProjSelect, setShowProjSelect] = useState(false);
   const [showUserSelect, setShowUserSelect] = useState(false);
+  const [showMsalSim, setShowMsalSim] = useState(false);
+  const [msalLoading, setMsalLoading] = useState(false);
 
   // ─── 1. API FETCHES ───
   const fetchProjects = async () => {
@@ -219,6 +212,21 @@ export default function Home() {
     } else {
       setLoginError("Invalid password for this profile!");
     }
+  };
+
+  const handleMicrosoftSSOLogin = (profile) => {
+    setMsalLoading(true);
+    setTimeout(() => {
+      setMsalLoading(false);
+      setShowMsalSim(false);
+      localStorage.setItem('company_current_session', JSON.stringify(profile));
+      setCurrentUser(profile);
+      setActiveUser(profile.name);
+      setIsLoggedIn(true);
+      fetchNotifications(profile.name);
+      setLoginPassword('');
+      setLoginError('');
+    }, 1000);
   };
 
   const handleLogout = () => {
@@ -405,7 +413,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-50 gap-4 dark:bg-slate-950">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-650" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
         <span className="text-sm font-bold text-slate-500 tracking-wider uppercase animate-pulse">
           Loading Workspace Data...
         </span>
@@ -509,13 +517,100 @@ export default function Home() {
             </button>
           </form>
 
+          <div className="relative flex py-3.5 items-center">
+            <div className="flex-grow border-t border-slate-100/60 dark:border-slate-850"></div>
+            <span className="flex-shrink mx-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Or login via SSO</span>
+            <div className="flex-grow border-t border-slate-100/60 dark:border-slate-850"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMsalSim(true)}
+            className="w-full rounded-xl border border-slate-200 bg-white/70 hover:bg-slate-50 py-3 text-xs font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-205 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-95 duration-150 shadow-sm"
+          >
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 23 23" fill="none">
+              <path d="M0 0h11v11H0z" fill="#F25022"/>
+              <path d="M12 0h11v11H12z" fill="#7FBA00"/>
+              <path d="M0 12h11v11H0z" fill="#00A4EF"/>
+              <path d="M12 12h11v11H12z" fill="#FFB900"/>
+            </svg>
+            Sign In with Microsoft 365
+          </button>
+
           <div className="mt-6 border-t border-slate-100 dark:border-slate-850 pt-4 text-center">
             <span className="text-[9px] font-bold text-slate-400 block uppercase">Sandbox Access Guide:</span>
             <code className="block text-[8px] text-indigo-500 mt-1 font-semibold dark:text-indigo-400">
-              susanth/susanth (User) | lyn/ravi (HR) | ilyas (Admin/admin)
+              Superadmin (Admin/admin)
             </code>
           </div>
         </div>
+
+        {/* Microsoft SSO Simulator Modal */}
+        {showMsalSim && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="w-full max-w-sm bg-white p-8 shadow-2xl rounded-2xl border border-slate-200/50 animate-in zoom-in-95 duration-150 select-none">
+              <div className="flex flex-col items-start space-y-4">
+                {/* Official MS Logo */}
+                <div className="flex items-center gap-2">
+                  <svg className="h-5 w-5 shrink-0" viewBox="0 0 23 23" fill="none">
+                    <path d="M0 0h11v11H0z" fill="#F25022"/>
+                    <path d="M12 0h11v11H12z" fill="#7FBA00"/>
+                    <path d="M0 12h11v11H0z" fill="#00A4EF"/>
+                    <path d="M12 12h11v11H12z" fill="#FFB900"/>
+                  </svg>
+                  <span className="text-sm font-bold text-slate-500 tracking-wide font-sans">Microsoft</span>
+                </div>
+
+                <div className="w-full">
+                  <h3 className="text-lg font-bold text-slate-800 leading-tight">Pick an account</h3>
+                  <p className="text-[11px] text-slate-500 mt-1">to sign in to <strong className="text-indigo-600">Finstack PPM Workspace</strong></p>
+                </div>
+
+                {msalLoading ? (
+                  <div className="w-full py-8 flex flex-col items-center justify-center gap-3">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse text-center">Exchanging credentials...</span>
+                  </div>
+                ) : (
+                  <div className="w-full space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {userProfiles.map(p => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => handleMicrosoftSSOLogin(p)}
+                        className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 text-left transition-all cursor-pointer hover:border-slate-200"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-[10px] shrink-0">
+                            {p.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-800 leading-none">{p.name}</div>
+                            <div className="text-[9px] text-slate-400 mt-1.5 truncate">{p.email || `${p.name.toLowerCase()}@company.com`}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold uppercase px-1.5 py-0.5 rounded leading-none shrink-0">
+                          {p.role}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="w-full pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowMsalSim(false)}
+                    disabled={msalLoading}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-800 p-2 cursor-pointer disabled:opacity-40"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -532,13 +627,13 @@ export default function Home() {
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850 relative">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200 dark:shadow-none">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200/50 dark:shadow-none">
                 N
               </div>
               <span className="font-bold text-xs text-slate-900 dark:text-white tracking-widest uppercase">Workspace PPM</span>
             </div>
           ) : (
-            <div className="mx-auto h-7 w-7 rounded-lg bg-indigo-650 flex items-center justify-center text-white font-black text-sm shadow-sm">
+            <div className="mx-auto h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200/50">
               N
             </div>
           )}
@@ -557,7 +652,7 @@ export default function Home() {
           {!sidebarCollapsed ? (
             <div className="rounded-xl bg-slate-50/50 border border-slate-150/60 p-3 dark:bg-slate-950/40 dark:border-slate-850/60 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 font-sans border border-indigo-500/20">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 font-sans border border-indigo-500/20">
                   {currentUser?.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -565,10 +660,10 @@ export default function Home() {
                   <div className="text-[9px] text-slate-400 truncate leading-none mt-0.5 font-sans">{currentUser?.email}</div>
                   <div className="flex items-center gap-2 mt-2">
                     <span className={`inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded font-sans ${
-                      (currentUser?.role === 'Admin' || currentUser?.role === 'Head') ? 'bg-rose-50 text-rose-700 dark:bg-rose-955/30 dark:text-rose-450 border border-rose-100/30' :
-                      (currentUser?.role === 'Project Manager' || currentUser?.role === 'Project Lead' || currentUser?.role === 'Support Manager' || currentUser?.role === 'Support Lead' || currentUser?.role === 'Manager') ? 'bg-violet-50 text-violet-755 dark:bg-violet-955/30 dark:text-violet-405 border border-violet-100/30' :
-                      (currentUser?.role === 'HR' || currentUser?.role === 'Sales') ? 'bg-amber-50 text-amber-705 dark:bg-amber-955/30 dark:text-amber-400 border border-amber-100/30' :
-                      'bg-emerald-55 text-emerald-700 dark:bg-emerald-955/30 dark:text-emerald-400 border border-emerald-100/30'
+                      (currentUser?.role === 'Admin' || currentUser?.role === 'Head') ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 border border-rose-100/30' :
+                      (currentUser?.role === 'Project Manager' || currentUser?.role === 'Project Lead' || currentUser?.role === 'Support Manager' || currentUser?.role === 'Support Lead' || currentUser?.role === 'Manager') ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 border border-violet-100/30' :
+                      (currentUser?.role === 'HR' || currentUser?.role === 'Sales') ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100/30' :
+                      'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-100/30'
                     }`}>
                       {currentUser?.role}
                     </span>
@@ -586,7 +681,7 @@ export default function Home() {
           ) : (
             <div className="relative group">
               <div 
-                className="mx-auto h-8 w-8 rounded-full bg-indigo-650 flex items-center justify-center text-white font-bold uppercase text-xs cursor-pointer select-none font-sans border border-indigo-500/20 transition-transform duration-200 hover:scale-105"
+                className="mx-auto h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-bold uppercase text-xs cursor-pointer select-none font-sans border border-indigo-500/20 transition-transform duration-200 hover:scale-105 shadow-sm shadow-indigo-200/50"
                 title={`${currentUser?.name} (${currentUser?.role})`}
                 onClick={handleLogout}
               >
@@ -650,8 +745,8 @@ export default function Home() {
                 }}
                 className={`w-full flex items-center rounded-r-xl py-2.5 pl-3 pr-4 transition-all text-xs font-bold relative group duration-150 cursor-pointer border-l-4 ${
                   isActive 
-                    ? 'bg-indigo-50 border-indigo-600 text-indigo-600 dark:bg-indigo-950/20 dark:border-indigo-400 dark:text-indigo-400' 
-                    : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/40 dark:hover:text-slate-205'
+                    ? 'bg-gradient-to-r from-indigo-50 to-transparent border-indigo-600 text-indigo-600 dark:from-indigo-950/30 dark:border-indigo-400 dark:text-indigo-400 shadow-[inset_1px_0_0_0_rgba(99,102,241,0.05)] font-extrabold' 
+                    : 'border-transparent text-slate-700 hover:bg-slate-50/50 hover:text-slate-900 dark:text-slate-355 dark:hover:bg-slate-900/40 dark:hover:text-slate-100'
                 }`}
                 title={sidebarCollapsed ? item.label : undefined}
               >

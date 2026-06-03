@@ -12,20 +12,11 @@ const STATUS_OPTIONS = [
   { value: 'done', label: 'Done', bg: '#ecfdf5', text: '#059669', dot: '#10b981' }
 ];
 
-const EMPLOYEES = ["Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi"];
+const EMPLOYEES = ["Superadmin"];
 
 const getOwnerBadgeStyle = (owner) => {
   const colors = {
-    Ilyas: { bg: '#dbeafe', text: '#1e40af', border: '#bfdbfe' },      // Indigo/Blue
-    Susanth: { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' },    // Green
-    Vishnu: { bg: '#fef3c7', text: '#854d0e', border: '#fde68a' },     // Amber
-    Bharath: { bg: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff' },    // Purple
-    Tom: { bg: '#fce7f3', text: '#9d174d', border: '#fbcfe8' },        // Pink
-    Vijayan: { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },    // Orange
-    Babu: { bg: '#e0e7ff', text: '#3730a3', border: '#c7d2fe' },       // Indigo
-    Irshad: { bg: '#f1f5f9', text: '#334155', border: '#cbd5e1' },     // Slate
-    Lyn: { bg: '#fae8ff', text: '#86198f', border: '#f5d0fe' },        // Fuchsia
-    Ravi: { bg: '#ccfbf1', text: '#0f766e', border: '#99f6e4' }        // Teal
+    Superadmin: { bg: '#dbeafe', text: '#1e40af', border: '#bfdbfe' }
   };
   return colors[owner] || { bg: '#f8fafc', text: '#64748b', border: '#e2e8f0' };
 };
@@ -746,21 +737,21 @@ export default function TaskTrackerTab({
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => onSelectItem(task, 'task')}
-                                  className="text-slate-400 hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-850 cursor-pointer"
                                   title="View Task Details"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => onSelectItem(task, 'task')}
-                                  className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-850 cursor-pointer"
                                   title="Edit Task"
                                 >
                                   <Edit2 className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteTask(task._id)}
-                                  className="text-slate-400 hover:text-rose-650 dark:hover:text-rose-500 transition-colors p-1 rounded hover:bg-slate-105 dark:hover:bg-slate-850 cursor-pointer"
+                                  className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-500 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-850 cursor-pointer"
                                   title="Delete Task"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -812,7 +803,7 @@ export default function TaskTrackerTab({
                   />
                   <button
                     onClick={handleAddCategory}
-                    className="rounded-lg bg-indigo-650 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-750 cursor-pointer"
+                    className="rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white cursor-pointer"
                   >
                     Add Group
                   </button>
@@ -927,7 +918,17 @@ export default function TaskTrackerTab({
                         </div>
 
                         {!isReadOnly && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                            <button
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteTask(t._id);
+                              }}
+                              className="rounded p-1 hover:bg-slate-100 text-slate-400 hover:text-rose-600 dark:hover:bg-slate-800 cursor-pointer"
+                              title="Delete Task"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                             <button
                               onClick={(e) => {
                                   e.stopPropagation();
@@ -935,7 +936,8 @@ export default function TaskTrackerTab({
                                   const nextIdx = (curIdx + 1) % STATUS_OPTIONS.length;
                                   handleUpdateTask(t._id, { status: STATUS_OPTIONS[nextIdx].value });
                               }}
-                              className="rounded p-1 hover:bg-slate-105 text-slate-400 hover:text-indigo-650 dark:hover:bg-slate-850 cursor-pointer"
+                              className="rounded p-1 hover:bg-slate-100 text-slate-400 hover:text-indigo-600 dark:hover:bg-slate-800 cursor-pointer"
+                              title="Move to Next Status"
                             >
                               <ArrowRight className="h-3 w-3" />
                             </button>

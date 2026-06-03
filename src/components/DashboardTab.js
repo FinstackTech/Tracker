@@ -291,13 +291,13 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         {/* KPI: Total Assigned */}
         <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-650" />
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-600" />
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{totalAssignedTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-650 dark:bg-blue-955/40 dark:text-blue-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
               <Users className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -310,9 +310,9 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{myAssignedTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
               <User className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -325,9 +325,9 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">In Progress Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{inProgressTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{inProgressTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-650 dark:bg-amber-955/40 dark:text-amber-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
               <Activity className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -340,9 +340,9 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Pending / Blocked</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-650 dark:bg-rose-955/40 dark:text-rose-450">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400">
               <AlertTriangle className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -355,13 +355,13 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Due Date Alerts</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-855 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-50 text-pink-650 dark:bg-pink-950/40 dark:text-pink-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-50 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400">
               <Clock className="h-4.5 w-4.5" />
             </div>
           </div>
-          <p className="text-[9px] text-rose-650 dark:text-rose-400 font-bold uppercase mt-3 tracking-wide">Due in &lt;= 3 days / overdue</p>
+          <p className="text-[9px] text-rose-600 dark:text-rose-450 font-bold uppercase mt-3 tracking-wide">Due in &lt;= 3 days / overdue</p>
         </div>
       </div>
 
@@ -375,16 +375,16 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Project Delivery</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-805 dark:text-white leading-tight">{completionPercentage}%</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
               <CheckCircle className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="mt-4 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
             <div className="h-full bg-indigo-600 transition-all duration-505" style={{ width: `${completionPercentage}%` }} />
           </div>
-          <div className="mt-2 flex justify-between text-[9px] font-extrabold uppercase text-slate-405 tracking-wide">
+          <div className="mt-2 flex justify-between text-[9px] font-extrabold uppercase text-slate-400 tracking-wide">
             <span>{completedTasks} Done</span>
             <span>{openTasks} Open</span>
           </div>
@@ -397,15 +397,15 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Open Backlog</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-805 dark:text-white leading-tight">{openTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-955/40 dark:text-sky-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
               <Activity className="h-4.5 w-4.5" />
             </div>
           </div>
-          <div className="mt-4 flex gap-4 text-[9px] font-extrabold uppercase text-slate-405 tracking-wide">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-405" /> {inProgressTasks} In Dev</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-350" /> {onHoldTasks} On Hold</span>
+          <div className="mt-4 flex gap-4 text-[9px] font-extrabold uppercase text-slate-400 tracking-wide">
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-400" /> {inProgressTasks} In Dev</span>
+            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /> {onHoldTasks} On Hold</span>
           </div>
         </div>
 
@@ -416,11 +416,11 @@ export default function DashboardTab({
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Contract Value</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-805 dark:text-white leading-tight">
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">
                 ${totalContracted.toLocaleString()}
               </h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-955/40 dark:text-emerald-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
               <Landmark className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -438,17 +438,17 @@ export default function DashboardTab({
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Net Margin</span>
               <h3 className={`mt-1 font-sans text-2xl font-black leading-tight ${
-                projectMargin >= 0 ? 'text-slate-850 dark:text-white' : 'text-rose-600'
+                projectMargin >= 0 ? 'text-slate-800 dark:text-white' : 'text-rose-600'
               }`}>
                 {marginPct}%
               </h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-650 dark:bg-violet-955/40 dark:text-violet-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-900/40 dark:text-violet-405">
               <TrendingUp className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="mt-4 flex justify-between text-[9px] font-extrabold uppercase tracking-wide">
-            <span className="text-slate-455">Costs: ${totalExpenses.toLocaleString()}</span>
+            <span className="text-slate-400">Costs: ${totalExpenses.toLocaleString()}</span>
             <span className={projectMargin >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-rose-500'}>
               Net: ${projectMargin.toLocaleString()}
             </span>
@@ -675,8 +675,8 @@ export default function DashboardTab({
                   return (
                     <th 
                       key={day} 
-                      className={`px-1 py-1.5 text-center text-[9px] font-extrabold min-w-[26px] border-r border-slate-100/40 dark:border-slate-850/40 ${
-                        isWeekend ? 'bg-slate-50 text-slate-400 dark:bg-slate-900/30' : 'text-slate-650'
+                      className={`px-1 py-1.5 text-center text-[9px] font-extrabold min-w-[26px] border-r border-r-slate-100/40 dark:border-r-slate-850/40 ${
+                        isWeekend ? 'bg-slate-50 text-slate-400 dark:bg-slate-900/30' : 'text-slate-600'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-0.5">
@@ -695,8 +695,8 @@ export default function DashboardTab({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
               {schedulerEmployees.map(emp => (
                 <tr key={emp} className="hover:bg-slate-50/20 dark:hover:bg-slate-900/10">
-                  <td className="py-2.5 pr-4 text-xs font-bold text-slate-850 dark:text-slate-205 flex items-center gap-2">
-                    <div className="h-5.5 w-5.5 rounded-full bg-indigo-50/80 border border-indigo-100/50 text-indigo-650 flex items-center justify-center font-black text-[9px] uppercase shrink-0 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
+                  <td className="py-2.5 pr-4 text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
+                    <div className="h-5.5 w-5.5 rounded-full bg-indigo-50/80 border border-indigo-100/50 text-indigo-600 flex items-center justify-center font-black text-[9px] uppercase shrink-0 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
                       {emp.charAt(0)}
                     </div>
                     <span className="truncate">{emp}</span>
@@ -821,8 +821,8 @@ export default function DashboardTab({
               onClick={() => window.print()}
               className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
             >
-              <Printer className="h-5 w-5 text-indigo-650 mb-2 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black text-indigo-750 dark:text-indigo-400 uppercase tracking-wide">Print Layout</span>
+              <Printer className="h-5 w-5 text-indigo-600 mb-2 transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Print Layout</span>
               <span className="text-[8px] text-slate-400 mt-0.5">PDF or Paper</span>
             </button>
           </div>

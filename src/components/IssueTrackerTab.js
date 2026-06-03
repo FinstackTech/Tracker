@@ -26,7 +26,7 @@ const PRIORITY_LEVELS = [
   { value: 'critical', label: 'Critical', color: '#be123c', bg: '#fff1f2' }
 ];
 
-const EMPLOYEES = ["Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi"];
+const EMPLOYEES = ["Superadmin"];
 
 export default function IssueTrackerTab({ 
   issues, 
@@ -273,7 +273,7 @@ export default function IssueTrackerTab({
           {!isReadOnly && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-650 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-100 hover:bg-indigo-750 transition-all dark:shadow-none cursor-pointer"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all dark:shadow-none cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               File Issue
@@ -397,7 +397,7 @@ export default function IssueTrackerTab({
                                   const nextIdx = (curIdx + 1) % ISSUE_STATUSES.length;
                                   handleUpdateStatus(issue._id, ISSUE_STATUSES[nextIdx].value);
                                 }}
-                                className="rounded p-1 hover:bg-slate-100 text-slate-400 hover:text-indigo-650 dark:hover:bg-slate-850 cursor-pointer"
+                                className="rounded p-1 hover:bg-slate-100 text-slate-400 hover:text-indigo-600 dark:hover:bg-slate-855 cursor-pointer"
                                 title="Move Status"
                               >
                                 <ArrowRight className="h-3 w-3" />
@@ -696,7 +696,7 @@ export default function IssueTrackerTab({
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-indigo-650 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-750 shadow-md shadow-indigo-100 dark:shadow-none"
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 shadow-md shadow-indigo-100 dark:shadow-none"
                 >
                   File Ticket
                 </button>

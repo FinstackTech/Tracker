@@ -583,7 +583,7 @@ export default function SettingsTab({
                   type="checkbox"
                   checked={triggerOnBlocker}
                   onChange={e => setTriggerOnBlocker(e.target.checked)}
-                  className="rounded text-indigo-650 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
+                  className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Flagged Blockers</div>
@@ -597,7 +597,7 @@ export default function SettingsTab({
                   type="checkbox"
                   checked={triggerOnCriticalBug}
                   onChange={e => setTriggerOnCriticalBug(e.target.checked)}
-                  className="rounded text-indigo-650 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
+                  className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Critical Priority Bugs</div>
@@ -611,7 +611,7 @@ export default function SettingsTab({
                   type="checkbox"
                   checked={triggerOnTaskDone}
                   onChange={e => setTriggerOnTaskDone(e.target.checked)}
-                  className="rounded text-indigo-650 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
+                  className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Task Completion</div>
@@ -625,7 +625,7 @@ export default function SettingsTab({
                   type="checkbox"
                   checked={triggerOnIssueResolved}
                   onChange={e => setTriggerOnIssueResolved(e.target.checked)}
-                  className="rounded text-indigo-650 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
+                  className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 disabled:opacity-60"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Issue Resolutions</div>
@@ -700,7 +700,7 @@ Settings updated successfully!
                 className="p-4 rounded-2xl border border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white hover:border-slate-200/80 dark:hover:bg-slate-900/30 dark:hover:border-slate-800 transition-all flex items-center justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-indigo-50 to-indigo-100 dark:from-slate-800 dark:to-slate-850 border border-indigo-100/50 dark:border-slate-800 text-indigo-650 dark:text-indigo-405 flex items-center justify-center font-black text-xs shrink-0 select-none">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-indigo-50 to-indigo-100 dark:from-slate-800 dark:to-slate-850 border border-indigo-100/50 dark:border-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs shrink-0 select-none">
                     {p.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
@@ -800,7 +800,7 @@ Settings updated successfully!
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 Add Profile
@@ -860,7 +860,7 @@ Settings updated successfully!
           <strong className="text-slate-700 dark:text-slate-350 block mb-1">💡 How to add projects in the application:</strong>
           There are two ways to register a project:
           <ul className="list-decimal pl-4 mt-1 space-y-0.5">
-            <li>Click the <strong className="text-indigo-650 dark:text-indigo-400 font-bold">"Initialize Project Profile"</strong> button in the top-right header of the main workspace.</li>
+            <li>Click the <strong className="text-indigo-600 dark:text-indigo-400 font-bold">"Initialize Project Profile"</strong> button in the top-right header of the main workspace.</li>
             <li>Fill in the inline creator form below (restricted to Administrators & Managers).</li>
           </ul>
         </div>
@@ -880,7 +880,7 @@ Settings updated successfully!
                 onClick={() => { if (!isActive && setActiveProject) setActiveProject(proj); }}
               >
                 {isActive && (
-                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-650 dark:bg-indigo-400" />
+                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-600 dark:bg-indigo-400" />
                 )}
                 
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -893,7 +893,7 @@ Settings updated successfully!
                     </h5>
                   </div>
                   {isActive && (
-                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-405 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
+                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
                       Active Selected
                     </span>
                   )}
@@ -912,7 +912,7 @@ Settings updated successfully!
                           e.stopPropagation();
                           setActiveProject(proj);
                         }}
-                        className="text-[9px] bg-indigo-55/80 hover:bg-indigo-650 hover:text-white dark:bg-indigo-950/40 dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-650 dark:text-indigo-400 px-2 py-0.5 rounded font-extrabold cursor-pointer transition-all uppercase tracking-wider border border-indigo-100/50 dark:border-indigo-900/40"
+                        className="text-[9px] bg-indigo-50/80 hover:bg-indigo-600 hover:text-white dark:bg-indigo-950/40 dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded font-extrabold cursor-pointer transition-all uppercase tracking-wider border border-indigo-100/50 dark:border-indigo-900/40"
                       >
                         Activate Project
                       </button>
@@ -986,7 +986,7 @@ Settings updated successfully!
               <button
                 type="submit"
                 disabled={addingProject}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 {addingProject ? 'Creating...' : 'Initialize Project'}
@@ -1085,7 +1085,7 @@ Settings updated successfully!
               <button
                 type="submit"
                 disabled={creatingEpic || !epicName.trim()}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
               >
                 <Plus className="h-4 w-4" />
                 {creatingEpic ? "Creating..." : "Save Epic Module"}
@@ -1180,7 +1180,7 @@ Settings updated successfully!
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-950 px-3.5 py-2.5 rounded-xl border border-slate-150/70 dark:border-slate-850/70">
-              <code className="font-mono text-[10.5px] select-all text-indigo-650 dark:text-indigo-400 font-bold truncate flex-1">
+              <code className="font-mono text-[10.5px] select-all text-indigo-600 dark:text-indigo-400 font-bold truncate flex-1">
                 http://localhost:3000/api/mcp
               </code>
               <CopyButton text="http://localhost:3000/api/mcp" />
@@ -1253,7 +1253,7 @@ Settings updated successfully!
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-950 px-3.5 py-2.5 rounded-xl border border-slate-150/70 dark:border-slate-850/70">
-              <code className="font-mono text-[10.5px] select-all text-indigo-650 dark:text-indigo-400 font-bold truncate flex-1">
+              <code className="font-mono text-[10.5px] select-all text-indigo-600 dark:text-indigo-400 font-bold truncate flex-1">
                 http://localhost:3000/api/gitea
               </code>
               <CopyButton text="http://localhost:3000/api/gitea" />

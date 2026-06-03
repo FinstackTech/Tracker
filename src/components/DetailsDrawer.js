@@ -39,7 +39,7 @@ const STATUS_MAPPINGS = [
   { value: 'closed', label: 'Closed' }
 ];
 
-const EMPLOYEES = ["Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi"];
+const EMPLOYEES = ["Superadmin"];
 
 export default function DetailsDrawer({ 
   item, 
@@ -652,7 +652,7 @@ export default function DetailsDrawer({
                       placeholder="e.g. DIB-Integration-Specs"
                       value={newFileName}
                       onChange={e => setNewFileName(e.target.value)}
-                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-505 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
+                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                       required
                     />
                   </div>
@@ -663,7 +663,7 @@ export default function DetailsDrawer({
                       placeholder="e.g. 1.5 MB, 320 KB"
                       value={newFileSize}
                       onChange={e => setNewFileSize(e.target.value)}
-                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-505 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
+                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -671,7 +671,7 @@ export default function DetailsDrawer({
                     <select
                       value={newFileType}
                       onChange={e => setNewFileType(e.target.value)}
-                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-550 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
+                      className="w-full rounded-lg border border-slate-205 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
                     >
                       <option value="pdf">PDF Specification Document (*.pdf)</option>
                       <option value="docx">Word Specification Draft (*.docx)</option>
@@ -685,7 +685,7 @@ export default function DetailsDrawer({
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    className="flex items-center gap-1 rounded-lg bg-indigo-650 hover:bg-indigo-750 px-3.5 py-1.5 text-[10px] font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-100"
+                    className="flex items-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 text-[10px] font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-100"
                   >
                     <Plus className="h-3 w-3" />
                     Attach Document
@@ -728,7 +728,7 @@ export default function DetailsDrawer({
                       <a 
                         href="#" 
                         onClick={(e) => { e.preventDefault(); alert(`Simulating file download/preview for: ${attach.name}`); }}
-                        className="text-slate-400 hover:text-indigo-650 transition-colors p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900"
+                        className="text-slate-400 hover:text-indigo-600 transition-colors p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900"
                         title="Download Attachment"
                       >
                         <Download className="h-3.5 w-3.5" />
@@ -794,7 +794,7 @@ export default function DetailsDrawer({
                 />
                 <button
                   type="submit"
-                  className="rounded-lg bg-indigo-650 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 shrink-0 cursor-pointer"
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 shrink-0 cursor-pointer"
                 >
                   Send
                 </button>

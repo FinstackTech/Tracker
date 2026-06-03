@@ -3,7 +3,7 @@ import {
   Calendar, CalendarDays, Plus, Trash2, ShieldAlert, CheckCircle, HelpCircle
 } from 'lucide-react';
 
-const EMPLOYEES = ["Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi"];
+const EMPLOYEES = ["Superadmin"];
 
 const MONTHS = [
   { name: "Jun 2026", monthIdx: 5, year: 2026 },
