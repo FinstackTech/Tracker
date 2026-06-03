@@ -33,12 +33,12 @@ const INITIAL_DOCUMENTS = [
   },
   {
     _id: "doc-4",
-    name: "Notion_Styling_Theme_Manual.md",
-    category: "Notion wiki",
-    fileType: "notion",
-    fileSize: "Notion URL",
-    url: "https://notion.so/finstack/theme-sharing-guide",
-    description: "Live Notion documentation detailing style tokens, fonts, and Apple design rules."
+    name: "Styling_Theme_Manual.md",
+    category: "Workspace wiki",
+    fileType: "wiki",
+    fileSize: "Wiki URL",
+    url: "https://finstack/theme-sharing-guide",
+    description: "Live documentation detailing style tokens, fonts, and Apple design rules."
   },
   {
     _id: "doc-5",
@@ -68,7 +68,7 @@ export default function DocManagerTab({ activeProject, currentUser }) {
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Head';
 
   // Categories list
-  const categories = ['All', 'Specifications', 'Integrations', 'Schemas', 'Notion wiki', 'Templates'];
+  const categories = ['All', 'Specifications', 'Integrations', 'Schemas', 'Workspace wiki', 'Templates'];
 
   // Filtered documents list
   const filteredDocs = useMemo(() => {
@@ -89,7 +89,7 @@ export default function DocManagerTab({ activeProject, currentUser }) {
       name: newName.trim(),
       category: newCategory,
       fileType: newType,
-      fileSize: newType === 'notion' ? 'Notion URL' : newSize,
+      fileSize: newType === 'wiki' ? 'Wiki URL' : newSize,
       url: newUrl.trim() || 'https://github.com/FinstackTech/Tracker',
       description: newDesc.trim() || "No description provided."
     };
@@ -114,7 +114,7 @@ export default function DocManagerTab({ activeProject, currentUser }) {
       case 'docx': return 'bg-blue-500 text-white';
       case 'xlsx': return 'bg-emerald-600 text-white';
       case 'json': return 'bg-amber-500 text-white';
-      case 'notion': return 'bg-slate-900 text-white dark:bg-slate-800';
+      case 'wiki': return 'bg-slate-900 text-white dark:bg-slate-800';
       default: return 'bg-slate-500 text-white';
     }
   };
@@ -190,7 +190,7 @@ export default function DocManagerTab({ activeProject, currentUser }) {
                   <option value="docx">Word Doc</option>
                   <option value="xlsx">Excel Sheet</option>
                   <option value="json">JSON Schema</option>
-                  <option value="notion">Notion URL</option>
+                  <option value="wiki">Wiki URL</option>
                 </select>
               </div>
               
@@ -200,7 +200,7 @@ export default function DocManagerTab({ activeProject, currentUser }) {
                   type="text"
                   placeholder="e.g. 2.4 MB"
                   value={newSize}
-                  disabled={newType === 'notion'}
+                  disabled={newType === 'wiki'}
                   onChange={e => setNewSize(e.target.value)}
                   className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold disabled:opacity-50"
                 />
@@ -208,10 +208,10 @@ export default function DocManagerTab({ activeProject, currentUser }) {
             </div>
 
             <div className="sm:col-span-3 space-y-1">
-              <label className="block text-[9px] font-black uppercase text-slate-400">File link URL / Notion URL</label>
+              <label className="block text-[9px] font-black uppercase text-slate-400">File link URL / Wiki URL</label>
               <input
                 type="url"
-                placeholder="https://notion.so/... or repository file link"
+                placeholder="https://finstack.so/... or repository file link"
                 value={newUrl}
                 onChange={e => setNewUrl(e.target.value)}
                 className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
@@ -319,9 +319,9 @@ export default function DocManagerTab({ activeProject, currentUser }) {
                 target="_blank" 
                 rel="noreferrer"
                 className="p-1 rounded bg-white hover:bg-slate-50 text-slate-500 border border-slate-150 dark:bg-slate-950 dark:border-slate-850 dark:text-slate-400 dark:hover:bg-slate-900 cursor-pointer"
-                title={doc.fileType === 'notion' ? "Open Notion Wiki" : "Preview Document"}
+                title={doc.fileType === 'wiki' ? "Open Wiki" : "Preview Document"}
               >
-                {doc.fileType === 'notion' ? <BookOpen className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
+                {doc.fileType === 'wiki' ? <BookOpen className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
               </a>
               {isAdmin && (
                 <button

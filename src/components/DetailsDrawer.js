@@ -136,7 +136,7 @@ export default function DetailsDrawer({
   };
 
   const handleDescKeyDown = (e) => {
-    // Detect `/` to open Notion commands menu
+    // Detect `/` to open template commands menu
     if (e.key === '/') {
       const { selectionStart } = e.target;
       // Approximate coordinates based on text cursor
@@ -316,10 +316,10 @@ export default function DetailsDrawer({
             </div>
           )}
 
-          {/* ─── NOTION PROPERTIES GRID ─── */}
+          {/* ─── PROPERTIES GRID ─── */}
           <div className="border border-slate-100/70 rounded-2xl p-4 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-950/20 space-y-3.5 text-xs">
             <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 mb-2 dark:border-slate-800">
-              Notion database properties
+              Database properties
             </div>
 
             {/* Property: Status */}
@@ -515,7 +515,7 @@ export default function DetailsDrawer({
           <div className="relative">
             <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
               <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
-              Notion Workspace Description (Type / for commands)
+              Workspace Description (Type / for commands)
             </label>
             <textarea
               disabled={isReadOnly}
@@ -530,7 +530,7 @@ export default function DetailsDrawer({
               onKeyDown={handleDescKeyDown}
               onBlur={handleDescBlur}
               rows="6"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-850 dark:bg-slate-950 dark:text-slate-350 font-sans leading-relaxed disabled:opacity-75 disabled:bg-slate-100/50"
+              className="w-full rounded-xl border border-slate-205 bg-slate-50 px-3.5 py-2.5 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-850 dark:bg-slate-950 dark:text-slate-355 font-sans leading-relaxed disabled:opacity-75 disabled:bg-slate-100/50"
             />
 
             {/* Floating Slash Commands Menu */}
@@ -540,7 +540,7 @@ export default function DetailsDrawer({
                 style={{ top: slashCoords.top, left: slashCoords.left }}
               >
                 <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1 dark:border-slate-800">
-                  Notion Block Templates
+                  Document Block Templates
                 </div>
                 {SLASH_COMMANDS.map(cmd => (
                   <button
@@ -802,11 +802,11 @@ export default function DetailsDrawer({
             )}
           </div>
 
-          {/* ─── JIRA-STYLE AUDIT HISTORY STREAM ─── */}
+          {/* ─── AUDIT HISTORY STREAM ─── */}
           <div className="border-t border-slate-100 pt-4 dark:border-slate-850">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-705 dark:text-slate-200 mb-3 uppercase tracking-wider">
               <Clock className="h-4 w-4 text-indigo-500" />
-              <span>Jira Audit History Logs</span>
+              <span>Audit History Logs</span>
             </div>
 
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">

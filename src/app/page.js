@@ -405,7 +405,7 @@ export default function Home() {
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-50 gap-4 dark:bg-slate-950">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-650" />
         <span className="text-sm font-bold text-slate-500 tracking-wider uppercase animate-pulse">
-          Loading Notion & Jira Workspaces...
+          Loading Workspace Data...
         </span>
  
       </div>

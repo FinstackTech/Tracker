@@ -57,7 +57,7 @@ const TaskSchema = new mongoose.Schema({
   notes: { type: String, default: '' },
   order: { type: Number, default: 0 },
   
-  // Jira & Notion Advanced Extensions
+  // Advanced Extensions
   description: { type: String, default: '' },
   priority: { type: String, enum: ['lowest', 'low', 'medium', 'high', 'critical'], default: 'medium' },
   epicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Epic' },
@@ -85,7 +85,7 @@ const IssueSchema = new mongoose.Schema({
   reporter: { type: String, default: '' },
   resolutionNotes: { type: String, default: '' },
   
-  // Jira & Notion Advanced Extensions
+  // Advanced Extensions
   epicId: { type: mongoose.Schema.Types.ObjectId, ref: 'Epic' },
   blocked: { type: Boolean, default: false },
   timeSpent: { type: Number, default: 0 },

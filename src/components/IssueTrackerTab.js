@@ -207,7 +207,7 @@ export default function IssueTrackerTab({
             {ISSUE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
 
-          {/* Jira Quick Filters */}
+          {/* Quick Filters */}
           <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 dark:border-slate-800">
             <button
               onClick={() => setOnlyMyIssues(!onlyMyIssues)}
@@ -255,7 +255,7 @@ export default function IssueTrackerTab({
               }`}
             >
               <Columns className="h-3.5 w-3.5" />
-              Jira Board
+              Issue Board
             </button>
             <button
               onClick={() => setViewMode('list')}

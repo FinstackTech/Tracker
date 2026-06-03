@@ -353,12 +353,12 @@ export default function TaskTrackerTab({
   return (
     <div className="space-y-6 font-sans">
       
-      {/* ─── NOTION COVER BANNER ─── */}
+      {/* ─── COVER BANNER ─── */}
       <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
         <div className="h-44 w-full overflow-hidden relative select-none">
           <img 
             src="/notion_banner_cover.png" 
-            alt="Notion cover" 
+            alt="Cover banner" 
             className="w-full h-full object-cover object-center scale-[1.01]" 
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
@@ -381,7 +381,7 @@ export default function TaskTrackerTab({
         </div>
       </div>
 
-      {/* ─── NOTION CONTROLS & VIEWS TAB BAR ─── */}
+      {/* ─── CONTROLS & VIEWS TAB BAR ─── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
@@ -516,7 +516,7 @@ export default function TaskTrackerTab({
         </div>
       </div>
 
-      {/* ─── LIST TABLE VIEW (Replicating Notion Screenshot) ─── */}
+      {/* ─── LIST TABLE VIEW ─── */}
       {viewMode === 'list' && (
         <div className="apple-card overflow-hidden">
           <div className="overflow-x-auto">
@@ -940,7 +940,7 @@ export default function TaskTrackerTab({
         </div>
       )}
 
-      {/* ─── NOTION MONTHLY CALENDAR VIEW ─── */}
+      {/* ─── MONTHLY CALENDAR VIEW ─── */}
       {viewMode === 'calendar' && (
         <div className="apple-card p-5 select-none">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
