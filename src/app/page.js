@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   Layers, Briefcase, Plus, FolderPlus, X, Columns, LayoutDashboard, CheckSquare, 
   AlertCircle, Calendar, Landmark, Settings, Bell, ChevronLeft, ChevronRight, User, Globe, LogOut,
-  CalendarRange, FileText
+  CalendarRange, FileText, Clock
 } from 'lucide-react';
 import DashboardTab from '@/components/DashboardTab';
 import TaskTrackerTab from '@/components/TaskTrackerTab';
