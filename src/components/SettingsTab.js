@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  Settings, Key, Webhook, Bell, Send, CheckCircle, MessageSquare, AlertCircle, Tag, Trash2, Plus, Lock, FolderKanban, Cpu, GitBranch, Users, MessageCircle, Globe, Copy, Check
+  Webhook, Send, CheckCircle, MessageSquare, Tag, Trash2, Lock, Cpu, GitBranch, MessageCircle, Globe, Copy, Check, Bell
 } from 'lucide-react';
 
 const CopyButton = ({ text }) => {
@@ -14,7 +14,7 @@ const CopyButton = ({ text }) => {
     <button 
       type="button" 
       onClick={handleCopy}
-      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-350 border border-slate-205 dark:border-slate-750 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+      className="px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase bg-slate-100 hover:bg-slate-200 dark:bg-slate-805 dark:hover:bg-slate-700 dark:text-slate-350 border border-slate-205 dark:border-slate-750 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -32,25 +32,6 @@ const CopyButton = ({ text }) => {
   );
 };
 
-
-const EPIC_COLORS = [
-  { hex: '#64748b', label: 'Slate' },
-  { hex: '#ef4444', label: 'Red' },
-  { hex: '#f97316', label: 'Orange' },
-  { hex: '#f59e0b', label: 'Amber' },
-  { hex: '#10b981', label: 'Green' },
-  { hex: '#059669', label: 'Emerald' },
-  { hex: '#0d9488', label: 'Teal' },
-  { hex: '#0ea5e9', label: 'Sky' },
-  { hex: '#3b82f6', label: 'Blue' },
-  { hex: '#4f46e5', label: 'Indigo' },
-  { hex: '#8b5cf6', label: 'Violet' },
-  { hex: '#a855f7', label: 'Purple' },
-  { hex: '#d946ef', label: 'Fuchsia' },
-  { hex: '#ec4899', label: 'Pink' },
-  { hex: '#f43f5e', label: 'Rose' }
-];
-
 const SlackIcon = (props) => (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" {...props}>
     <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523 2.528 2.528 0 0 1-2.522-2.523 2.528 2.528 0 0 1 2.522-2.52h2.52v2.52zm1.261 0a2.528 2.528 0 0 1 2.52-2.52h5.043a2.528 2.528 0 0 1 2.522 2.52v5.042a2.528 2.528 0 0 1-2.522 2.52H8.823a2.528 2.528 0 0 1-2.52-2.52v-5.042zM8.823 5.043a2.528 2.528 0 0 1-2.52-2.522A2.528 2.528 0 0 1 8.823 0a2.528 2.528 0 0 1 2.52 2.521v2.522h-2.52zm0 1.261a2.528 2.528 0 0 1 2.52 2.52v5.043a2.528 2.528 0 0 1-2.52 2.522H3.78a2.528 2.528 0 0 1-2.522-2.522V8.824a2.528 2.528 0 0 1 2.522-2.52h5.043zm10.135 3.764a2.528 2.528 0 0 1 2.52-2.52 2.528 2.528 0 0 1 2.522 2.52 2.528 2.528 0 0 1-2.522 2.52h-2.52v-2.52zm-1.262 0a2.528 2.528 0 0 1-2.52-2.52h-5.043a2.528 2.528 0 0 1-2.522-2.52V5.043a2.528 2.528 0 0 1 2.522-2.52h5.043a2.528 2.528 0 0 1 2.52 2.52v5.043zm-3.781 10.135a2.528 2.528 0 0 1 2.52 2.522 2.528 2.528 0 0 1-2.52-2.521 2.528 2.528 0 0 1-2.522-2.521v-2.522h2.522zm0-1.262a2.528 2.528 0 0 1-2.522-2.52v-5.043a2.528 2.528 0 0 1 2.522-2.52h5.043a2.528 2.528 0 0 1 2.522 2.52v5.043h-5.043z" />
@@ -66,120 +47,11 @@ const DiscordIcon = (props) => (
 export default function SettingsTab({ 
   activeUser, 
   activeProject, 
-  setActiveProject,
-  epics = [], 
-  setEpics, 
   currentUser,
-  userProfiles = [],
-  setUserProfiles,
-  projects = [],
-  setProjects,
-  view = 'webhooks'
+  showToast
 }) {
-  const [epicName, setEpicName] = useState('');
-  const [epicColor, setEpicColor] = useState('#4f46e5');
-  const [creatingEpic, setCreatingEpic] = useState(false);
-
-  // User Profile Form States
-  const [newUserName, setNewUserName] = useState('');
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserRole, setNewUserRole] = useState('Employee');
-  const [newUserPassword, setNewUserPassword] = useState('');
-
-  // Project Registry Form States
-  const [newProjName, setNewProjName] = useState('');
-  const [newProjCode, setNewProjCode] = useState('');
-  const [newProjClient, setNewProjClient] = useState('');
-  const [newProjType, setNewProjType] = useState('delivery');
-  const [addingProject, setAddingProject] = useState(false);
-
-  const handleAddUser = (e) => {
-    e.preventDefault();
-    if (!newUserName.trim() || !newUserEmail.trim()) return;
-    
-    if (userProfiles.some(u => u.name.toLowerCase() === newUserName.trim().toLowerCase())) {
-      alert("A user with this name already exists!");
-      return;
-    }
-
-    const updated = [
-      ...userProfiles,
-      {
-        name: newUserName.trim(),
-        role: newUserRole,
-        email: newUserEmail.trim(),
-        password: newUserPassword.trim() || 'user'
-      }
-    ];
-    setUserProfiles(updated);
-    localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-    
-    setNewUserName('');
-    setNewUserEmail('');
-    setNewUserRole('Employee');
-    setNewUserPassword('');
-  };
-
-  const handleDeleteUser = (nameToDelete) => {
-    if (nameToDelete === activeUser) {
-      alert("You cannot delete the currently logged in user!");
-      return;
-    }
-    if (!confirm(`Are you sure you want to delete profile: ${nameToDelete}?`)) return;
-
-    const updated = userProfiles.filter(u => u.name !== nameToDelete);
-    setUserProfiles(updated);
-    localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-  };
-
-  const handleAddProjectInline = async (e) => {
-    e.preventDefault();
-    if (!newProjName.trim() || !newProjCode.trim()) return;
-    setAddingProject(true);
-
-    const payload = {
-      name: newProjName.trim(),
-      code: newProjCode.trim().toUpperCase().replace(/\s+/g, '-'),
-      client: newProjClient.trim() || 'Internal',
-      type: newProjType,
-      status: 'active'
-    };
-
-    try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const res = await response.json();
-      if (res.success) {
-        setProjects(prev => [...prev, res.data]);
-        setNewProjName('');
-        setNewProjCode('');
-        setNewProjClient('');
-        setNewProjType('delivery');
-        alert(`Project "${payload.name}" initialized successfully!`);
-      } else {
-        alert(res.error || "Failed to create project");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error initializing project");
-    } finally {
-      setAddingProject(false);
-    }
-  };
-  
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Head';
-  const isManagerOrAdmin = 
-    currentUser?.role === 'Admin' || 
-    currentUser?.role === 'Head' || 
-    currentUser?.role === 'Project Manager' || 
-    currentUser?.role === 'Project Lead' || 
-    currentUser?.role === 'Support Manager' || 
-    currentUser?.role === 'Support Lead' || 
-    currentUser?.role === 'Manager';
-  const isReadOnly = !isAdmin && !isManagerOrAdmin;
+  
   const [msTeamsUrl, setMsTeamsUrl] = useState('');
   const [slackUrl, setSlackUrl] = useState('');
   const [discordUrl, setDiscordUrl] = useState('');
@@ -197,7 +69,6 @@ export default function SettingsTab({
   
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Fetch current integration settings
   const fetchSettings = async () => {
@@ -220,7 +91,7 @@ export default function SettingsTab({
         setTriggerOnIssueResolved(d.triggerOnIssueResolved !== undefined ? d.triggerOnIssueResolved : false);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to load integrations", e);
     }
   };
 
@@ -231,7 +102,6 @@ export default function SettingsTab({
   const handleSaveSettings = async (e) => {
     if (e) e.preventDefault();
     setSaving(true);
-    setSaveSuccess(false);
 
     const payload = {
       msTeamsUrl,
@@ -256,11 +126,15 @@ export default function SettingsTab({
       });
       const res = await response.json();
       if (res.success) {
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+        if (showToast) {
+          showToast("Webhooks & connectors saved successfully", "success");
+        } else {
+          alert("Integration settings updated successfully!");
+        }
       }
     } catch (err) {
       console.error(err);
+      if (showToast) showToast("Error syncing integration settings", "error");
     } finally {
       setSaving(false);
     }
@@ -293,30 +167,34 @@ export default function SettingsTab({
       });
       const res = await response.json();
       if (res.success) {
-        alert("Diagnostic test trigger dispatched successfully! Check Teams, Slack, Discord, Telegram or WhatsApp channels.");
+        if (showToast) {
+          showToast("Diagnostic test triggers dispatched!", "success");
+        } else {
+          alert("Diagnostic test trigger dispatched successfully! Check configured channels.");
+        }
       }
     } catch (e) {
       console.error(e);
+      if (showToast) showToast("Error sending diagnostic test", "error");
     } finally {
       setTesting(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in-30 duration-200">
+    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
       
       {/* ─── WEBHOOK CONFIGURATION FORM ─── */}
-      {view === 'webhooks' && (
-        <div className="apple-card p-6">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80">
         
-        <div className="flex items-center justify-between mb-6 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+        <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
               <Webhook className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
-                Third-Party Integrations & Hook Hub
+              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Third-Party Integrations Hub
               </h4>
               <p className="text-[10px] text-slate-400 mt-0.5">Route real-time alerts directly to enterprise messaging dashboards</p>
             </div>
@@ -328,11 +206,10 @@ export default function SettingsTab({
 
         <form onSubmit={handleSaveSettings} className="space-y-6">
           
-          {/* Responsive Connectors Sidebar Layout */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[300px]">
             
-            {/* Connector Selection List (Left Column) */}
-            <div className="md:col-span-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-slate-150/40 dark:border-slate-800/40 md:pr-4 scrollbar-none">
+            {/* Left Selection List */}
+            <div className="md:col-span-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 md:pr-4">
               
               {[
                 { id: 'teams', label: 'MS Teams', desc: 'Office connector', icon: Webhook, color: 'bg-violet-500', active: !!msTeamsUrl, activeBg: 'bg-violet-50/70 border-violet-200 dark:bg-violet-955/20 dark:border-violet-900/50' },
@@ -349,7 +226,7 @@ export default function SettingsTab({
                     key={c.id}
                     type="button"
                     onClick={() => setActiveConnector(c.id)}
-                    className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-3 shrink-0 md:shrink border hover:scale-[1.02] active:scale-[0.98] duration-150 ${
+                    className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-3 shrink-0 md:shrink border hover:scale-[1.01] active:scale-[0.99] duration-150 ${
                       isSelected 
                         ? c.activeBg 
                         : 'border-transparent hover:bg-slate-50/50 dark:hover:bg-slate-900/20'
@@ -362,28 +239,28 @@ export default function SettingsTab({
                       <div className="text-xs font-bold text-slate-800 dark:text-slate-205 flex items-center gap-1.5">
                         {c.label}
                         {c.active && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-sm" />
                         )}
                       </div>
-                      <div className="text-[9px] text-slate-450 truncate max-w-[120px] font-semibold">{c.desc}</div>
+                      <div className="text-[9px] text-slate-400 truncate max-w-[120px] font-semibold">{c.desc}</div>
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Active Connector Inputs Form Panel (Right Column) */}
+            {/* Right Input Panel */}
             <div className="md:col-span-8 space-y-4">
               
               {activeConnector === 'teams' && (
-                <div className="space-y-3 animate-fadeIn">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-violet-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       Microsoft Teams Connector URL
                     </h5>
                   </div>
-                  <p className="text-[10px] text-slate-405 leading-normal font-medium">
+                  <p className="text-[10px] text-slate-400 leading-normal font-medium">
                     Configure Microsoft Teams Incoming Webhook. The application will post Adaptive Cards with structural details for blocker flags and critical incidents.
                   </p>
                   <div className="space-y-1">
@@ -401,14 +278,14 @@ export default function SettingsTab({
               )}
 
               {activeConnector === 'slack' && (
-                <div className="space-y-3 animate-fadeIn">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       Slack Webhook Connector
                     </h5>
                   </div>
-                  <p className="text-[10px] text-slate-405 leading-normal font-medium">
+                  <p className="text-[10px] text-slate-400 leading-normal font-medium">
                     Configure a Slack Incoming Webhook App integration. Updates will be pushed directly into your designated Slack workspace channel using formatted Markdown messages.
                   </p>
                   <div className="space-y-1">
@@ -426,14 +303,14 @@ export default function SettingsTab({
               )}
 
               {activeConnector === 'discord' && (
-                <div className="space-y-3 animate-fadeIn">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       Discord Webhook integration
                     </h5>
                   </div>
-                  <p className="text-[10px] text-slate-405 leading-normal font-medium">
+                  <p className="text-[10px] text-slate-400 leading-normal font-medium">
                     Receive rich embeds with color-coded alerts on your Discord channel. Add a webhook URL from your Discord Server channel settings.
                   </p>
                   <div className="space-y-1">
@@ -451,10 +328,10 @@ export default function SettingsTab({
               )}
 
               {activeConnector === 'telegram' && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       Telegram Bot API Service
                     </h5>
                   </div>
@@ -489,10 +366,10 @@ export default function SettingsTab({
               )}
 
               {activeConnector === 'whatsapp' && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       WhatsApp Message Hook
                     </h5>
                   </div>
@@ -519,7 +396,7 @@ export default function SettingsTab({
                         placeholder={isAdmin ? "e.g. +966500000000" : "Restricted"}
                         value={whatsAppPhone}
                         onChange={e => setWhatsAppPhone(e.target.value)}
-                        className="w-full rounded-xl border border-slate-205 bg-slate-50/50 px-3.5 py-2.5 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-850 dark:bg-slate-950 dark:text-slate-350 disabled:opacity-60 font-semibold"
+                        className="w-full rounded-xl border border-slate-205 bg-slate-50/50 px-3.5 py-2.5 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-850 dark:bg-slate-950 dark:text-slate-355 disabled:opacity-60 font-semibold"
                       />
                     </div>
                   </div>
@@ -527,14 +404,14 @@ export default function SettingsTab({
               )}
 
               {activeConnector === 'custom' && (
-                <div className="space-y-3 animate-fadeIn">
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-slate-500" />
-                    <h5 className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
                       Custom Webhook API (JSON POST)
                     </h5>
                   </div>
-                  <p className="text-[10px] text-slate-405 leading-normal font-medium">
+                  <p className="text-[10px] text-slate-400 leading-normal font-medium">
                     Pushes a structured JSON request payload containing the notification properties, details, actor, and timestamp to a custom server or HTTP target.
                   </p>
                   <div className="space-y-2">
@@ -569,8 +446,8 @@ export default function SettingsTab({
           </div>
 
           {/* Alert triggers */}
-          <div className="space-y-4 pt-4 border-t border-slate-150/40 dark:border-slate-800/40">
-            <h5 className="text-xs font-black text-slate-705 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wide">
+          <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <h5 className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wide">
               <Bell className="h-4 w-4 text-indigo-500" />
               Outbound Event Dispatch Triggers
             </h5>
@@ -605,7 +482,7 @@ export default function SettingsTab({
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-950/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
+              <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-955/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
                 <input
                   disabled={!isAdmin}
                   type="checkbox"
@@ -637,8 +514,8 @@ export default function SettingsTab({
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-3 border-t border-slate-150/40 pt-4 dark:border-slate-800/40">
-            {isAdmin && (
+          <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+            {isAdmin ? (
               <>
                 <button
                   type="button"
@@ -652,13 +529,12 @@ export default function SettingsTab({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-100 dark:shadow-none cursor-pointer select-none"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-xs font-bold text-white shadow-md cursor-pointer select-none animate-all"
                 >
                   {saving ? 'Saving...' : 'Save Hub Config'}
                 </button>
               </>
-            )}
-            {!isAdmin && (
+            ) : (
               <div className="text-[10px] text-amber-600 font-bold bg-amber-50 dark:bg-amber-955/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5" />
                 <span>Integration settings are locked for non-administrators</span>
@@ -666,504 +542,18 @@ export default function SettingsTab({
             )}
           </div>
 
-          {saveSuccess && (
-            <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold justify-end mt-2 select-none animate-fadeIn">
-              <CheckCircle className="h-4 w-4" />
-Settings updated successfully!
-            </div>
-          )}
-
         </form>
       </div>
-      )}
-
-      {/* ─── EMPLOYEE & USER REGISTRY CARD ─── */}
-      {view === 'users' && (
-        <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-850 dark:bg-slate-900">
-        <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <Users className="h-5 w-5 text-indigo-500" />
-          <div>
-            <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
-              Employee & User Registry
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5">Manage user profiles, assignments, and access control credentials</p>
-          </div>
-        </div>
-
-        {/* User list card grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {userProfiles.map((p) => {
-            const isMe = p.name === activeUser;
-            return (
-              <div 
-                key={p.name} 
-                className="p-4 rounded-2xl border border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white hover:border-slate-200/80 dark:hover:bg-slate-900/30 dark:hover:border-slate-800 transition-all flex items-center justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-indigo-50 to-indigo-100 dark:from-slate-800 dark:to-slate-850 border border-indigo-100/50 dark:border-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs shrink-0 select-none">
-                    {p.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-slate-805 dark:text-slate-200 flex items-center gap-1.5 leading-snug">
-                      <span className="truncate">{p.name}</span>
-                      {isMe && (
-                        <span className="text-[8px] bg-slate-100 dark:bg-slate-950 text-slate-505 px-1.5 py-0.2 rounded font-extrabold uppercase">You</span>
-                      )}
-                    </div>
-                    <div className="text-[9px] text-slate-400 font-medium truncate leading-none mt-0.5">{p.email || 'N/A'}</div>
-                    <div className="mt-2">
-                      <span className={`inline-block px-1.5 py-0.5 text-[8px] font-extrabold uppercase rounded border ${
-                        (p.role === 'Admin' || p.role === 'Head') ? 'bg-rose-50/50 text-rose-700 border-rose-200/50 dark:bg-rose-955/10 dark:text-rose-400 dark:border-rose-955/20' :
-                        (p.role === 'Project Manager' || p.role === 'Project Lead' || p.role === 'Support Manager' || p.role === 'Support Lead' || p.role === 'Manager') ? 'bg-violet-50/50 text-violet-755 border-violet-200/50 dark:bg-violet-955/10 dark:text-violet-405 dark:border-violet-955/20' :
-                        (p.role === 'HR' || p.role === 'Sales') ? 'bg-amber-50/50 text-amber-705 border-amber-205/50 dark:bg-amber-955/10 dark:text-amber-400 dark:border-amber-955/20' :
-                        'bg-emerald-50/50 text-emerald-705 border-emerald-200/50 dark:bg-emerald-955/10 dark:text-emerald-400 dark:border-emerald-955/20'
-                      }`}>
-                        {p.role}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                
-                {isAdmin && (
-                  <button
-                    onClick={() => handleDeleteUser(p.name)}
-                    disabled={isMe}
-                    className="text-slate-350 hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 shrink-0 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-                    title="Remove User Profile"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Add User Profile Form (Admin only) */}
-        {isAdmin ? (
-          <form onSubmit={handleAddUser} className="bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
-            <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider mb-3.5">Add New User Profile</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">User Full Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. John Doe"
-                  value={newUserName}
-                  onChange={e => setNewUserName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="e.g. john@company.com"
-                  value={newUserEmail}
-                  onChange={e => setNewUserEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Assigned Access Role</label>
-                <select
-                  value={newUserRole}
-                  onChange={e => setNewUserRole(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
-                >
-                  <option value="Admin">Admin</option>
-                  <option value="HR">HR</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Project Manager">Project Manager</option>
-                  <option value="Head">Head</option>
-                  <option value="Project Lead">Project Lead</option>
-                  <option value="Support Manager">Support Manager</option>
-                  <option value="Support Lead">Support Lead</option>
-                  <option value="Support Member">Support Member</option>
-                  <option value="Team Member">Team Member</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Account Password</label>
-                <input
-                  type="text"
-                  placeholder="e.g. user123"
-                  value={newUserPassword}
-                  onChange={e => setNewUserPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex justify-end mt-4">
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
-              >
-                <Plus className="h-4 w-4" />
-                Add Profile
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-100 dark:border-amber-900/30 p-3.5 text-[10px] font-bold text-amber-700 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-amber-500" />
-            <span>Adding or removing employee user profiles is restricted to Administrators</span>
-          </div>
-        )}
-      </div>
-      )}
-
-      {/* ─── PROJECTS PORTFOLIO VIEW ─── */}
-      {view === 'projects' && (
-        <>
-          {/* Active selected project banner */}
-          {activeProject ? (
-            <div className="rounded-2xl border border-indigo-150 bg-indigo-50/50 p-5 dark:border-indigo-950/20 dark:bg-indigo-950/20 mb-6 flex items-center justify-between shadow-sm">
-              <div>
-                <span className="text-[10px] font-black text-indigo-550 dark:text-indigo-400 uppercase tracking-widest leading-none">Active Selected Workspace Project</span>
-                <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider mt-1.5 flex items-center gap-2">
-                  <span className="font-mono bg-indigo-100 dark:bg-indigo-900/60 px-2 py-0.5 rounded text-indigo-700 dark:text-indigo-300 text-xs">{activeProject.code}</span>
-                  <span>{activeProject.name}</span>
-                </h4>
-              </div>
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Active Project Selected" />
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-amber-150 bg-amber-50/50 p-5 dark:border-amber-955/20 dark:bg-amber-955/20 mb-6 flex items-center gap-3">
-              <Lock className="h-5 w-5 text-amber-500 shrink-0" />
-              <div>
-                <span className="text-[10px] font-black text-amber-600 dark:text-amber-405 uppercase tracking-widest leading-none">No Active Project Selected</span>
-                <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider mt-1.5">
-                  Please select or register a project below to activate workspace tracking
-                </h4>
-              </div>
-            </div>
-          )}
-
-          {/* ─── PROJECT REGISTRY CARD ─── */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <FolderKanban className="h-5 w-5 text-indigo-500" />
-          <div>
-            <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
-              Project Registry Manager
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5">Initialize and review enterprise project profiles and delivery scopes</p>
-          </div>
-        </div>
-
-        {/* Info Box */}
-        <div className="text-[10px] bg-slate-50 dark:bg-slate-950/20 p-3.5 rounded-xl border border-slate-150 dark:border-slate-850 mb-6 text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
-          <strong className="text-slate-700 dark:text-slate-350 block mb-1">💡 How to add projects in the application:</strong>
-          There are two ways to register a project:
-          <ul className="list-decimal pl-4 mt-1 space-y-0.5">
-            <li>Click the <strong className="text-indigo-600 dark:text-indigo-400 font-bold">"Initialize Project Profile"</strong> button in the top-right header of the main workspace.</li>
-            <li>Fill in the inline creator form below (restricted to Administrators & Managers).</li>
-          </ul>
-        </div>
-
-        {/* Project list cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {projects.map((proj) => {
-            const isActive = proj._id === activeProject?._id;
-            return (
-              <div 
-                key={proj._id} 
-                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] duration-150 relative overflow-hidden ${
-                  isActive 
-                    ? 'border-indigo-200 bg-indigo-50/15 dark:border-indigo-900/50 dark:bg-indigo-950/20 shadow-sm shadow-indigo-50/50 dark:shadow-none' 
-                    : 'border-slate-150/60 bg-slate-50/20 dark:border-slate-850/60 dark:bg-slate-955/10 hover:bg-white dark:hover:bg-slate-900/30 hover:border-slate-200/80 dark:hover:border-slate-800 cursor-pointer'
-                }`}
-                onClick={() => { if (!isActive && setActiveProject) setActiveProject(proj); }}
-              >
-                {isActive && (
-                  <div className="absolute top-0 right-0 h-2 w-2 rounded-bl-xl bg-indigo-600 dark:bg-indigo-400" />
-                )}
-                
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="min-w-0">
-                    <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 text-xs tracking-wider uppercase">
-                      {proj.code}
-                    </span>
-                    <h5 className="text-xs font-bold text-slate-855 dark:text-slate-205 mt-1 leading-snug truncate" title={proj.name}>
-                      {proj.name}
-                    </h5>
-                  </div>
-                  {isActive && (
-                    <span className="shrink-0 text-[8px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">
-                      Active Selected
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between border-t border-slate-100/60 dark:border-slate-800/60 pt-3 mt-3 text-xs">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-455 truncate">
-                    <Users className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="truncate max-w-[120px]">{proj.client}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 shrink-0">
-                    {!isActive && setActiveProject && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveProject(proj);
-                        }}
-                        className="text-[9px] bg-indigo-50/80 hover:bg-indigo-600 hover:text-white dark:bg-indigo-950/40 dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded font-extrabold cursor-pointer transition-all uppercase tracking-wider border border-indigo-100/50 dark:border-indigo-900/40"
-                      >
-                        Activate Project
-                      </button>
-                    )}
-                    <span className={`inline-block px-1.5 py-0.5 text-[8.5px] font-black rounded uppercase tracking-wide border ${
-                      proj.type === 'maintenance' 
-                        ? 'bg-amber-50/50 text-amber-705 border-amber-205/65 dark:bg-amber-955/15 dark:text-amber-400 dark:border-amber-950/20' 
-                        : 'bg-blue-50/50 text-blue-700 border-blue-200/50 dark:bg-blue-955/15 dark:text-blue-400 dark:border-blue-950/20'
-                    }`}>
-                      {proj.type === 'maintenance' ? 'SLA support' : 'Implementation'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Add Project Form (Admin/Manager only) */}
-        {isManagerOrAdmin ? (
-          <form onSubmit={handleAddProjectInline} className="bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
-            <h5 className="text-[10px] font-black text-slate-455 uppercase tracking-wider mb-3.5">Register New Project Profile</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Full Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dubai Islamic Bank Integration"
-                  value={newProjName}
-                  onChange={e => setNewProjName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Code</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. DIB-INT"
-                    value={newProjCode}
-                    onChange={e => setNewProjCode(e.target.value)}
-                    className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-mono font-bold"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Client Tag</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. DIB"
-                    value={newProjClient}
-                    onChange={e => setNewProjClient(e.target.value)}
-                    className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-semibold"
-                  />
-                </div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Focus Delivery Type</label>
-                <select
-                  value={newProjType}
-                  onChange={e => setNewProjType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3 py-1.5 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-300 font-bold cursor-pointer"
-                >
-                  <option value="delivery">Active Project Delivery (Implementation)</option>
-                  <option value="maintenance">SLA Project Maintenance (Ongoing Support)</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end mt-4">
-              <button
-                type="submit"
-                disabled={addingProject}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
-              >
-                <Plus className="h-4 w-4" />
-                {addingProject ? 'Creating...' : 'Initialize Project'}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-100 dark:border-amber-900/30 p-3.5 text-[10px] font-bold text-amber-705 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-amber-500" />
-            <span>Adding new project profiles is restricted to Administrators and Managers</span>
-          </div>
-        )}
-      </div>
-
-      {/* ─── PROJECT EPIC MANAGEMENT PANEL ─── */}
-      <div className="rounded-2xl border border-slate-150 bg-white p-6 shadow-sm dark:border-slate-855 dark:bg-slate-900 mt-6">
-        <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <FolderKanban className="h-5 w-5 text-indigo-500" />
-            <div>
-              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
-                Project Epics Manager
-              </h4>
-              <p className="text-[10px] text-slate-400 mt-0.5">Manage high-level project modules and feature bodies</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Epics creation form (Admin/Manager only) */}
-        {isManagerOrAdmin ? (
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            if (!epicName.trim() || !activeProject) return;
-            setCreatingEpic(true);
-            try {
-              const response = await fetch('/api/epics', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  projectId: activeProject._id,
-                  name: epicName.trim(),
-                  color: epicColor
-                })
-              });
-              const res = await response.json();
-              if (res.success) {
-                setEpics(prev => [...prev, res.data]);
-                setEpicName('');
-              }
-            } catch (err) {
-              console.error(err);
-            } finally {
-              setCreatingEpic(false);
-            }
-          }} className="space-y-4 mb-6 bg-slate-50/40 dark:bg-slate-955/25 p-5 rounded-2xl border border-slate-150/60 dark:border-slate-850/85">
-            <h5 className="text-[10px] font-black text-slate-450 uppercase tracking-wider">Create New Project Epic</h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Epic Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Authentication Gateway"
-                  value={epicName}
-                  onChange={e => setEpicName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-350 font-semibold"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-2">Badge Color Selector</label>
-                <div className="flex flex-wrap gap-2 pt-0.5">
-                  {EPIC_COLORS.map(c => (
-                    <button
-                      key={c.hex}
-                      type="button"
-                      onClick={() => setEpicColor(c.hex)}
-                      className={`h-6.5 w-6.5 rounded-full transition-all flex items-center justify-center border outline-none ${
-                        epicColor === c.hex 
-                          ? 'ring-2 ring-indigo-500 scale-110 shadow-md border-white dark:border-slate-900' 
-                          : 'border-transparent hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                      title={c.label}
-                    >
-                      {epicColor === c.hex && (
-                        <span className="text-[10px] text-white font-black drop-shadow">✓</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={creatingEpic || !epicName.trim()}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white shadow-sm cursor-pointer hover:scale-[1.01] active:scale-95 duration-150"
-              >
-                <Plus className="h-4 w-4" />
-                {creatingEpic ? "Creating..." : "Save Epic Module"}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="mb-6 rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 p-3.5 text-[10px] font-bold text-amber-705 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-amber-500" />
-            <span>Creating Epics is restricted to Admins and Managers.</span>
-          </div>
-        )}
-
-        {/* Epics list grid */}
-        <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Active Project Epics ({epics.length})</h5>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
-          {epics.map(epic => (
-            <div 
-              key={epic._id}
-              className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 dark:border-slate-850 bg-slate-50/20"
-            >
-              <div className="flex items-center gap-2">
-                <span 
-                  className="h-3 w-3 rounded-full shrink-0" 
-                  style={{ backgroundColor: epic.color }}
-                />
-                <span 
-                  className="inline-block rounded px-2.5 py-0.5 text-[10px] font-black text-white uppercase tracking-wider"
-                  style={{ backgroundColor: epic.color }}
-                >
-                  {epic.name}
-                </span>
-              </div>
-
-              {isManagerOrAdmin && (
-                <button
-                  onClick={async () => {
-                    if (!confirm("Delete Epic: " + epic.name + "?")) return;
-                    try {
-                      const response = await fetch(`/api/epics?id=${epic._id}`, { method: 'DELETE' });
-                      const res = await response.json();
-                      if (res.success) {
-                        setEpics(prev => prev.filter(e => e._id !== epic._id));
-                      }
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
-                  className="text-slate-350 hover:text-rose-600 transition-colors p-1"
-                  title="Remove Epic"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          ))}
-
-          {epics.length === 0 && (
-            <div className="col-span-2 text-center py-6 text-slate-400 italic text-xs">
-              No Epics initialized for this project.
-            </div>
-          )}
-        </div>
-      </div>
-      </>
-      )}
 
       {/* ─── MODEL CONTEXT PROTOCOL (MCP) CARD ─── */}
-      {view === 'webhooks' && (
-        <>
-          <div className="apple-card p-6 mt-6">
-        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
               <Cpu className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
                 Model Context Protocol (MCP) Node
               </h4>
               <p className="text-[10px] text-slate-400 mt-0.5">Expose project tracker data directly to external LLM clients</p>
@@ -1175,7 +565,7 @@ Settings updated successfully!
           <div className="rounded-2xl bg-slate-50/50 p-4.5 dark:bg-slate-950/15 border border-slate-150/60 dark:border-slate-850/60 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-black text-slate-405 uppercase tracking-wider text-[9.5px]">MCP Connection Node URL</span>
-              <span className="text-[8.5px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-800">
+              <span className="text-[8.5px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-850">
                 JSON-RPC 2.0 HTTP
               </span>
             </div>
@@ -1200,14 +590,14 @@ Settings updated successfully!
             </ul>
           </div>
 
-          <div className="space-y-2.5 pt-3.5 border-t border-slate-150/40 dark:border-slate-800/40">
+          <div className="space-y-2.5 pt-3.5 border-t border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <p className="font-black text-slate-750 dark:text-slate-300 uppercase tracking-wider text-[10px]">
                 Claude Desktop Configuration Setup:
               </p>
               <CopyButton text={`{\n  "mcpServers": {\n    "ppm-tracker": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "@modelcontextprotocol/server-http",\n        "http://localhost:3000/api/mcp"\n      ]\n    }\n  }\n}`} />
             </div>
-            <p className="text-[10px] text-slate-400 leading-normal font-medium">
+            <p className="text-[10px] text-slate-405 leading-normal font-medium">
               Copy the following JSON settings block to your <code className="bg-slate-105 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950 text-slate-655 dark:text-slate-300">claude_desktop_config.json</code> config file (located at <code className="bg-slate-105 px-1 py-0.5 rounded font-mono text-[9px] dark:bg-slate-950 text-slate-655 dark:text-slate-300">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows):
             </p>
             <pre className="bg-slate-950 text-slate-300 p-4 rounded-xl text-[10px] font-mono overflow-x-auto select-all leading-relaxed shadow-sm dark:bg-slate-955 border border-slate-850">
@@ -1229,14 +619,14 @@ Settings updated successfully!
       </div>
 
       {/* ─── GITEA WEBHOOK INTEGRATION CARD ─── */}
-      <div className="apple-card p-6 mt-6">
-        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
               <GitBranch className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
                 Local Gitea Webhook Service
               </h4>
               <p className="text-[10px] text-slate-400 mt-0.5">Automate tracker history entries and auto-resolve tasks using Gitea commit pushes</p>
@@ -1244,8 +634,8 @@ Settings updated successfully!
           </div>
         </div>
 
-        <div className="space-y-4 text-xs">
-          <div className="rounded-2xl bg-slate-50/50 p-4.5 dark:bg-slate-950/15 border border-slate-150/60 dark:border-slate-850/60 space-y-3">
+        <div className="space-y-4 text-xs font-sans">
+          <div className="rounded-2xl bg-slate-50/50 p-4.5 dark:bg-slate-955/15 border border-slate-150/60 dark:border-slate-850/60 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-black text-slate-405 uppercase tracking-wider text-[9.5px]">Webhook Target Payload URL</span>
               <span className="text-[8.5px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-800">
@@ -1276,14 +666,14 @@ Settings updated successfully!
       </div>
 
       {/* ─── CHATGPT CUSTOM GPT ACTION CARD ─── */}
-      <div className="apple-card p-6 mt-6">
-        <div className="flex items-center justify-between mb-4 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80">
+        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500">
               <MessageSquare className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-850 dark:text-slate-105 uppercase tracking-wider">
+              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
                 ChatGPT Custom GPT Action
               </h4>
               <p className="text-[10px] text-slate-400 mt-0.5">Integrate the workspace API directly into Custom ChatGPT models as custom actions</p>
@@ -1293,8 +683,8 @@ Settings updated successfully!
 
         <div className="space-y-4 text-xs font-sans">
           
-          <div className="text-[10px] bg-indigo-50/20 dark:bg-indigo-950/20 p-4 rounded-2xl border border-indigo-100/50 dark:border-indigo-950/50 text-slate-600 dark:text-slate-350 leading-relaxed font-medium space-y-2">
-            <strong className="text-indigo-750 dark:text-indigo-450 block uppercase tracking-wider text-[10px]">🚀 Connecting this Workspace to ChatGPT (Step-by-Step):</strong>
+          <div className="text-[10px] bg-indigo-50/20 dark:bg-indigo-950/20 p-4 rounded-2xl border border-indigo-100/50 dark:border-indigo-950/50 text-slate-655 dark:text-slate-350 leading-relaxed font-medium space-y-2">
+            <strong className="text-indigo-755 dark:text-indigo-405 block uppercase tracking-wider text-[10px]">🚀 Connecting this Workspace to ChatGPT (Step-by-Step):</strong>
             <ol className="list-decimal pl-4 space-y-1.5">
               <li>Open a local HTTP tunnel using ngrok (or localtunnel) to expose the app to the internet:
                 <code className="block bg-slate-100 text-slate-700 dark:bg-slate-950 dark:text-slate-300 px-2 py-1 rounded font-mono text-[10px] mt-1 select-all w-fit border dark:border-slate-850">ngrok http 3000</code>
@@ -1369,8 +759,6 @@ Settings updated successfully!
           </div>
         </div>
       </div>
-      </>
-      )}
 
     </div>
   );

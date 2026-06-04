@@ -523,7 +523,7 @@ export default function TaskTrackerTab({
                   <th className="px-4 py-3 w-24">Effort (d)</th>
                   <th className="px-4 py-3 w-24">SP (SP)</th>
                   <th className="px-4 py-3 min-w-[220px]">Notes</th>
-                  <th className="px-4 py-3 w-20 text-center">Actions</th>
+                  <th className="px-4 py-3 w-20 text-center sticky right-0 bg-slate-50 dark:bg-slate-950 z-10 border-l border-slate-100 dark:border-slate-800">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -733,7 +733,7 @@ export default function TaskTrackerTab({
                             </td>
 
                             {/* Actions column */}
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-4 py-3 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-950/40 z-10 border-l border-slate-100 dark:border-slate-800">
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => onSelectItem(task, 'task')}

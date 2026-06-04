@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   Layers, Briefcase, Plus, FolderPlus, X, Columns, LayoutDashboard, CheckSquare, 
   AlertCircle, Calendar, Landmark, Settings, Bell, ChevronLeft, ChevronRight, User, Globe, LogOut,
-  CalendarRange, FileText, Clock
+  CalendarRange, FileText, Clock, Search, ChevronDown, CheckCircle, Info, ShieldAlert, AlertTriangle
 } from 'lucide-react';
 import DashboardTab from '@/components/DashboardTab';
 import TaskTrackerTab from '@/components/TaskTrackerTab';
@@ -17,6 +17,10 @@ import PlannerTab from '@/components/PlannerTab';
 import DocManagerTab from '@/components/DocManagerTab';
 import DetailsDrawer from '@/components/DetailsDrawer';
 import { ThemeBackdrop } from '@/components/ThemeBackdrop';
+
+// Import our redesigned tabs
+import UsersTab from '@/components/UsersTab';
+import ProjectsTab from '@/components/ProjectsTab';
 
 const EMPLOYEES = ["Superadmin"];
 
@@ -49,7 +53,20 @@ export default function Home() {
   // States
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
   
+  // Toast Notification State
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  };
+
   // Modals & Drawers
   const [showAddProject, setShowAddProject] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null); // Task or Issue object
@@ -209,8 +226,10 @@ export default function Home() {
       setIsLoggedIn(true);
       setLoginPassword('');
       setLoginError('');
+      showToast(`Welcome back, ${profile.name}!`, "success");
     } else {
       setLoginError("Invalid password for this profile!");
+      showToast("Authentication failed", "error");
     }
   };
 
@@ -226,6 +245,7 @@ export default function Home() {
       fetchNotifications(profile.name);
       setLoginPassword('');
       setLoginError('');
+      showToast(`SSO Authenticated: ${profile.name}`, "success");
     }, 1000);
   };
 
@@ -234,6 +254,8 @@ export default function Home() {
     setIsLoggedIn(false);
     setCurrentUser(null);
     setActiveUser('');
+    setShowProfileDropdown(false);
+    showToast("Signed out successfully", "info");
   };
 
   // Run on active project change
@@ -303,6 +325,8 @@ export default function Home() {
       });
       const data = await res.json();
       
+      showToast(`${isTask ? 'Task' : 'Issue'} updated successfully`, "success");
+
       // Dispatch in-app notification if assignee was changed
       if (updatedFields.owner || updatedFields.assignee) {
         const assignedTo = updatedFields.owner || updatedFields.assignee;
@@ -323,6 +347,7 @@ export default function Home() {
 
     } catch (e) {
       console.error("Failed to sync item update:", e);
+      showToast("Error updating ticket details", "error");
     }
   };
 
@@ -340,9 +365,11 @@ export default function Home() {
           setIssues(prev => prev.filter(i => i._id !== itemId));
         }
         setSelectedItem(null);
+        showToast(`${isTask ? 'Task' : 'Issue'} deleted successfully`, "success");
       }
     } catch (err) {
       console.error(err);
+      showToast("Failed to delete item", "error");
     }
   };
 
@@ -372,9 +399,11 @@ export default function Home() {
         setProjCode('');
         setProjClient('');
         setShowAddProject(false);
+        showToast(`Project workspace "${payload.name}" initialized!`, "success");
       }
     } catch (err) {
       console.error(err);
+      showToast("Failed to initialize project profile", "error");
     }
   };
 
@@ -396,19 +425,56 @@ export default function Home() {
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  const sidebarMenu = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'projects', label: 'Projects Portfolio', icon: Briefcase },
-    { id: 'users', label: 'Users Registry', icon: User },
-    { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
-    { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
-    { id: 'planner', label: 'Project Planner', icon: CalendarRange },
-    { id: 'docs', label: 'Document Vault', icon: FileText },
-    { id: 'daily', label: 'Daily standup', icon: Columns },
-    { id: 'leaves', label: 'Leave Tracker', icon: Calendar },
-    { id: 'finance', label: 'Finance Hub', icon: Landmark },
-    { id: 'settings', label: 'Webhook Settings', icon: Settings }
+  // Collapsible sidebar menu segments
+  const sidebarGroups = [
+    {
+      title: "Workspace",
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'projects', label: 'Projects Portfolio', icon: Briefcase },
+        { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
+        { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
+        { id: 'planner', label: 'Project Planner', icon: CalendarRange }
+      ]
+    },
+    {
+      title: "Management",
+      items: [
+        { id: 'users', label: 'Users Registry', icon: User },
+        { id: 'docs', label: 'Document Vault', icon: FileText },
+        { id: 'leaves', label: 'Leave Tracker', icon: Calendar }
+      ]
+    },
+    {
+      title: "Operations",
+      items: [
+        { id: 'daily', label: 'Daily standup', icon: Columns },
+        { id: 'finance', label: 'Finance Hub', icon: Landmark }
+      ]
+    },
+    {
+      title: "Settings",
+      items: [
+        { id: 'settings', label: 'Webhook Settings', icon: Settings }
+      ]
+    }
   ];
+
+  // Helper to resolve breadcrumbs text based on tab ID
+  const getBreadcrumbs = () => {
+    for (const group of sidebarGroups) {
+      const matched = group.items.find(item => item.id === activeTab);
+      if (matched) {
+        return {
+          section: group.title,
+          label: matched.label
+        };
+      }
+    }
+    return { section: "Workspace", label: "Dashboard" };
+  };
+
+  const breadcrumbs = getBreadcrumbs();
 
   if (loading) {
     return (
@@ -417,26 +483,25 @@ export default function Home() {
         <span className="text-sm font-bold text-slate-500 tracking-wider uppercase animate-pulse">
           Loading Workspace Data...
         </span>
- 
       </div>
     );
   }
 
-   if (!isLoggedIn) {
+  if (!isLoggedIn) {
     return (
-      <div className="relative flex h-screen w-screen items-center justify-center overflow-hidden font-sans bg-slate-50 dark:bg-slate-950">
+      <div className="relative flex h-screen w-screen items-center justify-center overflow-hidden font-sans bg-slate-50 dark:bg-slate-955">
         <ThemeBackdrop />
         
-        {/* Decorative dynamic background blobs */}
+        {/* Decorative background blobs */}
         <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-gradient-to-br from-indigo-500/20 to-violet-500/0 blur-3xl" />
         <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-gradient-to-tl from-purple-500/10 to-indigo-500/0 blur-3xl" />
 
-        <div className="relative z-10 w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 dark:bg-slate-900/75 dark:border-slate-800/80 shadow-[0_20px_50px_rgba(99,102,241,0.06)] animate-in zoom-in-95 duration-200">
-          <div className="flex flex-col items-center mb-8">
+        <div className="relative z-10 w-full max-w-md bg-white/75 backdrop-blur-xl border border-white/20 rounded-3xl p-8 dark:bg-slate-900/75 dark:border-slate-805/85 shadow-[0_20px_50px_rgba(99,102,241,0.06)] animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center mb-8 select-none">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 shadow-lg shadow-indigo-200/50 dark:shadow-none mb-3.5 hover:scale-105 active:scale-95 transition-transform duration-200">
               <Layers className="h-6 w-6 text-white" />
             </div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+            <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest bg-gradient-to-r from-slate-800 to-slate-900 dark:from-white dark:to-slate-205 bg-clip-text text-transparent">
               Finstack PPM
             </h2>
             <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider mt-1.5">Unified Project Portfolio & Delivery Hub</p>
@@ -444,7 +509,7 @@ export default function Home() {
 
           <form onSubmit={handleLogin} className="space-y-5 text-xs">
             
-            {/* Clickable Profile Card Selector Grid */}
+            {/* User Profile Selector Grid */}
             <div>
               <label className="block text-[9px] font-black uppercase tracking-wider text-slate-450 mb-2.5 text-center">
                 Select Workspace Profile
@@ -467,10 +532,10 @@ export default function Home() {
                           : 'border-transparent hover:bg-slate-100/40 dark:hover:bg-slate-900/10'
                       }`}
                     >
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold uppercase transition-all duration-200 ${
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold uppercase transition-all duration-205 ${
                         isSelected
                           ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none'
-                          : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                          : 'bg-slate-200 text-slate-655 dark:bg-slate-800 dark:text-slate-400'
                       }`}>
                         {p.name.charAt(0)}
                       </div>
@@ -487,9 +552,9 @@ export default function Home() {
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-1.5 px-0.5">
+              <div className="flex justify-between items-center mb-1.5 px-0.5 select-none">
                 <label className="text-[9px] font-black uppercase tracking-wider text-slate-450">
-                  Password for <span className="text-indigo-600 dark:text-indigo-400 font-black">{loginUserName}</span>
+                  Password for <span className="text-indigo-650 dark:text-indigo-400 font-black">{loginUserName}</span>
                 </label>
                 <span className="text-[8px] text-slate-400 font-bold lowercase">default is role (e.g. 'admin')</span>
               </div>
@@ -517,7 +582,7 @@ export default function Home() {
             </button>
           </form>
 
-          <div className="relative flex py-3.5 items-center">
+          <div className="relative flex py-3.5 items-center select-none">
             <div className="flex-grow border-t border-slate-100/60 dark:border-slate-850"></div>
             <span className="flex-shrink mx-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Or login via SSO</span>
             <div className="flex-grow border-t border-slate-100/60 dark:border-slate-850"></div>
@@ -537,7 +602,7 @@ export default function Home() {
             Sign In with Microsoft 365
           </button>
 
-          <div className="mt-6 border-t border-slate-100 dark:border-slate-850 pt-4 text-center">
+          <div className="mt-6 border-t border-slate-100 dark:border-slate-850 pt-4 text-center select-none">
             <span className="text-[9px] font-bold text-slate-400 block uppercase">Sandbox Access Guide:</span>
             <code className="block text-[8px] text-indigo-500 mt-1 font-semibold dark:text-indigo-400">
               Superadmin (Admin/admin)
@@ -563,7 +628,7 @@ export default function Home() {
 
                 <div className="w-full">
                   <h3 className="text-lg font-bold text-slate-800 leading-tight">Pick an account</h3>
-                  <p className="text-[11px] text-slate-500 mt-1">to sign in to <strong className="text-indigo-600">Finstack PPM Workspace</strong></p>
+                  <p className="text-[11px] text-slate-505 mt-1">to sign in to <strong className="text-indigo-600">Finstack PPM Workspace</strong></p>
                 </div>
 
                 {msalLoading ? (
@@ -581,15 +646,15 @@ export default function Home() {
                         className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 text-left transition-all cursor-pointer hover:border-slate-200"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-[10px] shrink-0">
+                          <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-655 flex items-center justify-center font-bold text-[10px] shrink-0">
                             {p.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
                             <div className="text-xs font-bold text-slate-800 leading-none">{p.name}</div>
-                            <div className="text-[9px] text-slate-400 mt-1.5 truncate">{p.email || `${p.name.toLowerCase()}@company.com`}</div>
+                            <div className="text-[9px] text-slate-405 mt-1.5 truncate">{p.email || `${p.name.toLowerCase()}@company.com`}</div>
                           </div>
                         </div>
-                        <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold uppercase px-1.5 py-0.5 rounded leading-none shrink-0">
+                        <span className="text-[9px] bg-slate-100 text-slate-505 font-extrabold uppercase px-1.5 py-0.5 rounded leading-none shrink-0">
                           {p.role}
                         </span>
                       </button>
@@ -616,165 +681,121 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen w-screen bg-slate-50/40 text-slate-700 dark:bg-slate-950 dark:text-slate-350 font-sans overflow-hidden">
+    <div className="flex h-screen w-screen bg-slate-50/40 text-slate-700 dark:bg-slate-955 dark:text-slate-350 font-sans overflow-hidden">
       
       {/* LEFT COLLAPSIBLE SIDEBAR */}
       <aside 
-        className={`flex flex-col border-r border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/70 transition-all duration-200 ${
+        className={`flex flex-col border-r border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-slate-800/85 dark:bg-slate-950/70 transition-all duration-200 ${
           sidebarCollapsed ? 'w-16' : 'w-64'
         }`}
       >
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850 relative">
+        {/* Brand header */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850 relative shrink-0">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200/50 dark:shadow-none">
-                N
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-650 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm">
+                F
               </div>
-              <span className="font-bold text-xs text-slate-900 dark:text-white tracking-widest uppercase">Workspace PPM</span>
+              <span className="font-extrabold text-xs text-slate-850 dark:text-white tracking-widest uppercase">Finstack PPM</span>
             </div>
           ) : (
-            <div className="mx-auto h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm shadow-indigo-200/50">
-              N
+            <div className="mx-auto h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-650 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm animate-pulse">
+              F
             </div>
           )}
           
           <button 
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="absolute -right-3.5 top-4.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:bg-slate-50 dark:border-slate-850 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 hidden sm:flex transition-all duration-200 hover:scale-110 active:scale-90"
+            className="absolute -right-3.5 top-4.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:bg-slate-50 dark:border-slate-850 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 hidden sm:flex transition-all duration-200 hover:scale-110 active:scale-90 cursor-pointer"
             title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             {sidebarCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
         </div>
 
-        {/* User Card in Left Sidebar */}
-        <div className="p-3 border-b border-slate-100 dark:border-slate-850">
-          {!sidebarCollapsed ? (
-            <div className="rounded-xl bg-slate-50/50 border border-slate-150/60 p-3 dark:bg-slate-950/40 dark:border-slate-850/60 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0 font-sans border border-indigo-500/20">
-                  {currentUser?.name.charAt(0)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-slate-850 dark:text-slate-200 truncate leading-tight font-sans">{currentUser?.name}</div>
-                  <div className="text-[9px] text-slate-400 truncate leading-none mt-0.5 font-sans">{currentUser?.email}</div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className={`inline-block px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded font-sans ${
-                      (currentUser?.role === 'Admin' || currentUser?.role === 'Head') ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-450 border border-rose-100/30' :
-                      (currentUser?.role === 'Project Manager' || currentUser?.role === 'Project Lead' || currentUser?.role === 'Support Manager' || currentUser?.role === 'Support Lead' || currentUser?.role === 'Manager') ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 border border-violet-100/30' :
-                      (currentUser?.role === 'HR' || currentUser?.role === 'Sales') ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-100/30' :
-                      'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-100/30'
-                    }`}>
-                      {currentUser?.role}
-                    </span>
-                    <button
-                      onClick={handleLogout}
-                      className="text-[8px] font-extrabold uppercase text-slate-400 hover:text-rose-500 cursor-pointer flex items-center gap-0.5 transition-colors"
-                    >
-                      <LogOut className="h-2 w-2" />
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="relative group">
-              <div 
-                className="mx-auto h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-bold uppercase text-xs cursor-pointer select-none font-sans border border-indigo-500/20 transition-transform duration-200 hover:scale-105 shadow-sm shadow-indigo-200/50"
-                title={`${currentUser?.name} (${currentUser?.role})`}
-                onClick={handleLogout}
-              >
-                {currentUser?.name.charAt(0)}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Project Selector */}
-        <div className="p-3 border-b border-slate-100 dark:border-slate-850">
-          {!sidebarCollapsed ? (
-            <div className="relative">
-              <button 
-                onClick={() => { setShowProjSelect(!showProjSelect); setShowUserSelect(false); }}
-                className="w-full flex items-center justify-between rounded-xl bg-slate-50/50 border border-slate-150/60 px-3 py-2 text-left hover:bg-slate-100/70 dark:bg-slate-950/40 dark:border-slate-850/60 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-2 truncate">
-                  <Briefcase className="h-4 w-4 text-indigo-500 shrink-0" />
-                  <div className="truncate">
-                    <div className="text-[10px] text-slate-400 font-bold leading-none">PROJECT</div>
-                    <div className="text-xs font-bold text-slate-850 dark:text-slate-200 mt-0.5 truncate">{activeProject?.name}</div>
-                  </div>
-                </div>
-                <span className="text-[9px] text-slate-400 shrink-0 transition-transform duration-200" style={{ transform: showProjSelect ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
-              </button>
-
-              {showProjSelect && (
-                <div className="absolute left-0 right-0 mt-2 z-50 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-1.5 shadow-xl dark:border-slate-805 dark:bg-slate-900/95 animate-in slide-in-from-top-2 duration-150">
-                  {projects.map(proj => (
-                    <button
-                      key={proj._id}
-                      onClick={() => { setActiveProject(proj); setShowProjSelect(false); }}
-                      className="w-full text-left rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      {proj.name}
-                    </button>
-                  ))}
-                </div>
+        {/* Collapsible/Grouped Sidebar Menu Navigation */}
+        <div className="flex-1 pr-2 py-4 space-y-5 overflow-y-auto scrollbar-none select-none">
+          {sidebarGroups.map((group) => (
+            <div key={group.title} className="space-y-1">
+              {/* Group Title */}
+              {!sidebarCollapsed ? (
+                <span className="px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-505 block mb-1">
+                  {group.title}
+                </span>
+              ) : (
+                <div className="w-8 mx-auto border-t border-slate-100 dark:border-slate-850/60 my-2" />
               )}
-            </div>
-          ) : (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-slate-50 text-indigo-500 border border-slate-200 dark:bg-slate-950 dark:border-slate-850" title={activeProject?.name}>
-              <Briefcase className="h-4 w-4" />
-            </div>
-          )}
-        </div>
 
-        {/* Menu Nav */}
-        <nav className="flex-1 pr-2 py-4 space-y-1 overflow-y-auto">
-          {sidebarMenu.map((item) => {
-            const MenuIcon = item.icon;
-            const isActive = activeTab === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setSelectedItem(null);
-                }}
-                className={`w-full flex items-center rounded-r-xl py-2.5 pl-3 pr-4 transition-all text-xs font-bold relative group duration-150 cursor-pointer border-l-4 ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-indigo-50 to-transparent border-indigo-600 text-indigo-600 dark:from-indigo-950/30 dark:border-indigo-400 dark:text-indigo-400 shadow-[inset_1px_0_0_0_rgba(99,102,241,0.05)] font-extrabold' 
-                    : 'border-transparent text-slate-700 hover:bg-slate-50/50 hover:text-slate-900 dark:text-slate-355 dark:hover:bg-slate-900/40 dark:hover:text-slate-100'
-                }`}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                {!sidebarCollapsed && <span className="transition-transform group-hover:translate-x-0.5">{item.label}</span>}
-              </button>
-            );
-          })}
-        </nav>
+              {/* Group items */}
+              {group.items.map((item) => {
+                const MenuIcon = item.icon;
+                const isActive = activeTab === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setSelectedItem(null);
+                    }}
+                    className={`w-full flex items-center rounded-r-xl py-2.2 pl-3 pr-4 transition-all text-xs font-bold relative group duration-150 cursor-pointer border-l-4 ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-indigo-50 to-transparent border-indigo-650 text-indigo-600 dark:from-indigo-950/30 dark:border-indigo-400 dark:text-indigo-400 font-extrabold shadow-[inset_1px_0_0_0_rgba(99,102,241,0.02)]' 
+                        : 'border-transparent text-slate-700 hover:bg-slate-50/50 hover:text-slate-900 dark:text-slate-355 dark:hover:bg-slate-900/40 dark:hover:text-slate-100'
+                    }`}
+                    title={sidebarCollapsed ? item.label : undefined}
+                  >
+                    <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-450 dark:text-slate-400'}`} />
+                    {!sidebarCollapsed && <span className="transition-transform group-hover:translate-x-0.5">{item.label}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
 
       </aside>
 
       {/* MAIN CONTAINER */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative animate-in fade-in duration-150">
         
-        {/* Header */}
-        <header className="h-16 border-b border-slate-200/80 bg-white/70 backdrop-blur-md flex items-center justify-between px-6 shrink-0 dark:border-slate-800 dark:bg-slate-900/60">
-          <div>
-            <span className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">
-              {activeProject?.client || 'Internal'} Project Portfolio
-            </span>
-            <h2 className="text-sm font-bold text-slate-850 dark:text-white leading-none mt-1">
-              {activeProject?.name || 'Project Dashboard'}
-            </h2>
+        {/* PREMIUM REDESIGNED HEADER */}
+        <header className="h-16 border-b border-slate-200/80 bg-white/70 backdrop-blur-md flex items-center justify-between px-6 shrink-0 dark:border-slate-800/85 dark:bg-slate-900/60 select-none">
+          
+          {/* Breadcrumbs & Active Scope Details */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+            <span>{breadcrumbs.section}</span>
+            <span>/</span>
+            <span className="text-slate-850 dark:text-white font-bold">{breadcrumbs.label}</span>
+            
+            {/* Separator & Active Project Indicator badge */}
+            {activeProject && (
+              <>
+                <span className="hidden sm:inline">|</span>
+                <div className="hidden sm:flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/45 px-2 py-0.5 rounded-lg text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{activeProject.code}</span>
+                </div>
+              </>
+            )}
           </div>
 
+          {/* Search, Notifications & User Dropdown */}
           <div className="flex items-center gap-3">
-            {/* Relocated Header Notifications Dropdown */}
+            
+            {/* Global Search Box */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Global search board, logs..."
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                className="pl-8.5 pr-4 py-1.8 border border-slate-200 rounded-xl bg-slate-50/50 outline-none text-[10px] w-48 focus:w-60 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300 font-semibold transition-all"
+              />
+            </div>
+
+            {/* Notification alert bell */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -790,12 +811,12 @@ export default function Home() {
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2.5 z-55 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl w-80 dark:border-slate-800 dark:bg-slate-950/95 animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-850 mb-2 select-none">
+                <div className="absolute right-0 mt-2.5 z-55 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl w-80 dark:border-slate-800 dark:bg-slate-955/95 animate-in slide-in-from-top-2 duration-205">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-850 mb-2">
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Alert Feed</span>
                     <button 
                       onClick={() => setShowNotifications(false)} 
-                      className="text-slate-300 hover:text-slate-550 transition-colors"
+                      className="text-slate-300 hover:text-slate-550 transition-colors cursor-pointer"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -837,13 +858,60 @@ export default function Home() {
               )}
             </div>
 
+            {/* Quick Initialize Project profile button */}
             <button
               onClick={() => setShowAddProject(true)}
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-350 cursor-pointer hover:scale-[1.02] active:scale-95 duration-150"
+              className="hidden lg:flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-bold text-slate-700 transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-350 cursor-pointer hover:scale-[1.02] active:scale-95 duration-150"
             >
               <FolderPlus className="h-4 w-4 text-indigo-500" />
-              Initialize Project Profile
+              Initialize Project
             </button>
+
+            {/* Interactive User profile dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="flex items-center gap-1.5 p-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent hover:border-slate-205 dark:hover:border-slate-800 transition-all cursor-pointer"
+              >
+                <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-650 to-indigo-500 flex items-center justify-center text-white text-xs font-black uppercase shadow-sm border border-indigo-500/20">
+                  {currentUser?.name.charAt(0)}
+                </div>
+                <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showProfileDropdown && (
+                <div className="absolute right-0 mt-2 z-55 w-52 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-md p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-955/95 animate-in slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-850 text-left">
+                    <div className="text-xs font-bold text-slate-850 dark:text-slate-200 truncate">{currentUser?.name}</div>
+                    <div className="text-[9px] text-slate-400 truncate mt-0.5">{currentUser?.email}</div>
+                    <span className="inline-block mt-2 px-1.5 py-0.2 text-[8px] font-black uppercase rounded bg-indigo-50 text-indigo-755 border border-indigo-100 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/35">
+                      {currentUser?.role}
+                    </span>
+                  </div>
+
+                  <div className="p-1 space-y-1">
+                    <button
+                      onClick={() => {
+                        setActiveTab('settings');
+                        setShowProfileDropdown(false);
+                      }}
+                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-900 transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <Settings className="h-3.5 w-3.5 text-slate-405" />
+                      Connector Hub
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-colors flex items-center gap-2 cursor-pointer"
+                    >
+                      <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
         </header>
 
@@ -875,6 +943,7 @@ export default function Home() {
                 setSelectedItem(item);
                 setSelectedItemType(type);
               }}
+              showToast={showToast}
             />
           )}
 
@@ -891,6 +960,7 @@ export default function Home() {
                 setSelectedItemType(type);
               }}
               activeUser={activeUser}
+              showToast={showToast}
             />
           )}
 
@@ -903,6 +973,7 @@ export default function Home() {
                 setSelectedItem(item);
                 setSelectedItemType(type);
               }}
+              showToast={showToast}
             />
           )}
 
@@ -910,6 +981,7 @@ export default function Home() {
             <DocManagerTab 
               activeProject={activeProject}
               currentUser={currentUser}
+              showToast={showToast}
             />
           )}
 
@@ -920,6 +992,7 @@ export default function Home() {
               currentUser={currentUser}
               activeProject={activeProject}
               employees={userProfiles.map(u => u.name)}
+              showToast={showToast}
             />
           )}
 
@@ -930,6 +1003,7 @@ export default function Home() {
               activeUser={activeUser}
               currentUser={currentUser}
               employees={userProfiles.map(u => u.name)}
+              showToast={showToast}
             />
           )}
 
@@ -939,38 +1013,31 @@ export default function Home() {
               setTransactions={setTransactions}
               activeProject={activeProject}
               currentUser={currentUser}
+              showToast={showToast}
             />
           )}
 
           {activeTab === 'projects' && (
-            <SettingsTab 
+            <ProjectsTab 
               activeUser={activeUser} 
               activeProject={activeProject}
               setActiveProject={setActiveProject}
               epics={epics}
               setEpics={setEpics}
               currentUser={currentUser}
-              userProfiles={userProfiles}
-              setUserProfiles={setUserProfiles}
               projects={projects}
               setProjects={setProjects}
-              view="projects"
+              showToast={showToast}
             />
           )}
 
           {activeTab === 'users' && (
-            <SettingsTab 
-              activeUser={activeUser} 
-              activeProject={activeProject}
-              setActiveProject={setActiveProject}
-              epics={epics}
-              setEpics={setEpics}
+            <UsersTab 
+              activeUser={activeUser}
               currentUser={currentUser}
               userProfiles={userProfiles}
               setUserProfiles={setUserProfiles}
-              projects={projects}
-              setProjects={setProjects}
-              view="users"
+              showToast={showToast}
             />
           )}
 
@@ -978,15 +1045,8 @@ export default function Home() {
             <SettingsTab 
               activeUser={activeUser} 
               activeProject={activeProject}
-              setActiveProject={setActiveProject}
-              epics={epics}
-              setEpics={setEpics}
               currentUser={currentUser}
-              userProfiles={userProfiles}
-              setUserProfiles={setUserProfiles}
-              projects={projects}
-              setProjects={setProjects}
-              view="webhooks"
+              showToast={showToast}
             />
           )}
 
@@ -1012,11 +1072,11 @@ export default function Home() {
       {showAddProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800 animate-all">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider dark:text-white">
                 Initialize Project Profile
               </h3>
-              <button onClick={() => setShowAddProject(false)} className="text-slate-400 hover:text-slate-650">
+              <button onClick={() => setShowAddProject(false)} className="text-slate-400 hover:text-slate-650 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1031,7 +1091,7 @@ export default function Home() {
                   placeholder="e.g. Dubai Islamic Bank Core Support"
                   value={projName}
                   onChange={e => setProjName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-955 dark:text-slate-300 font-semibold"
                   required
                 />
               </div>
@@ -1046,7 +1106,7 @@ export default function Home() {
                     placeholder="e.g. DIB-CORE"
                     value={projCode}
                     onChange={e => setProjCode(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-955 dark:text-slate-300 font-mono"
                     required
                   />
                 </div>
@@ -1060,7 +1120,7 @@ export default function Home() {
                     placeholder="e.g. DIB Bank"
                     value={projClient}
                     onChange={e => setProjClient(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-955 font-semibold"
                   />
                 </div>
               </div>
@@ -1072,7 +1132,7 @@ export default function Home() {
                 <select
                   value={projType}
                   onChange={e => setProjType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-955 dark:text-slate-300 cursor-pointer"
                 >
                   <option value="delivery">Active Project Delivery (Implementation)</option>
                   <option value="maintenance">SLA Project Maintenance (Ongoing Support)</option>
@@ -1083,13 +1143,13 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setShowAddProject(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850"
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 shadow-md shadow-indigo-100 dark:shadow-none"
+                  className="rounded-xl bg-indigo-650 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 shadow-md cursor-pointer"
                 >
                   Create Profile
                 </button>
@@ -1098,6 +1158,43 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* STATE-DRIVEN GLOBAL TOAST PORTAL */}
+      <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2.5 max-w-sm pointer-events-none">
+        {toasts.map((toast) => {
+          let Icon = CheckCircle;
+          let colorStyles = "bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 text-slate-700 dark:text-slate-300";
+          let iconColor = "text-indigo-650 dark:text-indigo-400";
+          
+          if (toast.type === 'success') {
+            Icon = CheckCircle;
+            colorStyles = "bg-emerald-50/90 dark:bg-emerald-955/20 border-emerald-200 dark:border-emerald-900/50 text-slate-800 dark:text-emerald-400";
+            iconColor = "text-emerald-500";
+          } else if (toast.type === 'error') {
+            Icon = ShieldAlert;
+            colorStyles = "bg-rose-50/90 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/50 text-slate-800 dark:text-rose-400";
+            iconColor = "text-rose-500";
+          } else if (toast.type === 'info') {
+            Icon = Info;
+            colorStyles = "bg-blue-50/90 dark:bg-blue-955/20 border-blue-200 dark:border-blue-900/50 text-slate-800 dark:text-blue-400";
+            iconColor = "text-blue-500";
+          } else if (toast.type === 'warning') {
+            Icon = AlertTriangle;
+            colorStyles = "bg-amber-50/90 dark:bg-amber-955/20 border-amber-200 dark:border-amber-900/50 text-slate-800 dark:text-amber-400";
+            iconColor = "text-amber-500";
+          }
+
+          return (
+            <div 
+              key={toast.id}
+              className={`p-3.5 rounded-2xl border backdrop-blur-md shadow-2xl flex items-center gap-3 pointer-events-auto w-80 animate-in slide-in-from-bottom-5 fade-in duration-200 ${colorStyles}`}
+            >
+              <Icon className={`h-5 w-5 shrink-0 ${iconColor}`} />
+              <span className="text-[11px] font-bold leading-normal">{toast.message}</span>
+            </div>
+          );
+        })}
+      </div>
 
     </div>
   );

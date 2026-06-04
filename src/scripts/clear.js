@@ -7,11 +7,14 @@ async function clear() {
   await mongoose.connect(MONGODB_URI);
   console.log("Database connected successfully.");
 
-  const collections = mongoose.connection.collections;
+  const db = mongoose.connection.db;
+  const colList = await db.listCollections().toArray();
   
-  for (const key in collections) {
-    console.log(`Purging collection: ${key}`);
-    await collections[key].deleteMany({});
+  for (const col of colList) {
+    // Avoid clearing system collections if any
+    if (col.name.startsWith('system.')) continue;
+    console.log(`Purging collection: ${col.name}`);
+    await db.collection(col.name).deleteMany({});
   }
 
   console.log("All collections have been successfully cleared!");
