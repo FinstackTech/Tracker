@@ -938,8 +938,10 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </div>
+        </header>
 
-                {/* COMPACT HORIZONTAL MODULE SWITCHER */}
+              {/* COMPACT HORIZONTAL MODULE SWITCHER */}
         <div className="bg-white/60 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800/80 px-6 py-2.5 flex items-center justify-between shrink-0 select-none backdrop-blur-md">
           <div className="flex items-center gap-1.5">
             {[

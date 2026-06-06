@@ -4,7 +4,8 @@ import {
 } from 'recharts';
 import { 
   TrendingUp, Users, User, CheckCircle, AlertTriangle, DollarSign,
-  Briefcase, Activity, Landmark, Bell, Download, Printer, CalendarRange, Clock, ShieldCheck
+  Briefcase, Activity, Landmark, Bell, Download, Printer, CalendarRange, Clock, ShieldCheck,
+  Calendar, AlertCircle
 } from 'lucide-react';
 import { useState } from 'react';
 
