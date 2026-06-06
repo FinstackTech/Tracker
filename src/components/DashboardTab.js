@@ -258,206 +258,159 @@ export default function DashboardTab({
   return (
     <div className="space-y-6 animate-in fade-in-30 duration-200">
       
-      {/* ─── LEAVE ALERTS BANNER ─── */}
-      {leaveAlerts.map((alert, i) => (
-        <div 
-          key={i}
-          className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:scale-[1.005] ${
-            alert.isCritical 
-              ? 'border-rose-200 bg-rose-50/50 text-rose-900 dark:border-rose-955/20 dark:bg-rose-955/10 dark:text-rose-450' 
-              : 'border-amber-205 bg-amber-50/50 text-amber-900 dark:border-amber-955/20 dark:bg-amber-955/10 dark:text-amber-400'
-          }`}
-        >
-          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-            alert.isCritical 
-              ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-450' 
-              : 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-450'
-          }`}>
-            <AlertTriangle className="h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase mr-1">
-              {alert.isCritical ? 'CRITICAL TIMELINE CRUNCH: ' : 'STAFF OVERLAP CAUTION: '}
-            </span>
-            <span className="text-xs sm:text-sm font-semibold">
-              In <strong className="underline">{alert.month}</strong>, {alert.employees.join(', ')} are planned to be on leave. 
-              {alert.monthKey === '2026-08' && activeProject.code === 'ARB-EXIM' && (
-                <strong className="text-rose-605 dark:text-rose-400"> This overlaps with the SWIFT SR2026 delivery crunch! Please adjust milestone scopes.</strong>
-              )}
-            </span>
-          </div>
-        </div>
-      ))}
-
-      {/* ─── TASK ASSIGNMENT & ALERTS OVERVIEW ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-        {/* KPI: Total Assigned */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
-              <Users className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Across all members</p>
-        </div>
-
-        {/* KPI: My Assigned */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-955/30 dark:text-indigo-405">
-              <User className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-[8px] text-indigo-550 dark:text-indigo-400 font-semibold uppercase mt-3 tracking-wide">Assigned to {activeUser}</p>
-        </div>
-
-        {/* KPI: In Progress */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">In Progress Tasks</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{inProgressTasks}</h3>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50/55 text-amber-600 dark:bg-amber-955/20 dark:text-amber-400">
-              <Activity className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Active Dev / SIT / UAT</p>
-        </div>
-
-        {/* KPI: Blocked / Pending */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending / Blocked</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Blocked or On Hold</p>
-        </div>
-
-        {/* KPI: Due Alerts */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Due Date Alerts</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-[8px] text-rose-550 dark:text-rose-450 font-semibold uppercase mt-3 tracking-wide">{dueDateAlertsCount > 0 ? "⚠️ Overdue items exist" : "No immediate alerts"}</p>
-        </div>
-      </div>
-
-      {/* ─── KPI METRICS BOARD ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* ─── BENTO GRID LAYOUT ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
         
-        {/* KPI: Progress */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
+        {/* Item 1 (Col span 2): Project Delivery Progress */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Project Delivery</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
-              <CheckCircle className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
+              <CheckCircle className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div className="h-full bg-indigo-650 transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
-          </div>
-          <div className="mt-2 flex justify-between text-[8px] font-semibold uppercase text-slate-400 tracking-wide">
-            <span>{completedTasks} Done</span>
-            <span>{openTasks} Open</span>
+          <div className="mt-4">
+            <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-full bg-indigo-650 transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
+            </div>
+            <div className="mt-3 flex justify-between text-[9px] font-black uppercase text-slate-400 tracking-wider">
+              <span className="text-indigo-605 dark:text-indigo-400">{completedTasks} Completed Tasks</span>
+              <span>{openTasks} Open Tasks</span>
+            </div>
           </div>
         </div>
 
-        {/* KPI: Workload */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
+        {/* Item 2 (Col span 1): Open Backlog Status count */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Open Backlog</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50/50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
-              <Activity className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50/50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
+              <Activity className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 flex gap-4 text-[8px] font-semibold uppercase text-slate-400 tracking-wide">
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {inProgressTasks} In Dev</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-300" /> {onHoldTasks} On Hold</span>
+          <div className="mt-4 flex flex-col gap-1.5 text-[9px] font-black uppercase text-slate-400 tracking-wider">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-indigo-505" /> In Dev/SIT</span>
+              <strong className="text-slate-705 dark:text-slate-300">{inProgressTasks}</strong>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> Blocked</span>
+              <strong className="text-rose-600 dark:text-rose-400">{pendingOrBlockedTasks}</strong>
+            </div>
           </div>
         </div>
 
-        {/* KPI: Financials Revenue */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
+        {/* Item 3 (Col span 1): Due Date Alerts block */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Contract Value</span>
-              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">
-                ${totalContracted.toLocaleString()}
-              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Due Date Alerts</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-rose-600 dark:text-rose-455 leading-tight">{dueDateAlertsCount}</h3>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50/50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
-              <Landmark className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
+              <Clock className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 flex justify-between text-[8px] font-semibold uppercase tracking-wide">
-            <span className="text-emerald-600">Paid: ${invoicedAndPaid.toLocaleString()}</span>
-            <span className="text-amber-600">Unpaid: ${outstandingRevenue.toLocaleString()}</span>
-          </div>
+          <p className="text-[9px] text-rose-550 dark:text-rose-450 font-black uppercase tracking-wider mt-4">
+            {dueDateAlertsCount > 0 ? "⚠️ Immediate Action Required" : "All dates on track"}
+          </p>
         </div>
 
-        {/* KPI: Profit Margin */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
+        {/* Item 5 (Col span 1): Total Assigned Tasks */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Net Margin</span>
-              <h3 className={`mt-1 font-sans text-xl font-bold leading-tight ${
-                projectMargin >= 0 ? 'text-slate-800 dark:text-white' : 'text-rose-600'
-              }`}>
-                {marginPct}%
-              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50/50 text-violet-600 dark:bg-violet-900/45 dark:text-violet-405">
-              <TrendingUp className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
+              <Users className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 flex justify-between text-[8px] font-semibold uppercase tracking-wide">
-            <span className="text-slate-400">Costs: ${totalExpenses.toLocaleString()}</span>
-            <span className={projectMargin >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-rose-500'}>
-              Net: ${projectMargin.toLocaleString()}
-            </span>
+          <p className="text-[9px] text-slate-400 font-black uppercase mt-4 tracking-wider">Across all members</p>
+        </div>
+
+        {/* Item 6 (Col span 1): My Assigned Tasks */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-955/30 dark:text-indigo-405">
+              <User className="h-5 w-5" />
+            </div>
+          </div>
+          <p className="text-[9px] text-indigo-550 dark:text-indigo-400 font-black uppercase mt-4 tracking-wider truncate">For {activeUser}</p>
+        </div>
+
+        {/* Item 4 (Col span 2): Leaves/Overlaps timeline warning */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Timeline Alert Control
+              </h4>
+              <p className="text-[9px] font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Leave overlap & milestone risk</p>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50/55 text-amber-600 dark:bg-amber-955/20 dark:text-amber-400">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-2 flex-1 overflow-y-auto max-h-[80px] pr-1 mt-2 scrollbar-thin">
+            {leaveAlerts.length === 0 ? (
+              <div className="text-[10px] text-slate-400 font-medium py-2 flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                No overlapping staff leaves or crunches detected this month.
+              </div>
+            ) : (
+              leaveAlerts.map((alert, i) => (
+                <div 
+                  key={i}
+                  className={`p-2 rounded-xl border text-[9px] font-bold flex flex-col gap-0.5 ${
+                    alert.isCritical 
+                      ? 'border-rose-100 bg-rose-50/50 text-rose-900 dark:border-rose-950/30 dark:bg-rose-955/10 dark:text-rose-405' 
+                      : 'border-amber-100 bg-amber-50/50 text-amber-900 dark:border-amber-950/30 dark:bg-amber-955/10 dark:text-amber-400'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${
+                      alert.isCritical ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
+                    }`}>
+                      {alert.isCritical ? 'Critical' : 'Overlap'}
+                    </span>
+                    <strong className="underline">{alert.month}</strong>
+                  </div>
+                  <div>
+                    {alert.employees.join(', ')} are planned to be on leave. 
+                    {alert.monthKey === '2026-08' && activeProject.code === 'ARB-EXIM' && (
+                      <span className="text-rose-600 dark:text-rose-400 font-black"> Overlaps with SWIFT SR2026 delivery crunch!</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-      </div>
-
-      {/* ─── CHARTS PANEL ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Workload Effort Allocations */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
-          <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider">
-            Resource Workload & Effort (Man-Days)
-          </h4>
+        {/* Item 7 (Col span 3): Resource workload effort bar chart */}
+        <div className="lg:col-span-3 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.005] transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider flex items-center gap-2">
+              <Users className="h-4 w-4 text-indigo-500" />
+              Resource Workload & Effort (Man-Days)
+            </h4>
+          </div>
           {workloadData.length === 0 ? (
             <div className="flex h-64 items-center justify-center text-xs text-slate-400 italic">No active allocations found.</div>
           ) : (
-            <div className="h-64 select-none font-sans">
+            <div className="h-64 select-none font-sans mt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={workloadData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -483,16 +436,19 @@ export default function DashboardTab({
           )}
         </div>
 
-        {/* Expense Allocations */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
-          <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider">
-            Operational Cost Breakdown
-          </h4>
+        {/* Item 8 (Col span 1): Cost Breakdown pie chart */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-emerald-500" />
+              Operational Cost
+            </h4>
+          </div>
           {expenseData.length === 0 ? (
             <div className="flex h-64 items-center justify-center text-xs text-slate-400 italic">No expense records logged.</div>
           ) : (
-            <div className="h-64 flex flex-col justify-between select-none">
-              <div className="h-48">
+            <div className="h-64 flex flex-col justify-between select-none mt-2">
+              <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -500,7 +456,7 @@ export default function DashboardTab({
                       cx="50%"
                       cy="50%"
                       innerRadius={48}
-                      outerRadius={72}
+                      outerRadius={70}
                       paddingAngle={4}
                       dataKey="value"
                     >
@@ -520,15 +476,15 @@ export default function DashboardTab({
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px] border-t border-slate-100 pt-3 dark:border-slate-850">
+              <div className="grid grid-cols-2 gap-2 text-[10px] border-t border-slate-100 pt-3 dark:border-slate-850 max-h-[70px] overflow-y-auto scrollbar-thin">
                 {expenseData.map((d, index) => (
                   <div key={index} className="flex items-center gap-1.5 truncate">
                     <span 
                       className="h-2 w-2 rounded-full shrink-0" 
                       style={{ backgroundColor: COLORS[index % COLORS.length] }} 
                     />
-                    <span className="truncate text-slate-500 dark:text-slate-400 font-semibold">{d.name}:</span>
-                    <strong className="text-slate-700 dark:text-slate-200">${d.value.toLocaleString()}</strong>
+                    <span className="truncate text-slate-505 dark:text-slate-400 font-semibold">{d.name}:</span>
+                    <strong className="text-slate-700 dark:text-slate-205">${d.value.toLocaleString()}</strong>
                   </div>
                 ))}
               </div>
@@ -536,79 +492,78 @@ export default function DashboardTab({
           )}
         </div>
 
-      </div>
-
-      {/* ─── AGILE SPRINT BURNDOWN & INCIDENT PRIORITY CHARTS ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Row 4: Agile Complexity Progress (Col span 1) & Unresolved Bug Severity (Col span 2) & Financial Overview (Col span 1) */}
         
-        {/* Agile Sprint Burndown Gauge (SVG Circular progress ring redesign) */}
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
+        {/* Agile Complexity Progress circular gauge (Col span 1) */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div>
             <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4 text-indigo-500" />
-              Agile Complexity Progress
+              Agile Complexity
             </h4>
-            <p className="text-[9px] text-slate-400 mb-4">Compares completed vs target sprint complexity points</p>
+            <p className="text-[9px] text-slate-400">Target vs Burned SP complexity</p>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-4 select-none">
-            <div className="relative flex items-center justify-center h-32 w-32">
+          <div className="flex flex-col items-center justify-center py-2 select-none">
+            <div className="relative flex items-center justify-center h-28 w-28">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="50"
-                  className="stroke-slate-105 dark:stroke-slate-800"
-                  strokeWidth="8"
+                  cx="56"
+                  cy="56"
+                  r="44"
+                  className="stroke-slate-100 dark:stroke-slate-800"
+                  strokeWidth="7"
                   fill="transparent"
                 />
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="50"
+                  cx="56"
+                  cy="56"
+                  r="44"
                   className="stroke-indigo-600 transition-all duration-500 ease-out dark:stroke-indigo-550"
-                  strokeWidth="8"
+                  strokeWidth="7"
                   fill="transparent"
-                  strokeDasharray={2 * Math.PI * 50}
-                  strokeDashoffset={2 * Math.PI * 50 - (storyPointsPct / 100) * 2 * Math.PI * 50}
+                  strokeDasharray={2 * Math.PI * 44}
+                  strokeDashoffset={2 * Math.PI * 44 - (storyPointsPct / 100) * 2 * Math.PI * 44}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute text-center flex flex-col items-center justify-center">
-                <span className="text-2xl font-black text-slate-805 dark:text-white leading-none">{storyPointsPct}%</span>
-                <span className="text-[8px] font-black uppercase text-slate-400 mt-1 tracking-wider">Burned</span>
+                <span className="text-xl font-black text-slate-800 dark:text-white leading-none">{storyPointsPct}%</span>
+                <span className="text-[7px] font-black uppercase text-slate-400 mt-0.5 tracking-wider">Burned</span>
               </div>
             </div>
 
-            <div className="w-full mt-6 grid grid-cols-3 gap-2 text-center text-[10px] font-black uppercase tracking-wider">
-              <div className="bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850">
-                <span className="text-[8px] font-bold text-slate-400 block mb-0.5">Target</span>
-                <strong className="text-slate-800 dark:text-slate-205">{totalStoryPoints} SP</strong>
+            <div className="w-full mt-4 grid grid-cols-3 gap-1 text-center text-[9px] font-black uppercase tracking-wider">
+              <div className="bg-slate-50 dark:bg-slate-950/40 p-1.5 rounded-lg border border-slate-100 dark:border-slate-850">
+                <span className="text-[7px] font-bold text-slate-400 block mb-0.5">Target</span>
+                <strong className="text-slate-800 dark:text-slate-205">{totalStoryPoints}</strong>
               </div>
-              <div className="bg-emerald-50/30 dark:bg-emerald-950/15 p-2.5 rounded-xl border border-emerald-100/50 dark:border-emerald-900/20">
-                <span className="text-[8px] font-bold text-emerald-500 block mb-0.5">Done</span>
-                <strong className="text-emerald-700 dark:text-emerald-400">{completedStoryPoints} SP</strong>
+              <div className="bg-emerald-50/30 dark:bg-emerald-950/15 p-1.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
+                <span className="text-[7px] font-bold text-emerald-500 block mb-0.5">Done</span>
+                <strong className="text-emerald-700 dark:text-emerald-400">{completedStoryPoints}</strong>
               </div>
-              <div className="bg-rose-50/30 dark:bg-rose-955/15 p-2.5 rounded-xl border border-rose-100/50 dark:border-rose-900/20">
-                <span className="text-[8px] font-bold text-rose-500 block mb-0.5">Open</span>
-                <strong className="text-rose-700 dark:text-rose-455">{openStoryPoints} SP</strong>
+              <div className="bg-rose-50/30 dark:bg-rose-955/15 p-1.5 rounded-lg border border-rose-100/50 dark:border-rose-900/20">
+                <span className="text-[7px] font-bold text-rose-500 block mb-0.5">Open</span>
+                <strong className="text-rose-700 dark:text-rose-455">{openStoryPoints}</strong>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bug Backlog Priority Chart */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
-          <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
-            <Activity className="h-4 w-4 text-rose-500" />
-            Unresolved Bug Severity
-          </h4>
-          <p className="text-[9px] text-slate-400 mb-4">Distribution of open bugs and support incidents by priority</p>
+        {/* Unresolved Bug Severity (Col span 2) */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.005] transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+              <Activity className="h-4 w-4 text-rose-500" />
+              Unresolved Bug Severity
+            </h4>
+            <p className="text-[9px] text-slate-400 mb-2">Distribution of open bugs by priority severity</p>
+          </div>
           
           {activeBugs.length === 0 ? (
-            <div className="flex h-44 items-center justify-center text-xs text-slate-400 italic">No open bugs recorded.</div>
+            <div className="flex h-36 items-center justify-center text-xs text-slate-400 italic">No open bugs recorded.</div>
           ) : (
-            <div className="h-44 select-none">
+            <div className="h-36 select-none mt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bugPriorityData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -634,187 +589,224 @@ export default function DashboardTab({
           )}
         </div>
 
-      </div>
+        {/* Financial Overview (Col span 1) */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+              <Landmark className="h-4 w-4 text-emerald-500" />
+              Budget & Margin
+            </h4>
+            <p className="text-[9px] text-slate-400 mb-2">Contract value vs operational efficiency</p>
+          </div>
 
-      {/* ─── TEAM AVAILABILITY & MILESTONE SCHEDULER TIMELINE (Redesigned Calendar Grid) ─── */}
-      <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
-        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <CalendarRange className="h-4.5 w-4.5 text-indigo-500" />
+          <div className="space-y-3 mt-1">
+            {/* Contract Value Row */}
             <div>
-              <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
-                Team Availability & Milestone Scheduler
-              </h4>
-              <p className="text-[9px] text-slate-400 mt-0.5">Horizontal roster timeline calendar for {currentMonthName}</p>
+              <div className="flex justify-between items-center text-[9px] font-bold uppercase text-slate-400 tracking-wider">
+                <span>Contract Value</span>
+                <span className="text-slate-800 dark:text-white font-extrabold">${totalContracted.toLocaleString()}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-[8px] font-black uppercase text-slate-400 tracking-wide bg-slate-50 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-100 dark:border-slate-850">
+                <span className="text-emerald-600 font-bold">Paid: ${invoicedAndPaid.toLocaleString()}</span>
+                <span className="text-amber-600 font-bold">Unpaid: ${outstandingRevenue.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Net Margin Row */}
+            <div>
+              <div className="flex justify-between items-center text-[9px] font-bold uppercase text-slate-400 tracking-wider">
+                <span>Net Margin</span>
+                <span className={`font-extrabold ${projectMargin >= 0 ? 'text-indigo-650 dark:text-indigo-400' : 'text-rose-600'}`}>{marginPct}%</span>
+              </div>
+              <div className="mt-1 flex justify-between text-[8px] font-black uppercase text-slate-400 tracking-wide bg-slate-50 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-100 dark:border-slate-850 font-semibold">
+                <span>Costs: ${totalExpenses.toLocaleString()}</span>
+                <span className={projectMargin >= 0 ? 'text-emerald-605' : 'text-rose-500'}>Net: ${projectMargin.toLocaleString()}</span>
+              </div>
             </div>
           </div>
-          <span className="text-[9px] bg-indigo-50 text-indigo-750 px-2.5 py-1 rounded-full font-black uppercase dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/40 dark:border-indigo-900/30">
-            {daysInMonth} Days Matrix
-          </span>
         </div>
 
-        <div className="overflow-x-auto max-w-full scrollbar-thin">
-          <table className="w-full text-left border-collapse select-none">
-            <thead>
-              <tr className="border-b border-slate-105 dark:border-slate-805">
-                <th className="pr-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-wider min-w-[140px]">Team Member</th>
-                {daysArray.map(day => {
-                  const milestones = getMilestonesOnDay(day);
-                  const isWeekend = new Date(currentYear, currentMonthIdx, day).getDay() % 6 === 0;
-                  return (
-                    <th 
-                      key={day} 
-                      className={`px-1 py-1.5 text-center text-[9px] font-extrabold min-w-[26px] border-r border-r-slate-100/40 dark:border-r-slate-850/40 ${
-                        isWeekend ? 'bg-slate-50 text-slate-400 dark:bg-slate-900/30' : 'text-slate-600'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span>{day}</span>
-                        {milestones > 0 ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" title={`${milestones} Tickets Due`} />
-                        ) : (
-                          <span className="h-1.5 w-1.5" />
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-              {schedulerEmployees.map(emp => (
-                <tr key={emp} className="hover:bg-slate-50/20 dark:hover:bg-slate-900/10">
-                  <td className="py-2.5 pr-4 text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
-                    <div className="h-5.5 w-5.5 rounded-full bg-indigo-50/80 border border-indigo-100/50 text-indigo-600 flex items-center justify-center font-black text-[9px] uppercase shrink-0 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
-                      {emp.charAt(0)}
-                    </div>
-                    <span className="truncate">{emp}</span>
-                  </td>
+        {/* Item 9 (Col span 4): Team Availability & Milestone scheduler timeline (full-width visual bento slab) */}
+        <div className="lg:col-span-4 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.002] transition-all duration-200">
+          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <CalendarRange className="h-4.5 w-4.5 text-indigo-500" />
+              <div>
+                <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                  Team Availability & Milestone Scheduler
+                </h4>
+                <p className="text-[9px] text-slate-400 mt-0.5">Horizontal roster timeline calendar for {currentMonthName}</p>
+              </div>
+            </div>
+            <span className="text-[9px] bg-indigo-50 text-indigo-750 px-2.5 py-1 rounded-full font-black uppercase dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/40 dark:border-indigo-900/30">
+              {daysInMonth} Days Matrix
+            </span>
+          </div>
+
+          <div className="overflow-x-auto max-w-full scrollbar-thin">
+            <table className="w-full text-left border-collapse select-none">
+              <thead>
+                <tr className="border-b border-slate-105 dark:border-slate-805">
+                  <th className="pr-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-wider min-w-[140px]">Team Member</th>
                   {daysArray.map(day => {
-                    const onLeave = checkLeaveOnDay(emp, day);
+                    const milestones = getMilestonesOnDay(day);
                     const isWeekend = new Date(currentYear, currentMonthIdx, day).getDay() % 6 === 0;
                     return (
-                      <td 
+                      <th 
                         key={day} 
-                        className={`p-0.5 text-center border-r border-slate-100/40 dark:border-slate-850/40 ${
-                          isWeekend ? 'bg-slate-50/30 dark:bg-slate-955/20' : ''
+                        className={`px-1 py-1.5 text-center text-[9px] font-extrabold min-w-[26px] border-r border-r-slate-100/40 dark:border-r-slate-850/40 ${
+                          isWeekend ? 'bg-slate-50 text-slate-400 dark:bg-slate-900/30' : 'text-slate-600'
                         }`}
                       >
-                        {onLeave ? (
-                          <div 
-                            className="h-5 w-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 cursor-help shadow-sm transition-all duration-150"
-                            title={`${emp} on planned leave`}
-                          />
-                        ) : (
-                          <div className="h-5 w-full rounded-full border border-dashed border-slate-100 dark:border-slate-850/50" />
-                        )}
-                      </td>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span>{day}</span>
+                          {milestones > 0 ? (
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" title={`${milestones} Tickets Due`} />
+                          ) : (
+                            <span className="h-1.5 w-1.5" />
+                          )}
+                        </div>
+                      </th>
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                {schedulerEmployees.map(emp => (
+                  <tr key={emp} className="hover:bg-slate-50/20 dark:hover:bg-slate-900/10">
+                    <td className="py-2.5 pr-4 text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
+                      <div className="h-5.5 w-5.5 rounded-full bg-indigo-50/80 border border-indigo-100/50 text-indigo-600 flex items-center justify-center font-black text-[9px] uppercase shrink-0 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
+                        {emp.charAt(0)}
+                      </div>
+                      <span className="truncate">{emp}</span>
+                    </td>
+                    {daysArray.map(day => {
+                      const onLeave = checkLeaveOnDay(emp, day);
+                      const isWeekend = new Date(currentYear, currentMonthIdx, day).getDay() % 6 === 0;
+                      return (
+                        <td 
+                          key={day} 
+                          className={`p-0.5 text-center border-r border-slate-100/40 dark:border-slate-850/40 ${
+                            isWeekend ? 'bg-slate-50/30 dark:bg-slate-955/20' : ''
+                          }`}
+                        >
+                          {onLeave ? (
+                            <div 
+                              className="h-5 w-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 cursor-help shadow-sm transition-all duration-150"
+                              title={`${emp} on planned leave`}
+                            />
+                          ) : (
+                            <div className="h-5 w-full rounded-full border border-dashed border-slate-100 dark:border-slate-850/50" />
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-4 text-[9px] font-black uppercase text-slate-400 tracking-wider pt-3.5 border-t border-slate-100 dark:border-slate-800 select-none font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-5 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full" />
+              <span>Scheduled Leave Block</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+              <span>Milestone / Due Date Trigger</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-5 bg-slate-50 border border-slate-200/50 rounded-full dark:bg-slate-950 dark:border-slate-850" />
+              <span>Standard Working Day</span>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-4 text-[9px] font-black uppercase text-slate-400 tracking-wider pt-3.5 border-t border-slate-100 dark:border-slate-800 select-none">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-5 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full" />
-            <span>Scheduled Leave Block</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-            <span>Milestone / Due Date Trigger</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-5 bg-slate-50 border border-slate-200/50 rounded-full dark:bg-slate-950 dark:border-slate-850" />
-            <span>Standard Working Day</span>
-          </div>
-        </div>
-      </div>
+        {/* Item 10 (Col span 4): Alerts stream feed and report export center */}
+        <div className="lg:col-span-4 grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          
+          {/* Action Alerts (Col span 1) */}
+          <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.005] transition-all duration-200 flex flex-col justify-between min-h-[220px]">
+            <div>
+              <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                <Bell className="h-4.5 w-4.5 text-indigo-500" />
+                My Action Alerts
+              </h4>
+              <p className="text-[9px] text-slate-400 mb-3">Real-time task assignments and mentions</p>
+            </div>
 
-      {/* ─── NOTIFICATION FEED & REPORT EXPORT CENTER ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Notification Feed Widget */}
-        <div className="lg:col-span-1 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
-          <div>
-            <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
-              <Bell className="h-4.5 w-4.5 text-indigo-500" />
-              My Action Alerts
-            </h4>
-            <p className="text-[9px] text-slate-400 mb-4">Real-time task assignments and mentions</p>
-          </div>
-
-          <div className="space-y-2.5 flex-1 max-h-[160px] overflow-y-auto pr-1 scrollbar-thin">
-            {notifications.length === 0 ? (
-              <div className="text-center py-6 text-xs text-slate-400 italic flex flex-col items-center justify-center gap-2 select-none">
-                <ShieldCheck className="h-7 w-7 text-indigo-500/30" />
-                <span>Zero pending alerts</span>
-              </div>
-            ) : (
-              notifications.map(n => (
-                <div key={n._id} className="rounded-xl border border-indigo-100/40 bg-indigo-50/5 p-2.5 text-[10px] dark:border-indigo-950/40 dark:bg-indigo-950/10">
-                  <div className="font-bold text-slate-700 dark:text-slate-350">
-                    {n.actor} <span className="font-semibold text-slate-500 dark:text-slate-400">{n.message}</span>
-                  </div>
-                  <div className="text-[8px] text-slate-400 mt-1.5 flex items-center gap-1 font-semibold">
-                    <Clock className="h-2.5 w-2.5" />
-                    {new Date(n.createdAt).toLocaleDateString()}
-                  </div>
+            <div className="space-y-2 flex-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin">
+              {notifications.length === 0 ? (
+                <div className="text-center py-6 text-xs text-slate-400 italic flex flex-col items-center justify-center gap-2 select-none h-full justify-center">
+                  <ShieldCheck className="h-7 w-7 text-indigo-500/30" />
+                  <span>Zero pending alerts</span>
                 </div>
-              ))
-            )}
+              ) : (
+                notifications.map(n => (
+                  <div key={n._id} className="rounded-xl border border-indigo-100/40 bg-indigo-50/5 p-2 text-[9px] dark:border-indigo-950/40 dark:bg-indigo-950/10">
+                    <div className="font-bold text-slate-700 dark:text-slate-350">
+                      {n.actor} <span className="font-semibold text-slate-500 dark:text-slate-400">{n.message}</span>
+                    </div>
+                    <div className="text-[8px] text-slate-400 mt-1 flex items-center gap-1 font-semibold">
+                      <Clock className="h-2 w-2" />
+                      {new Date(n.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Report Export Center */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
-          <div>
-            <h4 className="text-xs font-black text-slate-850 dark:text-slate-105 mb-1 uppercase tracking-wider flex items-center gap-1.5">
-              <Printer className="h-4.5 w-4.5 text-emerald-500" />
-              Project Reporting & Export Center
-            </h4>
-            <p className="text-[9px] text-slate-400 mb-4">Export raw project data worksheets or trigger print views</p>
+          {/* Report Export Center (Col span 2) */}
+          <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.005] transition-all duration-200 flex flex-col justify-between min-h-[220px]">
+            <div>
+              <h4 className="text-xs font-black text-slate-850 dark:text-slate-105 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                <Printer className="h-4.5 w-4.5 text-emerald-500" />
+                Project Reporting & Export Center
+              </h4>
+              <p className="text-[9px] text-slate-400 mb-3">Export raw project data worksheets or trigger print views</p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 select-none mt-2">
+              <button
+                onClick={exportTasksToCSV}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+              >
+                <Download className="h-5 w-5 text-indigo-500 mb-2 transition-transform group-hover:scale-110" />
+                <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Tasks Sheet</span>
+                <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
+              </button>
+
+              <button
+                onClick={exportIssuesToCSV}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+              >
+                <Download className="h-5 w-5 text-rose-500 mb-2 transition-transform group-hover:scale-110" />
+                <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Bugs Sheet</span>
+                <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
+              </button>
+
+              <button
+                onClick={exportFinancialsToCSV}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+              >
+                <Download className="h-5 w-5 text-emerald-500 mb-2 transition-transform group-hover:scale-110" />
+                <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Financials</span>
+                <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
+              </button>
+
+              <button
+                onClick={() => window.print()}
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+              >
+                <Printer className="h-5 w-5 text-indigo-600 mb-2 transition-transform group-hover:scale-110" />
+                <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Print Layout</span>
+                <span className="text-[8px] text-slate-400 mt-0.5">PDF or Paper</span>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 select-none">
-            <button
-              onClick={exportTasksToCSV}
-              className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
-            >
-              <Download className="h-5 w-5 text-indigo-500 mb-2 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Tasks Sheet</span>
-              <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
-            </button>
-
-            <button
-              onClick={exportIssuesToCSV}
-              className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
-            >
-              <Download className="h-5 w-5 text-rose-500 mb-2 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Bugs Sheet</span>
-              <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
-            </button>
-
-            <button
-              onClick={exportFinancialsToCSV}
-              className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
-            >
-              <Download className="h-5 w-5 text-emerald-500 mb-2 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Financials</span>
-              <span className="text-[8px] text-slate-400 mt-0.5">Download CSV</span>
-            </button>
-
-            <button
-              onClick={() => window.print()}
-              className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
-            >
-              <Printer className="h-5 w-5 text-indigo-600 mb-2 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Print Layout</span>
-              <span className="text-[8px] text-slate-400 mt-0.5">PDF or Paper</span>
-            </button>
-          </div>
         </div>
 
       </div>

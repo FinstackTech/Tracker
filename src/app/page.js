@@ -52,10 +52,20 @@ export default function Home() {
 
   // States
   const [loading, setLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   
+  // Cockpit Workspace Layout & Command Center States
+  const [showCommandCenter, setShowCommandCenter] = useState(false);
+  const [commandQuery, setCommandQuery] = useState('');
+  
+  // Quick Standup Logger states
+  const [quickStandupTask, setQuickStandupTask] = useState('');
+  const [quickStandupHours, setQuickStandupHours] = useState('8');
+  const [quickStandupStatus, setQuickStandupStatus] = useState('completed');
+  const [quickStandupBlockers, setQuickStandupBlockers] = useState('');
+  const [quickStandupSubmitting, setQuickStandupSubmitting] = useState(false);
+
   // Toast Notification State
   const [toasts, setToasts] = useState([]);
 
@@ -83,6 +93,21 @@ export default function Home() {
   const [showUserSelect, setShowUserSelect] = useState(false);
   const [showMsalSim, setShowMsalSim] = useState(false);
   const [msalLoading, setMsalLoading] = useState(false);
+
+  // Keyboard shortcut listener for Command Center Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandCenter(prev => !prev);
+      }
+      if (e.key === 'Escape') {
+        setShowCommandCenter(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // ─── 1. API FETCHES ───
   const fetchProjects = async () => {
@@ -269,6 +294,45 @@ export default function Home() {
       setShowProfileDropdown(false);
       showToast("Sandbox data reset successfully!", "info");
       window.location.reload();
+    }
+  };
+
+  const handlePostQuickStandup = async (e) => {
+    e.preventDefault();
+    if (!quickStandupTask.trim()) return;
+    setQuickStandupSubmitting(true);
+    try {
+      const response = await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeName: activeUser,
+          date: new Date().toISOString().substring(0, 10),
+          projectId: activeProject ? activeProject._id : undefined,
+          taskDescription: quickStandupTask.trim(),
+          hoursSpent: Number(quickStandupHours) || 8,
+          status: quickStandupStatus,
+          blockers: quickStandupStatus === 'blocked' ? quickStandupBlockers.trim() : ''
+        })
+      });
+      const res = response.body ? await response.json() : null;
+      if (res && res.success) {
+        showToast("Standup log added successfully!", "success");
+        setQuickStandupTask('');
+        setQuickStandupHours('8');
+        setQuickStandupStatus('completed');
+        setQuickStandupBlockers('');
+        if (activeProject) {
+          fetchTasksIssuesAndEpics(activeProject._id);
+        }
+      } else {
+        showToast(res?.error || "Failed to post standup log", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error connection failed", "error");
+    } finally {
+      setQuickStandupSubmitting(false);
     }
   };
 
@@ -697,117 +761,55 @@ export default function Home() {
   return (
     <div className="flex h-screen w-screen bg-slate-50/40 text-slate-700 dark:bg-slate-955 dark:text-slate-350 font-sans overflow-hidden">
       
-      {/* LEFT COLLAPSIBLE SIDEBAR */}
-      <aside 
-        className={`flex flex-col border-r border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-slate-800/85 dark:bg-slate-950/70 transition-all duration-200 ${
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        }`}
-      >
-        {/* Brand header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-850 relative shrink-0">
-          {!sidebarCollapsed ? (
+      {/* MAIN CONTAINER */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative animate-in fade-in duration-150">
+        
+        {/* STICKY GLASS HEADER */}
+        <header className="sticky top-0 z-45 h-16 border-b border-slate-200/80 bg-white/75 backdrop-blur-md flex items-center justify-between px-6 shrink-0 dark:border-slate-800/85 dark:bg-slate-900/60 select-none">
+          
+          {/* Logo & Breadcrumbs */}
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-650 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm">
                 F
               </div>
-              <span className="font-extrabold text-xs text-slate-850 dark:text-white tracking-widest uppercase">Finstack PPM</span>
+              <span className="font-extrabold text-xs text-slate-850 dark:text-white tracking-widest uppercase">Finstack</span>
             </div>
-          ) : (
-            <div className="mx-auto h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-650 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-sm animate-pulse">
-              F
-            </div>
-          )}
-          
-          <button 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="absolute -right-3.5 top-4.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm hover:bg-slate-50 dark:border-slate-850 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 hidden sm:flex transition-all duration-200 hover:scale-110 active:scale-90 cursor-pointer"
-            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {sidebarCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
-          </button>
-        </div>
-
-        {/* Collapsible/Grouped Sidebar Menu Navigation */}
-        <div className="flex-1 pr-2 py-4 space-y-5 overflow-y-auto scrollbar-none select-none">
-          {sidebarGroups.map((group) => (
-            <div key={group.title} className="space-y-1">
-              {/* Group Title */}
-              {!sidebarCollapsed ? (
-                <span className="px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-505 block mb-1">
-                  {group.title}
-                </span>
-              ) : (
-                <div className="w-8 mx-auto border-t border-slate-100 dark:border-slate-850/60 my-2" />
-              )}
-
-              {/* Group items */}
-              {group.items.map((item) => {
-                const MenuIcon = item.icon;
-                const isActive = activeTab === item.id;
-                
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSelectedItem(null);
-                    }}
-                    className={`w-full flex items-center rounded-r-xl py-2.2 pl-3 pr-4 transition-all text-xs font-bold relative group duration-150 cursor-pointer border-l-4 ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-indigo-50 to-transparent border-indigo-650 text-indigo-600 dark:from-indigo-950/30 dark:border-indigo-400 dark:text-indigo-400 font-extrabold shadow-[inset_1px_0_0_0_rgba(99,102,241,0.02)]' 
-                        : 'border-transparent text-slate-700 hover:bg-slate-50/50 hover:text-slate-900 dark:text-slate-355 dark:hover:bg-slate-900/40 dark:hover:text-slate-100'
-                    }`}
-                    title={sidebarCollapsed ? item.label : undefined}
-                  >
-                    <MenuIcon className={`h-4.5 w-4.5 shrink-0 transition-transform group-hover:scale-110 ${sidebarCollapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-450 dark:text-slate-400'}`} />
-                    {!sidebarCollapsed && <span className="transition-transform group-hover:translate-x-0.5">{item.label}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-      </aside>
-
-      {/* MAIN CONTAINER */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative animate-in fade-in duration-150">
-        
-        {/* PREMIUM REDESIGNED HEADER */}
-        <header className="h-16 border-b border-slate-200/80 bg-white/70 backdrop-blur-md flex items-center justify-between px-6 shrink-0 dark:border-slate-800/85 dark:bg-slate-900/60 select-none">
-          
-          {/* Breadcrumbs & Active Scope Details */}
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-            <span>{breadcrumbs.section}</span>
-            <span>/</span>
-            <span className="text-slate-850 dark:text-white font-bold">{breadcrumbs.label}</span>
             
-            {/* Separator & Active Project Indicator badge */}
-            {activeProject && (
-              <>
-                <span className="hidden sm:inline">|</span>
-                <div className="hidden sm:flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/45 px-2 py-0.5 rounded-lg text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{activeProject.code}</span>
-                </div>
-              </>
-            )}
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+              <span>{breadcrumbs.section}</span>
+              <span>/</span>
+              <span className="text-slate-850 dark:text-white font-bold">{breadcrumbs.label}</span>
+              
+              {activeProject && (
+                <>
+                  <span className="hidden sm:inline">|</span>
+                  <div className="hidden sm:flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/45 px-2 py-0.5 rounded-lg text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{activeProject.code}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Search, Notifications & User Dropdown */}
+          {/* Controls: Search, Cmd+K button, Notifications, User Dropdown */}
           <div className="flex items-center gap-3">
             
-            {/* Global Search Box */}
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Global search board, logs..."
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-                className="pl-8.5 pr-4 py-1.8 border border-slate-200 rounded-xl bg-slate-50/50 outline-none text-[10px] w-48 focus:w-60 focus:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300 font-semibold transition-all"
-              />
-            </div>
+            {/* Cmd+K Palette Trigger Indicator */}
+            <button
+              onClick={() => setShowCommandCenter(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-205 bg-slate-50/40 hover:bg-slate-100/60 px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:border-slate-800 dark:bg-slate-950/20 transition-all cursor-pointer"
+              title="Open Command Center (Ctrl+K)"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Search...</span>
+              <span className="hidden sm:inline border border-slate-200/80 dark:border-slate-800 px-1 py-0.2 rounded text-[8px] font-black uppercase bg-white dark:bg-slate-900 shadow-sm">
+                Ctrl+K
+              </span>
+            </button>
 
             {/* Notification alert bell */}
             <div className="relative">
@@ -858,7 +860,7 @@ export default function Home() {
                           <div>
                             <strong className="text-slate-700 dark:text-slate-200 font-bold">{notif.actor}</strong> {notif.message}
                           </div>
-                          <div className="text-[8px] text-slate-450 mt-1 flex items-center gap-1">
+                          <div className="text-[8px] text-slate-455 mt-1 flex items-center gap-1">
                             <Clock className="h-2.5 w-2.5" />
                             {new Date(notif.createdAt).toLocaleDateString(undefined, {
                               month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -909,7 +911,7 @@ export default function Home() {
                         setActiveTab('settings');
                         setShowProfileDropdown(false);
                       }}
-                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-900 transition-colors flex items-center gap-2 cursor-pointer"
+                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-655 hover:bg-slate-50 dark:text-slate-355 dark:hover:bg-slate-900 transition-colors flex items-center gap-2 cursor-pointer"
                     >
                       <Settings className="h-3.5 w-3.5 text-slate-405" />
                       Connector Hub
@@ -938,159 +940,550 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Scrollable central view */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 pb-20">
+        {/* MAIN BODY: central view + right smart rail */}
+        <div className="flex-1 flex overflow-hidden relative">
           
-          {activeTab === 'dashboard' && (
-            <DashboardTab 
-              tasks={tasks}
-              issues={issues}
-              leaves={leaves}
-              transactions={transactions}
-              activeProject={activeProject}
-              activeUser={activeUser}
-              currentUser={currentUser}
-              notifications={notifications}
-              employees={userProfiles.map(u => u.name)}
-            />
-          )}
+          {/* Scrollable central view */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 pb-28 relative">
+            
+            {activeTab === 'dashboard' && (
+              <DashboardTab 
+                tasks={tasks}
+                issues={issues}
+                leaves={leaves}
+                transactions={transactions}
+                activeProject={activeProject}
+                activeUser={activeUser}
+                currentUser={currentUser}
+                notifications={notifications}
+                employees={userProfiles.map(u => u.name)}
+              />
+            )}
 
-          {activeTab === 'tasks' && (
-            <TaskTrackerTab 
-              tasks={tasks}
-              setTasks={setTasks}
-              activeProject={activeProject}
-              epics={epics}
-              currentUser={currentUser}
-              employees={userProfiles.map(u => u.name)}
-              onSelectItem={(item, type) => {
-                setSelectedItem(item);
-                setSelectedItemType(type);
-              }}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'tasks' && (
+              <TaskTrackerTab 
+                tasks={tasks}
+                setTasks={setTasks}
+                activeProject={activeProject}
+                epics={epics}
+                currentUser={currentUser}
+                employees={userProfiles.map(u => u.name)}
+                onSelectItem={(item, type) => {
+                  setSelectedItem(item);
+                  setSelectedItemType(type);
+                }}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'issues' && (
-            <IssueTrackerTab 
-              issues={issues}
-              setIssues={setIssues}
-              activeProject={activeProject}
-              epics={epics}
-              currentUser={currentUser}
-              employees={userProfiles.map(u => u.name)}
-              onSelectItem={(item, type) => {
-                setSelectedItem(item);
-                setSelectedItemType(type);
-              }}
-              activeUser={activeUser}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'issues' && (
+              <IssueTrackerTab 
+                issues={issues}
+                setIssues={setIssues}
+                activeProject={activeProject}
+                epics={epics}
+                currentUser={currentUser}
+                employees={userProfiles.map(u => u.name)}
+                onSelectItem={(item, type) => {
+                  setSelectedItem(item);
+                  setSelectedItemType(type);
+                }}
+                activeUser={activeUser}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'planner' && (
-            <PlannerTab 
-              activeProject={activeProject}
-              tasks={tasks}
-              epics={epics}
-              onSelectItem={(item, type) => {
-                setSelectedItem(item);
-                setSelectedItemType(type);
-              }}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'planner' && (
+              <PlannerTab 
+                activeProject={activeProject}
+                tasks={tasks}
+                epics={epics}
+                onSelectItem={(item, type) => {
+                  setSelectedItem(item);
+                  setSelectedItemType(type);
+                }}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'docs' && (
-            <DocManagerTab 
-              activeProject={activeProject}
-              currentUser={currentUser}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'docs' && (
+              <DocManagerTab 
+                activeProject={activeProject}
+                currentUser={currentUser}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'daily' && (
-            <DailyTrackerTab 
-              projects={projects}
-              activeUser={activeUser}
-              currentUser={currentUser}
-              activeProject={activeProject}
-              employees={userProfiles.map(u => u.name)}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'daily' && (
+              <DailyTrackerTab 
+                projects={projects}
+                activeUser={activeUser}
+                currentUser={currentUser}
+                activeProject={activeProject}
+                employees={userProfiles.map(u => u.name)}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'leaves' && (
-            <LeaveTrackerTab 
-              leaves={leaves}
-              setLeaves={setLeaves}
-              activeUser={activeUser}
-              currentUser={currentUser}
-              employees={userProfiles.map(u => u.name)}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'leaves' && (
+              <LeaveTrackerTab 
+                leaves={leaves}
+                setLeaves={setLeaves}
+                activeUser={activeUser}
+                currentUser={currentUser}
+                employees={userProfiles.map(u => u.name)}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'finance' && (
-            <FinanceHubTab 
-              transactions={transactions}
-              setTransactions={setTransactions}
-              activeProject={activeProject}
-              currentUser={currentUser}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'finance' && (
+              <FinanceHubTab 
+                transactions={transactions}
+                setTransactions={setTransactions}
+                activeProject={activeProject}
+                currentUser={currentUser}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'projects' && (
-            <ProjectsTab 
-              activeUser={activeUser} 
-              activeProject={activeProject}
-              setActiveProject={setActiveProject}
-              epics={epics}
-              setEpics={setEpics}
-              currentUser={currentUser}
-              projects={projects}
-              setProjects={setProjects}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'projects' && (
+              <ProjectsTab 
+                activeUser={activeUser} 
+                activeProject={activeProject}
+                setActiveProject={setActiveProject}
+                epics={epics}
+                setEpics={setEpics}
+                currentUser={currentUser}
+                projects={projects}
+                setProjects={setProjects}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'users' && (
-            <UsersTab 
-              activeUser={activeUser}
-              currentUser={currentUser}
-              userProfiles={userProfiles}
-              setUserProfiles={setUserProfiles}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'users' && (
+              <UsersTab 
+                activeUser={activeUser}
+                currentUser={currentUser}
+                userProfiles={userProfiles}
+                setUserProfiles={setUserProfiles}
+                showToast={showToast}
+              />
+            )}
 
-          {activeTab === 'settings' && (
-            <SettingsTab 
-              activeUser={activeUser} 
-              activeProject={activeProject}
-              currentUser={currentUser}
-              showToast={showToast}
-            />
-          )}
+            {activeTab === 'settings' && (
+              <SettingsTab 
+                activeUser={activeUser} 
+                activeProject={activeProject}
+                currentUser={currentUser}
+                showToast={showToast}
+              />
+            )}
 
+          </div>
+
+          {/* RIGHT SMART RAIL (Cockpit Sidebar) */}
+          <aside className="w-80 border-l border-slate-200/80 bg-white/35 backdrop-blur-md dark:border-slate-800/85 dark:bg-slate-950/20 hidden xl:flex flex-col h-full shrink-0 p-5 overflow-y-auto space-y-6 select-none text-xs">
+            
+            {/* Section 1: Active Project Summary */}
+            {activeProject ? (
+              <div className="space-y-3">
+                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
+                  Active Project Cockpit
+                </div>
+                <div>
+                  <div className="font-bold text-slate-850 dark:text-slate-100 truncate">{activeProject.name}</div>
+                  <div className="text-[9px] text-slate-400 mt-0.5 font-mono">Code: {activeProject.code} • Client: {activeProject.client || 'Internal'}</div>
+                </div>
+
+                {/* Progress bar */}
+                {(() => {
+                  const projTasks = tasks;
+                  const total = projTasks.length;
+                  const completed = projTasks.filter(t => t.status === 'done').length;
+                  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                  
+                  const openBugs = issues.filter(i => i.status !== 'closed' && i.status !== 'resolved').length;
+                  const blocked = projTasks.filter(t => t.blocked).length;
+
+                  return (
+                    <div className="space-y-2.5">
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full dark:bg-slate-800 overflow-hidden">
+                        <div className="h-full bg-indigo-650 transition-all duration-300" style={{ width: `${pct}%` }} />
+                      </div>
+                      <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wide">
+                        <span>{pct}% Done</span>
+                        <span>{completed}/{total} Tasks</span>
+                      </div>
+
+                      {/* Stat badges */}
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="bg-rose-50/50 border border-rose-100/50 p-2 rounded-xl text-center dark:bg-rose-955/10 dark:border-rose-950/30">
+                          <div className="text-rose-600 font-extrabold text-sm leading-none">{openBugs}</div>
+                          <div className="text-[8px] text-rose-500 font-bold uppercase mt-1">Open Bugs</div>
+                        </div>
+                        <div className="bg-amber-50/50 border border-amber-100/50 p-2 rounded-xl text-center dark:bg-amber-955/10 dark:border-amber-955/10">
+                          <div className="text-amber-600 font-extrabold text-sm leading-none">{blocked}</div>
+                          <div className="text-[8px] text-amber-500 font-bold uppercase mt-1">Blocked</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="text-[10px] text-slate-450 italic p-3 text-center bg-slate-50 dark:bg-slate-950/20 rounded-xl">
+                No active project scope loaded.
+              </div>
+            )}
+
+            {/* Section 2: Quick Standup Logger */}
+            <div className="space-y-3 bg-slate-50/55 border border-slate-100/60 p-4 rounded-2xl dark:bg-slate-955/20 dark:border-slate-800/60">
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-indigo-500" />
+                Quick Standup Logger
+              </div>
+              
+              <form onSubmit={handlePostQuickStandup} className="space-y-3">
+                <div>
+                  <textarea
+                    placeholder="What did you complete today?"
+                    value={quickStandupTask}
+                    onChange={e => setQuickStandupTask(e.target.value)}
+                    rows="2"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      placeholder="Hours (8)"
+                      value={quickStandupHours}
+                      onChange={e => setQuickStandupHours(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-center font-bold dark:border-slate-850 dark:bg-slate-900"
+                      min="1"
+                      max="24"
+                    />
+                  </div>
+                  <div>
+                    <select
+                      value={quickStandupStatus}
+                      onChange={e => setQuickStandupStatus(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
+                    >
+                      <option value="completed">Done</option>
+                      <option value="in-progress">In Dev</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </div>
+                </div>
+
+                {quickStandupStatus === 'blocked' && (
+                  <input
+                    type="text"
+                    placeholder="Blocker details..."
+                    value={quickStandupBlockers}
+                    onChange={e => setQuickStandupBlockers(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs dark:border-slate-850 dark:bg-slate-900"
+                    required
+                  />
+                )}
+
+                <button
+                  type="submit"
+                  disabled={quickStandupSubmitting}
+                  className="w-full rounded-xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold py-1.8 text-[10px] uppercase tracking-wider cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  {quickStandupSubmitting ? 'Posting...' : 'Log Standup'}
+                </button>
+              </form>
+            </div>
+
+            {/* Section 3: Active Team Leaves */}
+            <div className="space-y-3">
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
+                Team Capacity & Leaves
+              </div>
+              <div className="space-y-2">
+                {leaves.length === 0 ? (
+                  <div className="text-[9px] text-slate-400 italic">No leaves registered this month.</div>
+                ) : (
+                  leaves.slice(0, 4).map(l => (
+                    <div key={l._id} className="flex items-center justify-between text-[10px] text-slate-650 dark:text-slate-350">
+                      <span className="font-semibold">{l.employeeName}</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 dark:text-indigo-400 font-bold">{l.daysCount}d out</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Section 4: User Selector Sandbox */}
+            <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800/60">
+              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                OIDC Session Switcher
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={activeUser}
+                  onChange={e => {
+                    const uName = e.target.value;
+                    const matched = userProfiles.find(u => u.name === uName);
+                    if (matched) {
+                      setCurrentUser(matched);
+                      setActiveUser(uName);
+                      localStorage.setItem('company_current_session', JSON.stringify(matched));
+                      fetchNotifications(uName);
+                      showToast(`Identity Swapped to: ${uName}`, "info");
+                    }
+                  }}
+                  className="flex-1 rounded-xl border border-slate-205 bg-white px-2.5 py-1.5 text-[11px] font-bold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
+                >
+                  {userProfiles.map(u => (
+                    <option key={u.name} value={u.name}>{u.name} ({u.role})</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleResetSandbox}
+                  className="rounded-xl border border-slate-200 hover:bg-slate-50 p-2 dark:border-slate-800 dark:hover:bg-slate-850 cursor-pointer"
+                  title="Purge local state and reload"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                </button>
+              </div>
+            </div>
+
+          </aside>
         </div>
 
-        {/* AGILE DETAILS DRAWER */}
-        {selectedItem && (
-          <DetailsDrawer 
-            item={selectedItem}
-            itemType={selectedItemType}
-            epics={epics}
-            onClose={() => setSelectedItem(null)}
-            onUpdate={handleUpdateItem}
-            onDelete={handleDeleteItem}
-            activeUser={activeUser}
-            currentUser={currentUser}
-          />
-        )}
+        {/* FLOATING COMMAND ORBIT NAVIGATION DOCK */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-2 max-w-[95vw] overflow-x-auto scrollbar-none select-none">
+          {[
+            { id: 'dashboard', label: 'Bento Dashboard', icon: LayoutDashboard },
+            { id: 'projects', label: 'Projects Portfolio', icon: Briefcase },
+            { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
+            { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
+            { id: 'planner', label: 'Timeline Planner', icon: CalendarRange },
+            { id: 'users', label: 'Users Registry', icon: User },
+            { id: 'docs', label: 'Document Vault', icon: FileText },
+            { id: 'leaves', label: 'Leave Planner', icon: Calendar },
+            { id: 'daily', label: 'Daily Standup', icon: Columns },
+            { id: 'finance', label: 'Finance Hub', icon: Landmark },
+            { id: 'settings', label: 'Connector Settings', icon: Settings },
+          ].map(item => {
+            const IconComponent = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <div key={item.id} className="relative group shrink-0">
+                {/* Tooltip */}
+                <span className="absolute bottom-full mb-3.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900/90 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-black rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap uppercase tracking-wider">
+                  {item.label}
+                </span>
+                {/* Orb */}
+                <button
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setSelectedItem(null);
+                  }}
+                  className={`h-10 w-10 rounded-full flex items-center justify-center transition-all duration-150 cursor-pointer ${
+                    isActive 
+                      ? 'bg-indigo-650 text-white dark:bg-indigo-500 shadow-lg scale-110' 
+                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  <IconComponent className="h-5 w-5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
 
       </div>
+
+      {/* ─── COMMAND CENTER PANEL (CMD+K) ─── */}
+      {showCommandCenter && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed inset-0 -z-10" onClick={() => setShowCommandCenter(false)} />
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md shadow-2xl overflow-hidden dark:border-slate-800 dark:bg-slate-900/95 max-h-[480px] flex flex-col animate-in zoom-in-95 duration-150 select-none text-xs">
+            
+            {/* Input Search box */}
+            <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5 shrink-0">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search tabs, projects, roles or actions..."
+                value={commandQuery}
+                onChange={e => setCommandQuery(e.target.value)}
+                className="flex-1 bg-transparent border-none outline-none text-xs text-slate-800 dark:text-white font-semibold placeholder-slate-400"
+                autoFocus
+              />
+              <span className="text-[9px] font-black uppercase text-slate-400 border border-slate-205 dark:border-slate-850 px-1.5 py-0.5 rounded-md">
+                ESC
+              </span>
+            </div>
+            
+            {/* Results body */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-4">
+              
+              {/* Category: Navigation */}
+              {(() => {
+                const navOptions = [
+                  { id: 'dashboard', label: 'Go to Bento Dashboard', icon: LayoutDashboard },
+                  { id: 'projects', label: 'Go to Projects Portfolio', icon: Briefcase },
+                  { id: 'tasks', label: 'Go to Tasks Board', icon: CheckSquare },
+                  { id: 'issues', label: 'Go to Issue Tracker', icon: AlertCircle },
+                  { id: 'planner', label: 'Go to Timeline Planner', icon: CalendarRange },
+                  { id: 'users', label: 'Go to Users Registry', icon: User },
+                  { id: 'docs', label: 'Go to Document Vault', icon: FileText },
+                  { id: 'leaves', label: 'Go to Leave Planner', icon: Calendar },
+                  { id: 'daily', label: 'Go to Daily Standup Log', icon: Columns },
+                  { id: 'finance', label: 'Go to Finance Hub Ledger', icon: Landmark },
+                  { id: 'settings', label: 'Go to Webhook Connector Settings', icon: Settings },
+                ].filter(opt => opt.label.toLowerCase().includes(commandQuery.toLowerCase()));
+
+                if (navOptions.length === 0) return null;
+
+                return (
+                  <div className="space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-wider text-slate-400 px-2.5 mb-1.5">
+                      Navigation
+                    </div>
+                    {navOptions.map(opt => {
+                      const Icon = opt.icon;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            setActiveTab(opt.id);
+                            setSelectedItem(null);
+                            setShowCommandCenter(false);
+                            setCommandQuery('');
+                          }}
+                          className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 text-slate-750 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
+                        >
+                          <Icon className="h-4 w-4 text-slate-400" />
+                          <span className="flex-1 truncate">{opt.label}</span>
+                          <span className="text-[8px] font-black text-slate-400 bg-slate-50 dark:bg-slate-950 px-1 py-0.2 rounded">Enter</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* Category: Projects */}
+              {(() => {
+                const projOptions = projects.filter(p => 
+                  p.name.toLowerCase().includes(commandQuery.toLowerCase()) || 
+                  p.code.toLowerCase().includes(commandQuery.toLowerCase())
+                );
+
+                if (projOptions.length === 0) return null;
+
+                return (
+                  <div className="space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-wider text-slate-400 px-2.5 mb-1.5">
+                      Workspace Project Switcher
+                    </div>
+                    {projOptions.map(p => (
+                      <button
+                        key={p._id}
+                        onClick={() => {
+                          setActiveProject(p);
+                          setShowCommandCenter(false);
+                          setCommandQuery('');
+                          showToast(`Activated Project Workspace: ${p.code}`, "success");
+                        }}
+                        className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 text-slate-750 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
+                      >
+                        <Briefcase className="h-4 w-4 text-slate-400" />
+                        <span className="flex-1 truncate">{p.name} ({p.code})</span>
+                        <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.2 rounded dark:bg-indigo-950/20">Scope</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Category: Identities */}
+              {(() => {
+                const userOptions = userProfiles.filter(u => 
+                  u.name.toLowerCase().includes(commandQuery.toLowerCase()) || 
+                  u.role.toLowerCase().includes(commandQuery.toLowerCase())
+                );
+
+                if (userOptions.length === 0) return null;
+
+                return (
+                  <div className="space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-wider text-slate-400 px-2.5 mb-1.5">
+                      Identity Role Swapping
+                    </div>
+                    {userOptions.map(u => (
+                      <button
+                        key={u.name}
+                        onClick={() => {
+                          setCurrentUser(u);
+                          setActiveUser(u.name);
+                          localStorage.setItem('company_current_session', JSON.stringify(u));
+                          fetchNotifications(u.name);
+                          setShowCommandCenter(false);
+                          setCommandQuery('');
+                          showToast(`Authenticated as: ${u.name}`, "info");
+                        }}
+                        className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 text-slate-750 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
+                      >
+                        <User className="h-4 w-4 text-slate-400" />
+                        <span className="flex-1 truncate">{u.name} ({u.role})</span>
+                        <span className="text-[9px] font-black text-slate-400 bg-slate-50 dark:bg-slate-950 px-1.5 py-0.2 rounded">{u.role}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Category: Quick Actions */}
+              {(() => {
+                const actions = [
+                  { label: 'Initialize Project Workspace', action: () => { setShowAddProject(true); }, icon: FolderPlus },
+                  { label: 'Reset Local Sandbox Cache', action: () => { handleResetSandbox(); }, icon: AlertTriangle },
+                  { label: 'Trigger MSAL SSO Authentication', action: () => { setShowMsalSim(true); }, icon: Globe },
+                ].filter(act => act.label.toLowerCase().includes(commandQuery.toLowerCase()));
+
+                if (actions.length === 0) return null;
+
+                return (
+                  <div className="space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-wider text-slate-400 px-2.5 mb-1.5">
+                      Global Smart Actions
+                    </div>
+                    {actions.map((act, i) => {
+                      const Icon = act.icon;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            act.action();
+                            setShowCommandCenter(false);
+                            setCommandQuery('');
+                          }}
+                          className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 text-slate-750 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
+                        >
+                          <Icon className="h-4 w-4 text-slate-400" />
+                          <span className="flex-1 truncate">{act.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD PROJECT MODAL */}
       {showAddProject && (
@@ -1100,7 +1493,7 @@ export default function Home() {
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider dark:text-white">
                 Initialize Project Profile
               </h3>
-              <button onClick={() => setShowAddProject(false)} className="text-slate-400 hover:text-slate-650 cursor-pointer">
+              <button onClick={() => setShowAddProject(false)} className="text-slate-400 hover:text-slate-655 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1196,7 +1589,7 @@ export default function Home() {
             iconColor = "text-emerald-500";
           } else if (toast.type === 'error') {
             Icon = ShieldAlert;
-            colorStyles = "bg-rose-50/90 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/50 text-slate-800 dark:text-rose-400";
+            colorStyles = "bg-rose-50/90 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/50 text-slate-800 dark:text-rose-455";
             iconColor = "text-rose-500";
           } else if (toast.type === 'info') {
             Icon = Info;
@@ -1219,7 +1612,6 @@ export default function Home() {
           );
         })}
       </div>
-
     </div>
   );
 }
