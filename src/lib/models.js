@@ -169,6 +169,20 @@ const EmployeeSchema = new mongoose.Schema({
   lastLogin: { type: String, default: '' }
 }, { timestamps: true });
 
+// ─── 10. DOCUMENT / ATTACHMENT VAULT SCHEMA ───
+const DocumentSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  fileType: { type: String, required: true },
+  fileSize: { type: String, default: '0 KB' },
+  sizeBytes: { type: Number, default: 0 },
+  owner: { type: String, required: true },
+  url: { type: String, default: '' },
+  description: { type: String, default: '' },
+  lastUpdated: { type: String, default: '' }
+}, { timestamps: true });
+
 // Clear cached models in development to pick up schema upgrades
 if (process.env.NODE_ENV !== 'production') {
   delete mongoose.models.Project;
@@ -181,6 +195,7 @@ if (process.env.NODE_ENV !== 'production') {
   delete mongoose.models.Notification;
   delete mongoose.models.Integration;
   delete mongoose.models.Employee;
+  delete mongoose.models.Document;
 }
 
 export const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
@@ -193,4 +208,5 @@ export const Transaction = mongoose.models.Transaction || mongoose.model('Transa
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 export const Integration = mongoose.models.Integration || mongoose.model('Integration', IntegrationSchema);
 export const Employee = mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
+export const Document = mongoose.models.Document || mongoose.model('Document', DocumentSchema);
 

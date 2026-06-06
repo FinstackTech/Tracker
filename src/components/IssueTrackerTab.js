@@ -682,7 +682,7 @@ export default function IssueTrackerTab({
                   className="w-full rounded-xl border border-slate-205 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
                 >
                   <option value="">Unassigned</option>
-                  {EMPLOYEES.map(emp => <option key={emp} value={emp}>{emp}</option>)}
+                  {employeesList.map(emp => <option key={emp} value={emp}>{emp}</option>)}
                 </select>
               </div>
 

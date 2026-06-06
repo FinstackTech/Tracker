@@ -97,6 +97,19 @@ const IntegrationSchema = new mongoose.Schema({
   triggerOnCriticalBug: { type: Boolean, default: true }
 });
 
+const DocumentSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  fileType: { type: String, required: true },
+  fileSize: { type: String, default: '0 KB' },
+  sizeBytes: { type: Number, default: 0 },
+  owner: { type: String, required: true },
+  url: { type: String, default: '' },
+  description: { type: String, default: '' },
+  lastUpdated: { type: String, default: '' }
+}, { timestamps: true });
+
 const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema);
 const Issue = mongoose.models.Issue || mongoose.model('Issue', IssueSchema);
@@ -105,6 +118,7 @@ const Leave = mongoose.models.Leave || mongoose.model('Leave', LeaveSchema);
 const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 const Integration = mongoose.models.Integration || mongoose.model('Integration', IntegrationSchema);
+const Document = mongoose.models.Document || mongoose.model('Document', DocumentSchema);
 
 const WORKFLOW_CHECKLIST_DATA = {
   "Standing Module": [
@@ -179,6 +193,7 @@ async function seed() {
   await Transaction.deleteMany({});
   await Notification.deleteMany({});
   await Integration.deleteMany({});
+  await Document.deleteMany({});
 
   console.log("Seeding default projects...");
 
@@ -211,6 +226,72 @@ async function seed() {
     startDate: "2026-01-01",
     endDate: "2026-12-31"
   });
+
+  console.log("Seeding default documents...");
+  const INITIAL_DOCUMENTS = [
+    {
+      name: "Eximbills_Enterprise_Upgrade_Specs.pdf",
+      category: "Specifications",
+      fileType: "pdf",
+      fileSize: "2.8 MB",
+      sizeBytes: 2936012,
+      owner: "Superadmin",
+      lastUpdated: "2026-06-03 14:32",
+      url: "https://github.com/FinstackTech/Tracker/blob/main/docs/specs.pdf",
+      description: "Detailed system and data requirements mapping for the Al Rajhi Bank Eximbills platform core upgrade."
+    },
+    {
+      name: "Al_Rajhi_Sanctions_Integration_Guide.docx",
+      category: "Integrations",
+      fileType: "docx",
+      fileSize: "1.4 MB",
+      sizeBytes: 1468006,
+      owner: "Superadmin",
+      lastUpdated: "2026-06-02 09:15",
+      url: "https://github.com/FinstackTech/Tracker/blob/main/docs/sanctions_guide.docx",
+      description: "Technical workflow specification mapping task flows to the FircoSoft sanctions check backend."
+    },
+    {
+      name: "Bawatech_Phase3_API_Schema.json",
+      category: "Schemas",
+      fileType: "json",
+      fileSize: "256 KB",
+      sizeBytes: 262144,
+      owner: "Superadmin",
+      lastUpdated: "2026-06-03 17:10",
+      url: "https://github.com/FinstackTech/Tracker/blob/main/docs/api_schema.json",
+      description: "Structured JSON schemas for the Bawatech Phase 3 API endpoint integrations."
+    },
+    {
+      name: "Styling_Theme_Manual.md",
+      category: "Workspace wiki",
+      fileType: "wiki",
+      fileSize: "Wiki URL",
+      sizeBytes: 0,
+      owner: "Superadmin",
+      lastUpdated: "2026-06-01 11:20",
+      url: "https://finstack/theme-sharing-guide",
+      description: "Live documentation detailing style tokens, fonts, and Apple design rules."
+    },
+    {
+      name: "Export_LC_Financing_Formulas.xlsx",
+      category: "Templates",
+      fileType: "xlsx",
+      fileSize: "780 KB",
+      sizeBytes: 798720,
+      owner: "Superadmin",
+      lastUpdated: "2026-05-28 16:45",
+      url: "https://github.com/FinstackTech/Tracker/blob/main/docs/formulas.xlsx",
+      description: "Financial formulas matrix supporting Bai' Ajel export LC pricing calculations."
+    }
+  ];
+
+  for (const doc of INITIAL_DOCUMENTS) {
+    await Document.create({
+      projectId: arbProject._id,
+      ...doc
+    });
+  }
 
   console.log("Seeding ARB data from Excel JSON...");
   const arbJsonPath = path.join('C:', 'Users', 'ilyas', '.gemini', 'antigravity', 'scratch', 'arb_data.json');

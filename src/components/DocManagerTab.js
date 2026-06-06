@@ -67,8 +67,11 @@ const INITIAL_DOCUMENTS = [
   }
 ];
 
+import { useEffect } from 'react';
+
 export default function DocManagerTab({ activeProject, currentUser, showToast }) {
-  const [documents, setDocuments] = useState(INITIAL_DOCUMENTS);
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [formatFilter, setFormatFilter] = useState('All');
@@ -101,6 +104,26 @@ export default function DocManagerTab({ activeProject, currentUser, showToast })
 
   // Categories list
   const categories = ['All', 'Specifications', 'Integrations', 'Schemas', 'Workspace wiki', 'Templates'];
+
+  const fetchDocuments = async () => {
+    if (!activeProject?._id) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/documents?projectId=${activeProject._id}`);
+      const res = await response.json();
+      if (res.success) {
+        setDocuments(res.data);
+      }
+    } catch (e) {
+      console.error("Failed to load documents", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [activeProject]);
   
   // Unique Owners list
   const uniqueOwners = ['All', ...new Set(documents.map(d => d.owner))];
@@ -126,7 +149,7 @@ export default function DocManagerTab({ activeProject, currentUser, showToast })
     });
   }, [documents, search, selectedCategory, formatFilter, ownerFilter]);
 
-  const handleAddDocument = (e) => {
+  const handleAddDocument = async (e) => {
     e.preventDefault();
     if (!newName.trim()) return;
 
@@ -138,52 +161,70 @@ export default function DocManagerTab({ activeProject, currentUser, showToast })
       sizeBytes = isKB ? Math.round(numericVal * 1024) : Math.round(numericVal * 1024 * 1024);
     }
 
-    const newDoc = {
-      _id: `doc-${Date.now()}`,
+    const newDocPayload = {
+      projectId: activeProject._id,
       name: newName.trim().endsWith(`.${newType}`) ? newName.trim() : `${newName.trim()}.${newType}`,
       category: newCategory,
       fileType: newType,
       fileSize: newType === 'wiki' ? 'Wiki URL' : newSize,
       sizeBytes: sizeBytes,
       owner: currentUser?.name || 'Superadmin',
-      lastUpdated: new Date().toISOString().replace('T', ' ').substring(0, 16),
       url: newUrl.trim() || 'https://github.com/FinstackTech/Tracker',
       description: newDesc.trim() || "No description provided."
     };
 
-    setDocuments(prev => [newDoc, ...prev]);
-    showToast(`File "${newDoc.name}" attached successfully`, "success");
-    
-    // Reset Form
-    setNewName('');
-    setNewUrl('');
-    setNewDesc('');
-    setShowAddDoc(false);
+    try {
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDocPayload)
+      });
+      const res = await response.json();
+      if (res.success) {
+        setDocuments(prev => [res.data, ...prev]);
+        showToast(`File "${res.data.name}" attached successfully`, "success");
+        setNewName('');
+        setNewUrl('');
+        setNewDesc('');
+        setShowAddDoc(false);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to attach document", "error");
+    }
   };
 
-  const handleSaveMetadata = (e) => {
+  const handleSaveMetadata = async (e) => {
     e.preventDefault();
     if (!editingDoc || !editName.trim()) return;
 
-    setDocuments(prev => prev.map(d => {
-      if (d._id === editingDoc._id) {
-        return {
-          ...d,
-          name: editName.trim(),
-          category: editCategory,
-          url: editUrl.trim(),
-          description: editDesc.trim(),
-          lastUpdated: new Date().toISOString().replace('T', ' ').substring(0, 16)
-        };
-      }
-      return d;
-    }));
+    const updatePayload = {
+      _id: editingDoc._id,
+      name: editName.trim(),
+      category: editCategory,
+      url: editUrl.trim(),
+      description: editDesc.trim()
+    };
 
-    showToast(`Metadata updated for "${editName}"`, "success");
-    setEditingDoc(null);
+    try {
+      const response = await fetch('/api/documents', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatePayload)
+      });
+      const res = await response.json();
+      if (res.success) {
+        setDocuments(prev => prev.map(d => d._id === editingDoc._id ? res.data : d));
+        showToast(`Metadata updated for "${editName}"`, "success");
+        setEditingDoc(null);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save metadata", "error");
+    }
   };
 
-  const handleReplaceVersion = (e) => {
+  const handleReplaceVersion = async (e) => {
     e.preventDefault();
     if (!replacingDoc) return;
 
@@ -191,26 +232,46 @@ export default function DocManagerTab({ activeProject, currentUser, showToast })
     const isKB = replaceSize.toLowerCase().includes('kb');
     const sizeBytes = isKB ? Math.round(numericVal * 1024) : Math.round(numericVal * 1024 * 1024);
 
-    setDocuments(prev => prev.map(d => {
-      if (d._id === replacingDoc._id) {
-        return {
-          ...d,
-          fileSize: replaceSize,
-          sizeBytes: sizeBytes,
-          lastUpdated: new Date().toISOString().replace('T', ' ').substring(0, 16)
-        };
-      }
-      return d;
-    }));
+    const updatePayload = {
+      _id: replacingDoc._id,
+      fileSize: replaceSize,
+      sizeBytes: sizeBytes
+    };
 
-    showToast(`Replaced file version for "${replacingDoc.name}" (${replaceSize})`, "success");
-    setReplacingDoc(null);
+    try {
+      const response = await fetch('/api/documents', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatePayload)
+      });
+      const res = await response.json();
+      if (res.success) {
+        setDocuments(prev => prev.map(d => d._id === replacingDoc._id ? res.data : d));
+        showToast(`Replaced file version for "${replacingDoc.name}" (${replaceSize})`, "success");
+        setReplacingDoc(null);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to replace version", "error");
+    }
   };
 
-  const handleDeleteDoc = (doc) => {
+  const handleDeleteDoc = async (doc) => {
     if (!confirm(`Are you sure you want to permanently delete document reference: "${doc.name}"?`)) return;
-    setDocuments(prev => prev.filter(d => d._id !== doc._id));
-    showToast(`Removed "${doc.name}" from document vault`, "success");
+    
+    try {
+      const response = await fetch(`/api/documents?id=${doc._id}`, {
+        method: 'DELETE'
+      });
+      const res = await response.json();
+      if (res.success) {
+        setDocuments(prev => prev.filter(d => d._id !== doc._id));
+        showToast(`Removed "${doc.name}" from document vault`, "success");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to delete document reference", "error");
+    }
   };
 
   const handleShareDoc = (doc) => {
