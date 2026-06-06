@@ -26,7 +26,27 @@ export default function DashboardTab({
   activeUser,
   currentUser,
   notifications = [],
-  employees = []
+  employees = [],
+  
+  // Quick Standup Logger
+  quickStandupTask = '',
+  setQuickStandupTask,
+  quickStandupHours = '8',
+  setQuickStandupHours,
+  quickStandupStatus = 'completed',
+  setQuickStandupStatus,
+  quickStandupBlockers = '',
+  setQuickStandupBlockers,
+  quickStandupSubmitting = false,
+  handlePostQuickStandup,
+  
+  // OIDC Sandbox Switcher
+  userProfiles = [],
+  setCurrentUser,
+  setActiveUser,
+  fetchNotifications,
+  handleResetSandbox,
+  showToast
 }) {
   const [exporting, setExporting] = useState(false);
 
@@ -268,7 +288,7 @@ export default function DashboardTab({
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Project Delivery</span>
               <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-605 dark:bg-indigo-950/30 dark:text-indigo-405">
               <CheckCircle className="h-5 w-5" />
             </div>
           </div>
@@ -277,7 +297,7 @@ export default function DashboardTab({
               <div className="h-full bg-indigo-650 transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
             </div>
             <div className="mt-3 flex justify-between text-[9px] font-black uppercase text-slate-400 tracking-wider">
-              <span className="text-indigo-605 dark:text-indigo-400">{completedTasks} Completed Tasks</span>
+              <span className="text-indigo-605 dark:text-indigo-450">{completedTasks} Completed Tasks</span>
               <span>{openTasks} Open Tasks</span>
             </div>
           </div>
@@ -290,14 +310,14 @@ export default function DashboardTab({
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Open Backlog</span>
               <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50/50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
               <Activity className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-1.5 text-[9px] font-black uppercase text-slate-400 tracking-wider">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-indigo-505" /> In Dev/SIT</span>
-              <strong className="text-slate-705 dark:text-slate-300">{inProgressTasks}</strong>
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-indigo-500" /> In Dev/SIT</span>
+              <strong className="text-slate-700 dark:text-slate-300">{inProgressTasks}</strong>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> Blocked</span>
@@ -313,7 +333,7 @@ export default function DashboardTab({
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Due Date Alerts</span>
               <h3 className="mt-1 font-sans text-2xl font-black text-rose-600 dark:text-rose-455 leading-tight">{dueDateAlertsCount}</h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50/55 text-rose-605 dark:bg-rose-955/20 dark:text-rose-405">
               <Clock className="h-5 w-5" />
             </div>
           </div>
@@ -322,11 +342,11 @@ export default function DashboardTab({
           </p>
         </div>
 
-        {/* Item 5 (Col span 1): Total Assigned Tasks */}
+        {/* Item 4 (Col span 1): Total Assigned Tasks */}
         <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Assigned</span>
               <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
@@ -336,30 +356,164 @@ export default function DashboardTab({
           <p className="text-[9px] text-slate-400 font-black uppercase mt-4 tracking-wider">Across all members</p>
         </div>
 
-        {/* Item 6 (Col span 1): My Assigned Tasks */}
+        {/* Item 5 (Col span 1): My Assigned Tasks */}
         <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Assigned</span>
               <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-600 dark:bg-indigo-955/30 dark:text-indigo-405">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-650 dark:bg-indigo-955/30 dark:text-indigo-405">
               <User className="h-5 w-5" />
             </div>
           </div>
           <p className="text-[9px] text-indigo-550 dark:text-indigo-400 font-black uppercase mt-4 tracking-wider truncate">For {activeUser}</p>
         </div>
 
-        {/* Item 4 (Col span 2): Leaves/Overlaps timeline warning */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+        {/* Item 9.5 (Col span 1): Team Capacity & Leaves */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance</span>
+              <h4 className="font-sans text-[10px] font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Team Leaves
+              </h4>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-indigo-600 dark:bg-slate-955/40 dark:text-indigo-405">
+              <Calendar className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-2 mt-3 flex-1 overflow-y-auto max-h-[80px] pr-1 scrollbar-thin">
+            {leaves.length === 0 ? (
+              <div className="text-[9px] text-slate-400 italic py-2">No active leaves this month.</div>
+            ) : (
+              leaves.slice(0, 3).map(l => (
+                <div key={l._id} className="flex items-center justify-between text-[9px] text-slate-600 dark:text-slate-350 bg-slate-50/50 dark:bg-slate-950/30 px-2 py-1 rounded-lg border border-slate-100/50 dark:border-slate-850/50 font-semibold">
+                  <span className="truncate max-w-[80px]">{l.employeeName}</span>
+                  <span className="text-[8px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-405 font-black tracking-wide shrink-0">{l.daysCount}d out</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Item 9 (Col span 1): OIDC Session Switcher */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[140px]">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sandbox OIDC</span>
+              <h4 className="font-sans text-[10px] font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Session Control
+              </h4>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-indigo-600 dark:bg-slate-955/40 dark:text-indigo-405">
+              <User className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-2.5 mt-3 flex-1 flex flex-col justify-end">
+            <select
+              value={activeUser}
+              onChange={e => {
+                const uName = e.target.value;
+                const matched = userProfiles.find(u => u.name === uName);
+                if (matched) {
+                  setCurrentUser(matched);
+                  setActiveUser(uName);
+                  localStorage.setItem('company_current_session', JSON.stringify(matched));
+                  fetchNotifications(uName);
+                  if (showToast) showToast(`Identity Swapped: ${uName}`, "info");
+                }
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-[9px] font-black dark:border-slate-850 dark:bg-slate-950/50 dark:text-slate-300 cursor-pointer"
+            >
+              {userProfiles.map(u => (
+                <option key={u.name} value={u.name}>{u.name.slice(0, 10)} ({u.role})</option>
+              ))}
+            </select>
+            <button
+              onClick={handleResetSandbox}
+              className="w-full rounded-xl border border-amber-200/50 bg-amber-50/20 hover:bg-amber-100/30 text-amber-700 dark:border-amber-900/30 dark:bg-amber-955/10 dark:text-amber-400 font-black py-1 text-[8px] uppercase tracking-wider cursor-pointer shadow-sm transition-all duration-100 flex items-center justify-center gap-1"
+            >
+              <AlertTriangle className="h-3 w-3" />
+              <span>Purge Cache</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Item 7 (Col span 2): Active Project Cockpit */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[160px]">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Scope Overview</span>
+              <h4 className="font-sans text-xs font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Active Project Cockpit
+              </h4>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/30 dark:text-indigo-405">
+              <Briefcase className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="mt-3 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="font-bold text-slate-800 dark:text-slate-205 text-sm leading-tight truncate">{activeProject.name}</div>
+              <div className="text-[9px] text-slate-400 mt-1 font-mono">
+                Code: <strong className="text-slate-600 dark:text-slate-300">{activeProject.code}</strong> • Client: <strong className="text-slate-600 dark:text-slate-300">{activeProject.client || 'Internal'}</strong>
+              </div>
+            </div>
+
+            {(() => {
+              const total = tasks.length;
+              const completed = tasks.filter(t => t.status === 'done').length;
+              const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+              const openBugs = issues.filter(i => i.status !== 'closed' && i.status !== 'resolved').length;
+              const blocked = tasks.filter(t => t.blocked).length;
+
+              return (
+                <div className="mt-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-650 transition-all duration-300" style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wide">
+                      <span className="text-indigo-600 dark:text-indigo-400">{pct}% Complete</span>
+                      <span>{completed}/{total} Tasks</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-rose-50/40 border border-rose-100/40 p-2.5 rounded-xl text-center dark:bg-rose-955/10 dark:border-rose-950/25 flex items-center justify-between">
+                      <div className="text-left">
+                        <div className="text-[8px] text-rose-500 font-black uppercase tracking-wider">Open Bugs</div>
+                        <div className="text-xs font-black text-rose-600 dark:text-rose-455 mt-0.5">{openBugs} Incidents</div>
+                      </div>
+                      <AlertCircle className="h-4 w-4 text-rose-500/50 shrink-0" />
+                    </div>
+
+                    <div className="bg-amber-50/40 border border-amber-100/40 p-2.5 rounded-xl text-center dark:bg-amber-955/10 dark:border-amber-950/25 flex items-center justify-between">
+                      <div className="text-left">
+                        <div className="text-[8px] text-amber-550 font-black uppercase tracking-wider">Blocked</div>
+                        <div className="text-xs font-black text-amber-605 dark:text-amber-455 mt-0.5">{blocked} Tickets</div>
+                      </div>
+                      <AlertTriangle className="h-4 w-4 text-amber-500/50 shrink-0" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Item 6 (Col span 1): Timeline Alert Control / Leave warnings */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[160px]">
           <div className="flex items-center justify-between mb-1">
             <div>
               <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Timeline Alert Control
+                Timeline Warnings
               </h4>
-              <p className="text-[9px] font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Leave overlap & milestone risk</p>
+              <p className="text-[9px] font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Leave overlap risks</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50/55 text-amber-600 dark:bg-amber-955/20 dark:text-amber-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50/55 text-amber-600 dark:bg-amber-955/20 dark:text-amber-450">
               <AlertTriangle className="h-5 w-5" />
             </div>
           </div>
@@ -367,36 +521,101 @@ export default function DashboardTab({
             {leaveAlerts.length === 0 ? (
               <div className="text-[10px] text-slate-400 font-medium py-2 flex items-center gap-1.5">
                 <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
-                No overlapping staff leaves or crunches detected this month.
+                No timeline conflicts detected.
               </div>
             ) : (
-              leaveAlerts.map((alert, i) => (
+              leaveAlerts.slice(0, 2).map((alert, i) => (
                 <div 
                   key={i}
                   className={`p-2 rounded-xl border text-[9px] font-bold flex flex-col gap-0.5 ${
                     alert.isCritical 
-                      ? 'border-rose-100 bg-rose-50/50 text-rose-900 dark:border-rose-950/30 dark:bg-rose-955/10 dark:text-rose-405' 
+                      ? 'border-rose-100 bg-rose-50/50 text-rose-900 dark:border-rose-950/30 dark:bg-rose-955/10 dark:text-rose-455' 
                       : 'border-amber-100 bg-amber-50/50 text-amber-900 dark:border-amber-950/30 dark:bg-amber-955/10 dark:text-amber-400'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${
-                      alert.isCritical ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
+                  <div className="flex items-center gap-1">
+                    <span className={`px-1 rounded text-[7px] font-black uppercase ${
+                      alert.isCritical ? 'bg-rose-150 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-amber-150 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
                     }`}>
                       {alert.isCritical ? 'Critical' : 'Overlap'}
                     </span>
-                    <strong className="underline">{alert.month}</strong>
+                    <strong className="underline">{alert.month.split(' ')[0]}</strong>
                   </div>
-                  <div>
-                    {alert.employees.join(', ')} are planned to be on leave. 
-                    {alert.monthKey === '2026-08' && activeProject.code === 'ARB-EXIM' && (
-                      <span className="text-rose-600 dark:text-rose-400 font-black"> Overlaps with SWIFT SR2026 delivery crunch!</span>
-                    )}
+                  <div className="truncate text-slate-500 dark:text-slate-400">
+                    {alert.employees.join(', ')}
                   </div>
                 </div>
               ))
             )}
           </div>
+        </div>
+
+        {/* Item 8 (Col span 1): Quick Standup Logger */}
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between min-h-[160px]">
+          <div className="flex items-center justify-between mb-1.5">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Daily Updates</span>
+              <h4 className="font-sans text-xs font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                Quick Standup
+              </h4>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-indigo-655 dark:bg-slate-950/40 dark:text-indigo-405">
+              <Clock className="h-5 w-5" />
+            </div>
+          </div>
+
+          <form onSubmit={handlePostQuickStandup} className="space-y-2 mt-2">
+            <div>
+              <textarea
+                placeholder="What did you complete today?"
+                value={quickStandupTask}
+                onChange={e => setQuickStandupTask(e.target.value)}
+                rows="1"
+                className="w-full rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-[9px] outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-950/50 dark:text-slate-350 font-semibold"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              <input
+                type="number"
+                placeholder="Hours"
+                value={quickStandupHours}
+                onChange={e => setQuickStandupHours(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white/70 px-1.5 py-0.5 text-[9px] text-center font-black dark:border-slate-850 dark:bg-slate-950/50 dark:text-slate-300"
+                min="1"
+                max="24"
+              />
+              <select
+                value={quickStandupStatus}
+                onChange={e => setQuickStandupStatus(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white/70 px-1 py-0.5 text-[9px] font-bold dark:border-slate-850 dark:bg-slate-950/50 dark:text-slate-300 cursor-pointer"
+              >
+                <option value="completed">Done</option>
+                <option value="in-progress">In Dev</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </div>
+
+            {quickStandupStatus === 'blocked' && (
+              <input
+                type="text"
+                placeholder="Blocker info..."
+                value={quickStandupBlockers}
+                onChange={e => setQuickStandupBlockers(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white/70 px-1.5 py-0.5 text-[8px] dark:border-slate-850 dark:bg-slate-955/50 dark:text-slate-300 font-semibold"
+                required
+              />
+            )}
+
+            <button
+              type="submit"
+              disabled={quickStandupSubmitting}
+              className="w-full rounded-xl bg-indigo-650 hover:bg-indigo-755 text-white font-bold py-1 text-[9px] uppercase tracking-wider cursor-pointer shadow-sm disabled:opacity-50 transition-colors"
+            >
+              {quickStandupSubmitting ? 'Posting...' : 'Log Update'}
+            </button>
+          </form>
         </div>
 
         {/* Item 7 (Col span 3): Resource workload effort bar chart */}
@@ -492,8 +711,6 @@ export default function DashboardTab({
           )}
         </div>
 
-        {/* Row 4: Agile Complexity Progress (Col span 1) & Unresolved Bug Severity (Col span 2) & Financial Overview (Col span 1) */}
-        
         {/* Agile Complexity Progress circular gauge (Col span 1) */}
         <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:scale-[1.01] transition-all duration-200 flex flex-col justify-between">
           <div>
@@ -534,11 +751,11 @@ export default function DashboardTab({
             </div>
 
             <div className="w-full mt-4 grid grid-cols-3 gap-1 text-center text-[9px] font-black uppercase tracking-wider">
-              <div className="bg-slate-50 dark:bg-slate-950/40 p-1.5 rounded-lg border border-slate-100 dark:border-slate-850">
+              <div className="bg-slate-50 dark:bg-slate-955/40 p-1.5 rounded-lg border border-slate-100 dark:border-slate-850">
                 <span className="text-[7px] font-bold text-slate-400 block mb-0.5">Target</span>
                 <strong className="text-slate-800 dark:text-slate-205">{totalStoryPoints}</strong>
               </div>
-              <div className="bg-emerald-50/30 dark:bg-emerald-950/15 p-1.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
+              <div className="bg-emerald-50/30 dark:bg-emerald-955/15 p-1.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
                 <span className="text-[7px] font-bold text-emerald-500 block mb-0.5">Done</span>
                 <strong className="text-emerald-700 dark:text-emerald-400">{completedStoryPoints}</strong>
               </div>
@@ -717,7 +934,7 @@ export default function DashboardTab({
               <span>Milestone / Due Date Trigger</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-5 bg-slate-50 border border-slate-200/50 rounded-full dark:bg-slate-950 dark:border-slate-850" />
+              <span className="h-2.5 w-5 bg-slate-50 border border-slate-200/50 rounded-full dark:bg-slate-955 dark:border-slate-855" />
               <span>Standard Working Day</span>
             </div>
           </div>
@@ -771,7 +988,7 @@ export default function DashboardTab({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 select-none mt-2">
               <button
                 onClick={exportTasksToCSV}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-955 text-center cursor-pointer shadow-sm group duration-150"
               >
                 <Download className="h-5 w-5 text-indigo-500 mb-2 transition-transform group-hover:scale-110" />
                 <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Tasks Sheet</span>
@@ -780,7 +997,7 @@ export default function DashboardTab({
 
               <button
                 onClick={exportIssuesToCSV}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-955 text-center cursor-pointer shadow-sm group duration-150"
               >
                 <Download className="h-5 w-5 text-rose-500 mb-2 transition-transform group-hover:scale-110" />
                 <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Bugs Sheet</span>
@@ -789,7 +1006,7 @@ export default function DashboardTab({
 
               <button
                 onClick={exportFinancialsToCSV}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-955 text-center cursor-pointer shadow-sm group duration-150"
               >
                 <Download className="h-5 w-5 text-emerald-500 mb-2 transition-transform group-hover:scale-110" />
                 <span className="text-[9px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">Financials</span>
@@ -798,9 +1015,9 @@ export default function DashboardTab({
 
               <button
                 onClick={() => window.print()}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-950 text-center cursor-pointer shadow-sm group duration-150"
+                className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-150 bg-slate-50/50 hover:bg-slate-100/80 hover:scale-[1.02] active:scale-[0.98] transition-all dark:border-slate-850 dark:bg-slate-955 text-center cursor-pointer shadow-sm group duration-150"
               >
-                <Printer className="h-5 w-5 text-indigo-600 mb-2 transition-transform group-hover:scale-110" />
+                <Printer className="h-5 w-5 text-indigo-605 mb-2 transition-transform group-hover:scale-110" />
                 <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Print Layout</span>
                 <span className="text-[8px] text-slate-400 mt-0.5">PDF or Paper</span>
               </button>

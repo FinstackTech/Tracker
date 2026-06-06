@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { 
   Layers, Briefcase, Plus, FolderPlus, X, Columns, LayoutDashboard, CheckSquare, 
   AlertCircle, Calendar, Landmark, Settings, Bell, ChevronLeft, ChevronRight, User, Globe, LogOut,
-  CalendarRange, FileText, Clock, Search, ChevronDown, CheckCircle, Info, ShieldAlert, AlertTriangle
+  CalendarRange, FileText, Clock, Search, ChevronDown, CheckCircle, Info, ShieldAlert, AlertTriangle,
+  Terminal, Sliders
 } from 'lucide-react';
 import DashboardTab from '@/components/DashboardTab';
 import TaskTrackerTab from '@/components/TaskTrackerTab';
@@ -58,6 +59,7 @@ export default function Home() {
   // Cockpit Workspace Layout & Command Center States
   const [showCommandCenter, setShowCommandCenter] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
+  const [showCockpitDrawer, setShowCockpitDrawer] = useState(false);
   
   // Quick Standup Logger states
   const [quickStandupTask, setQuickStandupTask] = useState('');
@@ -937,10 +939,85 @@ export default function Home() {
               )}
             </div>
 
-          </div>
-        </header>
+                {/* COMPACT HORIZONTAL MODULE SWITCHER */}
+        <div className="bg-white/60 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800/80 px-6 py-2.5 flex items-center justify-between shrink-0 select-none backdrop-blur-md">
+          <div className="flex items-center gap-1.5">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'projects', label: 'Projects', icon: Briefcase },
+              { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+              { id: 'issues', label: 'Issues', icon: AlertCircle },
+              { id: 'planner', label: 'Timeline', icon: CalendarRange },
+            ].map(item => {
+              const IconComponent = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setSelectedItem(null);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-450'
+                      : 'text-slate-500 hover:text-slate-850 hover:bg-slate-50/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/40'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
 
-        {/* MAIN BODY: central view + right smart rail */}
+            {/* Temporary tab for advanced modules */}
+            {!['dashboard', 'projects', 'tasks', 'issues', 'planner'].includes(activeTab) && (() => {
+              const allItems = [
+                { id: 'users', label: 'Users Registry', icon: User },
+                { id: 'docs', label: 'Document Vault', icon: FileText },
+                { id: 'leaves', label: 'Leave Planner', icon: Calendar },
+                { id: 'daily', label: 'Daily Standup', icon: Columns },
+                { id: 'finance', label: 'Finance Hub', icon: Landmark },
+                { id: 'settings', label: 'Settings', icon: Settings },
+              ];
+              const matched = allItems.find(item => item.id === activeTab);
+              if (!matched) return null;
+              const MatchedIcon = matched.icon;
+              return (
+                <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-1.5">
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-650 dark:bg-indigo-950/40 dark:text-indigo-455 cursor-pointer animate-in fade-in zoom-in-95 duration-100"
+                  >
+                    <MatchedIcon className="h-4 w-4" />
+                    <span>{matched.label}</span>
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Toggle for Cockpit Drawer */}
+          {activeProject && (
+            <button
+              onClick={() => setShowCockpitDrawer(!showCockpitDrawer)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer hover:scale-[1.01] active:scale-95 duration-100 ${
+                showCockpitDrawer
+                  ? 'bg-indigo-650 border-indigo-650 text-white dark:bg-indigo-500 dark:border-indigo-500'
+                  : 'bg-white border-slate-205 text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-850'
+              }`}
+            >
+              <Sliders className="h-3.5 w-3.5" />
+              <span>Project Cockpit</span>
+              {showCockpitDrawer ? (
+                <ChevronRight className="h-3 w-3" />
+              ) : (
+                <ChevronLeft className="h-3 w-3" />
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* MAIN BODY: central view + collapsible drawer */}
         <div className="flex-1 flex overflow-hidden relative">
           
           {/* Scrollable central view */}
@@ -957,6 +1034,26 @@ export default function Home() {
                 currentUser={currentUser}
                 notifications={notifications}
                 employees={userProfiles.map(u => u.name)}
+                
+                // Quick Standup Logger
+                quickStandupTask={quickStandupTask}
+                setQuickStandupTask={setQuickStandupTask}
+                quickStandupHours={quickStandupHours}
+                setQuickStandupHours={setQuickStandupHours}
+                quickStandupStatus={quickStandupStatus}
+                setQuickStandupStatus={setQuickStandupStatus}
+                quickStandupBlockers={quickStandupBlockers}
+                setQuickStandupBlockers={setQuickStandupBlockers}
+                quickStandupSubmitting={quickStandupSubmitting}
+                handlePostQuickStandup={handlePostQuickStandup}
+                
+                // OIDC Switcher Sandbox
+                userProfiles={userProfiles}
+                setCurrentUser={setCurrentUser}
+                setActiveUser={setActiveUser}
+                fetchNotifications={fetchNotifications}
+                handleResetSandbox={handleResetSandbox}
+                showToast={showToast}
               />
             )}
 
@@ -1081,226 +1178,227 @@ export default function Home() {
 
           </div>
 
-          {/* RIGHT SMART RAIL (Cockpit Sidebar) */}
-          <aside className="w-80 border-l border-slate-200/80 bg-white/35 backdrop-blur-md dark:border-slate-800/85 dark:bg-slate-950/20 hidden xl:flex flex-col h-full shrink-0 p-5 overflow-y-auto space-y-6 select-none text-xs">
+          {/* COLLAPSIBLE PROJECT COCKPIT DRAWER */}
+          <>
+            {/* Backdrop Overlay */}
+            <div 
+              className={`fixed inset-0 z-40 bg-slate-900/15 backdrop-blur-xs transition-opacity duration-300 ${
+                showCockpitDrawer ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+              onClick={() => setShowCockpitDrawer(false)}
+            />
             
-            {/* Section 1: Active Project Summary */}
-            {activeProject ? (
-              <div className="space-y-3">
-                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
-                  Active Project Cockpit
-                </div>
-                <div>
-                  <div className="font-bold text-slate-850 dark:text-slate-100 truncate">{activeProject.name}</div>
-                  <div className="text-[9px] text-slate-400 mt-0.5 font-mono">Code: {activeProject.code} • Client: {activeProject.client || 'Internal'}</div>
-                </div>
-
-                {/* Progress bar */}
-                {(() => {
-                  const projTasks = tasks;
-                  const total = projTasks.length;
-                  const completed = projTasks.filter(t => t.status === 'done').length;
-                  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-                  
-                  const openBugs = issues.filter(i => i.status !== 'closed' && i.status !== 'resolved').length;
-                  const blocked = projTasks.filter(t => t.blocked).length;
-
-                  return (
-                    <div className="space-y-2.5">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full dark:bg-slate-800 overflow-hidden">
-                        <div className="h-full bg-indigo-650 transition-all duration-300" style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wide">
-                        <span>{pct}% Done</span>
-                        <span>{completed}/{total} Tasks</span>
-                      </div>
-
-                      {/* Stat badges */}
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div className="bg-rose-50/50 border border-rose-100/50 p-2 rounded-xl text-center dark:bg-rose-955/10 dark:border-rose-950/30">
-                          <div className="text-rose-600 font-extrabold text-sm leading-none">{openBugs}</div>
-                          <div className="text-[8px] text-rose-500 font-bold uppercase mt-1">Open Bugs</div>
-                        </div>
-                        <div className="bg-amber-50/50 border border-amber-100/50 p-2 rounded-xl text-center dark:bg-amber-955/10 dark:border-amber-955/10">
-                          <div className="text-amber-600 font-extrabold text-sm leading-none">{blocked}</div>
-                          <div className="text-[8px] text-amber-500 font-bold uppercase mt-1">Blocked</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : (
-              <div className="text-[10px] text-slate-450 italic p-3 text-center bg-slate-50 dark:bg-slate-950/20 rounded-xl">
-                No active project scope loaded.
-              </div>
-            )}
-
-            {/* Section 2: Quick Standup Logger */}
-            <div className="space-y-3 bg-slate-50/55 border border-slate-100/60 p-4 rounded-2xl dark:bg-slate-955/20 dark:border-slate-800/60">
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-indigo-500" />
-                Quick Standup Logger
-              </div>
-              
-              <form onSubmit={handlePostQuickStandup} className="space-y-3">
-                <div>
-                  <textarea
-                    placeholder="What did you complete today?"
-                    value={quickStandupTask}
-                    onChange={e => setQuickStandupTask(e.target.value)}
-                    rows="2"
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="Hours (8)"
-                      value={quickStandupHours}
-                      onChange={e => setQuickStandupHours(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-center font-bold dark:border-slate-850 dark:bg-slate-900"
-                      min="1"
-                      max="24"
-                    />
-                  </div>
-                  <div>
-                    <select
-                      value={quickStandupStatus}
-                      onChange={e => setQuickStandupStatus(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
-                    >
-                      <option value="completed">Done</option>
-                      <option value="in-progress">In Dev</option>
-                      <option value="blocked">Blocked</option>
-                    </select>
-                  </div>
-                </div>
-
-                {quickStandupStatus === 'blocked' && (
-                  <input
-                    type="text"
-                    placeholder="Blocker details..."
-                    value={quickStandupBlockers}
-                    onChange={e => setQuickStandupBlockers(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs dark:border-slate-850 dark:bg-slate-900"
-                    required
-                  />
-                )}
-
-                <button
-                  type="submit"
-                  disabled={quickStandupSubmitting}
-                  className="w-full rounded-xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold py-1.8 text-[10px] uppercase tracking-wider cursor-pointer shadow-sm disabled:opacity-50"
+            {/* Drawer Content */}
+            <aside 
+              className={`fixed inset-y-0 right-0 z-50 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200/80 dark:border-slate-800/85 shadow-2xl flex flex-col h-full transform transition-transform duration-300 ease-in-out select-none text-xs ${
+                showCockpitDrawer ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            >
+              {/* Header inside drawer */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Project Cockpit</span>
+                <button 
+                  onClick={() => setShowCockpitDrawer(false)}
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  {quickStandupSubmitting ? 'Posting...' : 'Log Standup'}
+                  <X className="h-4 w-4" />
                 </button>
-              </form>
-            </div>
-
-            {/* Section 3: Active Team Leaves */}
-            <div className="space-y-3">
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
-                Team Capacity & Leaves
               </div>
-              <div className="space-y-2">
-                {leaves.length === 0 ? (
-                  <div className="text-[9px] text-slate-400 italic">No leaves registered this month.</div>
+
+              {/* Scrollable sections */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-6">
+                {activeProject ? (
+                  <div className="space-y-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
+                      Active Project Scope
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-850 dark:text-slate-100 truncate">{activeProject.name}</div>
+                      <div className="text-[9px] text-slate-400 mt-0.5 font-mono">Code: {activeProject.code} • Client: {activeProject.client || 'Internal'}</div>
+                    </div>
+
+                    {/* Progress bar */}
+                    {(() => {
+                      const projTasks = tasks;
+                      const total = projTasks.length;
+                      const completed = projTasks.filter(t => t.status === 'done').length;
+                      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                      
+                      const openBugs = issues.filter(i => i.status !== 'closed' && i.status !== 'resolved').length;
+                      const blocked = projTasks.filter(t => t.blocked).length;
+
+                      return (
+                        <div className="space-y-2.5">
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full dark:bg-slate-800 overflow-hidden">
+                            <div className="h-full bg-indigo-650 transition-all duration-300" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wide">
+                            <span>{pct}% Done</span>
+                            <span>{completed}/{total} Tasks</span>
+                          </div>
+
+                          {/* Stat badges */}
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="bg-rose-50/50 border border-rose-100/50 p-2 rounded-xl text-center dark:bg-rose-955/10 dark:border-rose-950/30">
+                              <div className="text-rose-600 font-extrabold text-sm leading-none">{openBugs}</div>
+                              <div className="text-[8px] text-rose-500 font-bold uppercase mt-1">Open Bugs</div>
+                            </div>
+                            <div className="bg-amber-50/50 border border-amber-100/50 p-2 rounded-xl text-center dark:bg-amber-955/10 dark:border-amber-955/10">
+                              <div className="text-amber-600 font-extrabold text-sm leading-none">{blocked}</div>
+                              <div className="text-[8px] text-amber-500 font-bold uppercase mt-1">Blocked</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 ) : (
-                  leaves.slice(0, 4).map(l => (
-                    <div key={l._id} className="flex items-center justify-between text-[10px] text-slate-650 dark:text-slate-350">
-                      <span className="font-semibold">{l.employeeName}</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 dark:text-indigo-400 font-bold">{l.daysCount}d out</span>
-                    </div>
-                  ))
+                  <div className="text-[10px] text-slate-450 italic p-3 text-center bg-slate-50 dark:bg-slate-955/20 rounded-xl">
+                    No active project scope loaded.
+                  </div>
                 )}
-              </div>
-            </div>
 
-            {/* Section 4: User Selector Sandbox */}
-            <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800/60">
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                OIDC Session Switcher
-              </div>
-              <div className="flex items-center gap-2">
-                <select
-                  value={activeUser}
-                  onChange={e => {
-                    const uName = e.target.value;
-                    const matched = userProfiles.find(u => u.name === uName);
-                    if (matched) {
-                      setCurrentUser(matched);
-                      setActiveUser(uName);
-                      localStorage.setItem('company_current_session', JSON.stringify(matched));
-                      fetchNotifications(uName);
-                      showToast(`Identity Swapped to: ${uName}`, "info");
-                    }
-                  }}
-                  className="flex-1 rounded-xl border border-slate-205 bg-white px-2.5 py-1.5 text-[11px] font-bold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
-                >
-                  {userProfiles.map(u => (
-                    <option key={u.name} value={u.name}>{u.name} ({u.role})</option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleResetSandbox}
-                  className="rounded-xl border border-slate-200 hover:bg-slate-50 p-2 dark:border-slate-800 dark:hover:bg-slate-850 cursor-pointer"
-                  title="Purge local state and reload"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                </button>
-              </div>
-            </div>
+                {/* Section 2: Quick Standup Logger */}
+                <div className="space-y-3 bg-slate-50/55 border border-slate-100/60 p-4 rounded-2xl dark:bg-slate-955/20 dark:border-slate-800/60">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-indigo-500" />
+                    Quick Standup Logger
+                  </div>
+                  
+                  <form onSubmit={handlePostQuickStandup} className="space-y-3">
+                    <div>
+                      <textarea
+                        placeholder="What did you complete today?"
+                        value={quickStandupTask}
+                        onChange={e => setQuickStandupTask(e.target.value)}
+                        rows="2"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900"
+                        required
+                      />
+                    </div>
 
-          </aside>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <input
+                          type="number"
+                          placeholder="Hours (8)"
+                          value={quickStandupHours}
+                          onChange={e => setQuickStandupHours(e.target.value)}
+                          className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-center font-bold dark:border-slate-850 dark:bg-slate-900"
+                          min="1"
+                          max="24"
+                        />
+                      </div>
+                      <div>
+                        <select
+                          value={quickStandupStatus}
+                          onChange={e => setQuickStandupStatus(e.target.value)}
+                          className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
+                        >
+                          <option value="completed">Done</option>
+                          <option value="in-progress">In Dev</option>
+                          <option value="blocked">Blocked</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {quickStandupStatus === 'blocked' && (
+                      <input
+                        type="text"
+                        placeholder="Blocker details..."
+                        value={quickStandupBlockers}
+                        onChange={e => setQuickStandupBlockers(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs dark:border-slate-850 dark:bg-slate-900"
+                        required
+                      />
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={quickStandupSubmitting}
+                      className="w-full rounded-xl bg-indigo-650 hover:bg-indigo-755 text-white font-bold py-1.8 text-[10px] uppercase tracking-wider cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      {quickStandupSubmitting ? 'Posting...' : 'Log Standup'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Section 3: Active Team Leaves */}
+                <div className="space-y-3">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 dark:border-slate-800/60">
+                    Team Capacity & Leaves
+                  </div>
+                  <div className="space-y-2">
+                    {leaves.length === 0 ? (
+                      <div className="text-[9px] text-slate-400 italic">No leaves registered this month.</div>
+                    ) : (
+                      leaves.slice(0, 4).map(l => (
+                        <div key={l._id} className="flex items-center justify-between text-[10px] text-slate-655 dark:text-slate-350">
+                          <span className="font-semibold">{l.employeeName}</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/20 dark:text-indigo-400 font-bold">{l.daysCount}d out</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Section 4: User Selector Sandbox */}
+                <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800/60">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    OIDC Session Switcher
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={activeUser}
+                      onChange={e => {
+                        const uName = e.target.value;
+                        const matched = userProfiles.find(u => u.name === uName);
+                        if (matched) {
+                          setCurrentUser(matched);
+                          setActiveUser(uName);
+                          localStorage.setItem('company_current_session', JSON.stringify(matched));
+                          fetchNotifications(uName);
+                          showToast(`Identity Swapped to: ${uName}`, "info");
+                        }
+                      }}
+                      className="flex-1 rounded-xl border border-slate-205 bg-white px-2.5 py-1.5 text-[11px] font-bold dark:border-slate-850 dark:bg-slate-900 cursor-pointer"
+                    >
+                      {userProfiles.map(u => (
+                        <option key={u.name} value={u.name}>{u.name} ({u.role})</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleResetSandbox}
+                      className="rounded-xl border border-slate-200 hover:bg-slate-50 p-2 dark:border-slate-800 dark:hover:bg-slate-850 cursor-pointer"
+                      title="Purge local state and reload"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </>
+
         </div>
 
-        {/* FLOATING COMMAND ORBIT NAVIGATION DOCK */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-2 max-w-[95vw] overflow-x-auto scrollbar-none select-none">
-          {[
-            { id: 'dashboard', label: 'Bento Dashboard', icon: LayoutDashboard },
-            { id: 'projects', label: 'Projects Portfolio', icon: Briefcase },
-            { id: 'tasks', label: 'Tasks Board', icon: CheckSquare },
-            { id: 'issues', label: 'Issue Tracker', icon: AlertCircle },
-            { id: 'planner', label: 'Timeline Planner', icon: CalendarRange },
-            { id: 'users', label: 'Users Registry', icon: User },
-            { id: 'docs', label: 'Document Vault', icon: FileText },
-            { id: 'leaves', label: 'Leave Planner', icon: Calendar },
-            { id: 'daily', label: 'Daily Standup', icon: Columns },
-            { id: 'finance', label: 'Finance Hub', icon: Landmark },
-            { id: 'settings', label: 'Connector Settings', icon: Settings },
-          ].map(item => {
-            const IconComponent = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <div key={item.id} className="relative group shrink-0">
-                {/* Tooltip */}
-                <span className="absolute bottom-full mb-3.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900/90 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-black rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap uppercase tracking-wider">
-                  {item.label}
-                </span>
-                {/* Orb */}
-                <button
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSelectedItem(null);
-                  }}
-                  className={`h-10 w-10 rounded-full flex items-center justify-center transition-all duration-150 cursor-pointer ${
-                    isActive 
-                      ? 'bg-indigo-650 text-white dark:bg-indigo-500 shadow-lg scale-110' 
-                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'
-                  }`}
-                >
-                  <IconComponent className="h-5 w-5" />
-                </button>
-              </div>
-            );
-          })}
+        {/* FLOATING COMMAND SWITCHER LAUNCHER TRIGGER */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={() => setShowCommandCenter(true)}
+            className="h-12 w-12 rounded-full bg-gradient-to-tr from-indigo-650 to-indigo-500 hover:from-indigo-600 hover:to-indigo-550 text-white shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all duration-150 group relative border border-indigo-500/20"
+            title="Open Command Center (Ctrl+K)"
+          >
+            <Terminal className="h-5.5 w-5.5 animate-pulse" />
+            
+            {/* Hover Label */}
+            <span className="absolute right-full mr-3.5 px-2.5 py-1 bg-slate-900/90 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-black rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap uppercase tracking-wider">
+              Launcher Console
+            </span>
+          </button>
         </div>
-
       </div>
+
 
       {/* ─── COMMAND CENTER PANEL (CMD+K) ─── */}
       {showCommandCenter && (
