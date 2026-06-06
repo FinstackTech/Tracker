@@ -258,6 +258,20 @@ export default function Home() {
     showToast("Signed out successfully", "info");
   };
 
+  const handleResetSandbox = () => {
+    if (confirm("Are you sure you want to reset all local browser cache and user profiles? This will restore the default Superadmin profile and log you out.")) {
+      localStorage.removeItem('company_current_session');
+      localStorage.setItem('company_user_profiles', JSON.stringify(USER_PROFILES));
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      setActiveUser('');
+      setUserProfiles(USER_PROFILES);
+      setShowProfileDropdown(false);
+      showToast("Sandbox data reset successfully!", "info");
+      window.location.reload();
+    }
+  };
+
   // Run on active project change
   useEffect(() => {
     if (activeProject) {
@@ -907,6 +921,15 @@ export default function Home() {
                       <LogOut className="h-3.5 w-3.5 text-rose-500" />
                       Sign Out
                     </button>
+                    <div className="border-t border-slate-100 dark:border-slate-800/60 my-1" />
+                    <button
+                      onClick={handleResetSandbox}
+                      className="w-full text-left rounded-lg px-2.5 py-1.5 text-[10px] font-black uppercase text-amber-600 hover:bg-amber-50 dark:text-amber-450 dark:hover:bg-amber-955/10 transition-colors flex items-center gap-2 cursor-pointer"
+                      title="Clear local browser profiles cache and log out to start fresh"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                      Reset Local Cache
+                    </button>
                   </div>
                 </div>
               )}
@@ -928,6 +951,7 @@ export default function Home() {
               activeUser={activeUser}
               currentUser={currentUser}
               notifications={notifications}
+              employees={userProfiles.map(u => u.name)}
             />
           )}
 

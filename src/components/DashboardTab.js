@@ -25,7 +25,8 @@ export default function DashboardTab({
   activeProject,
   activeUser,
   currentUser,
-  notifications = []
+  notifications = [],
+  employees = []
 }) {
   const [exporting, setExporting] = useState(false);
 
@@ -166,8 +167,9 @@ export default function DashboardTab({
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   // List of active employees to map in horizontal scheduler
+  const baseEmployees = employees.length > 0 ? employees : ["Superadmin"];
   const schedulerEmployees = Array.from(new Set([
-    "Ilyas", "Susanth", "Vishnu", "Bharath", "Tom", "Vijayan", "Babu", "Irshad", "Lyn", "Ravi",
+    ...baseEmployees,
     ...leaves.map(l => l.employeeName)
   ])).slice(0, 10);
 
