@@ -159,6 +159,16 @@ const IntegrationSchema = new mongoose.Schema({
   triggerOnIssueResolved: { type: Boolean, default: false }
 }, { timestamps: true });
 
+const EmployeeSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  role: { type: String, default: 'Employee' },
+  email: { type: String, required: true },
+  password: { type: String, default: 'user' },
+  team: { type: String, default: 'Engineering' },
+  status: { type: String, default: 'Active' },
+  lastLogin: { type: String, default: '' }
+}, { timestamps: true });
+
 // Clear cached models in development to pick up schema upgrades
 if (process.env.NODE_ENV !== 'production') {
   delete mongoose.models.Project;
@@ -170,6 +180,7 @@ if (process.env.NODE_ENV !== 'production') {
   delete mongoose.models.Transaction;
   delete mongoose.models.Notification;
   delete mongoose.models.Integration;
+  delete mongoose.models.Employee;
 }
 
 export const Project = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
@@ -181,3 +192,5 @@ export const Leave = mongoose.models.Leave || mongoose.model('Leave', LeaveSchem
 export const Transaction = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 export const Integration = mongoose.models.Integration || mongoose.model('Integration', IntegrationSchema);
+export const Employee = mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
+

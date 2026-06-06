@@ -244,6 +244,48 @@ async function runTests() {
       report('POST /api/mcp', false, e.message);
     }
 
+    // 15.5. Employee API Tests
+    let testEmployee = null;
+    try {
+      // Create employee
+      const createRes = await fetch(`${BASE_URL}/api/employees`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Automated Test Employee',
+          role: 'Employee',
+          email: 'test_emp@company.com',
+          password: 'testpassword',
+          team: 'Engineering',
+          status: 'Active'
+        })
+      });
+      const createData = await createRes.json();
+      testEmployee = createData.data;
+      report('POST /api/employees (Create Employee)', createData.success && testEmployee && testEmployee._id);
+
+      // GET employees
+      const getRes = await fetch(`${BASE_URL}/api/employees`);
+      const getData = await getRes.json();
+      const hasSuperadmin = getData.data && getData.data.some(e => e.name === 'Superadmin');
+      report('GET /api/employees (Query and Check Seeding)', getData.success && Array.isArray(getData.data) && hasSuperadmin);
+
+      // PUT employee
+      const putRes = await fetch(`${BASE_URL}/api/employees`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _id: testEmployee._id,
+          name: 'Automated Test Employee',
+          team: 'Operations'
+        })
+      });
+      const putData = await putRes.json();
+      report('PUT /api/employees (Update Employee)', putData.success && putData.data && putData.data.team === 'Operations');
+    } catch (e) {
+      report('Employee API Operations', false, e.message);
+    }
+
     // 16. POST /api/gitea Webhook Auto-Resolve
     if (testTask) {
       try {
@@ -300,6 +342,12 @@ async function runTests() {
       const res = await fetch(`${BASE_URL}/api/projects?id=${testProject._id}`, { method: 'DELETE' });
       const data = await res.json();
       report('DELETE /api/projects Cleanup', data.success);
+    }
+
+    if (testEmployee) {
+      const res = await fetch(`${BASE_URL}/api/employees?id=${testEmployee._id}`, { method: 'DELETE' });
+      const data = await res.json();
+      report('DELETE /api/employees Cleanup', data.success);
     }
 
     console.log('\n🌟 Integration testing validation sequence finished!\n');

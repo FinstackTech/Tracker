@@ -223,19 +223,40 @@ class _LoginScreenState extends State<LoginScreen> {
     _loadUserProfiles();
   }
 
-  void _loadUserProfiles() {
-    // In our mobile companion app we initialize with the default web user profiles list.
-    // Adding users in the HR Hub will append profiles here dynamically.
-    _profiles = [
-      {'name': 'Superadmin', 'role': 'Admin', 'email': 'superadmin@company.com', 'team': 'Operations'},
-      {'name': 'Ilyas', 'role': 'Director', 'email': 'ilyas@company.com', 'team': 'Engineering'},
-      {'name': 'Susanth', 'role': 'Lead Architect', 'email': 'susanth@company.com', 'team': 'Engineering'},
-      {'name': 'Vishnu', 'role': 'Developer', 'email': 'vishnu@company.com', 'team': 'Engineering'},
-      {'name': 'Tom', 'role': 'Product Manager', 'email': 'tom@company.com', 'team': 'Product'},
-      {'name': 'HR Manager', 'role': 'HR', 'email': 'hr@company.com', 'team': 'HR'},
-    ];
-    _selectedProfile = _profiles[0];
+  Future<void> _loadUserProfiles() async {
+    try {
+      final response = await http.get(Uri.parse('${widget.baseUrl}/api/employees')).timeout(
+        const Duration(seconds: 4),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> list = data['data'] ?? [];
+          setState(() {
+            _profiles = list.map((item) => {
+              'name': (item['name'] ?? '').toString(),
+              'role': (item['role'] ?? 'Employee').toString(),
+              'email': (item['email'] ?? '').toString(),
+              'team': (item['team'] ?? 'Engineering').toString(),
+              'status': (item['status'] ?? 'Active').toString(),
+            }).toList();
+            if (_profiles.isNotEmpty) {
+              _selectedProfile = _profiles[0];
+            }
+            _loadingProfiles = false;
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading profiles: $e');
+    }
+    // Fallback: if fetch fails, use a local default Superadmin
     setState(() {
+      _profiles = [
+        {'name': 'Superadmin', 'role': 'Admin', 'email': 'superadmin@company.com', 'team': 'Operations', 'status': 'Active'}
+      ];
+      _selectedProfile = _profiles[0];
       _loadingProfiles = false;
     });
   }
@@ -383,6 +404,28 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
     _userProfiles = List<Map<String, String>>.from(widget.initialProfiles);
     _activeSessionUser = widget.currentUser;
     _fetchProjects();
+    _fetchUserProfiles();
+  }
+
+  Future<void> _fetchUserProfiles() async {
+    try {
+      final res = await http.get(Uri.parse('${widget.baseUrl}/api/employees'));
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        final List<dynamic> list = data['data'] ?? [];
+        setState(() {
+          _userProfiles = list.map((item) => {
+            'name': (item['name'] ?? '').toString(),
+            'role': (item['role'] ?? 'Employee').toString(),
+            'email': (item['email'] ?? '').toString(),
+            'team': (item['team'] ?? 'Engineering').toString(),
+            'status': (item['status'] ?? 'Active').toString(),
+          }).toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading profiles: $e');
+    }
   }
 
   Future<void> _fetchProjects() async {
@@ -427,10 +470,20 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
     });
   }
 
-  void _addNewUserLocally(Map<String, String> user) {
-    setState(() {
-      _userProfiles.add(user);
-    });
+  Future<void> _addNewUser(Map<String, String> user) async {
+    try {
+      final res = await http.post(
+        Uri.parse('${widget.baseUrl}/api/employees'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(user),
+      );
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        await _fetchUserProfiles();
+      }
+    } catch (e) {
+      debugPrint('Error creating employee: $e');
+    }
   }
 
   @override
@@ -443,12 +496,14 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
         baseUrl: widget.baseUrl, 
         currentUser: _activeSessionUser, 
         userProfiles: _userProfiles,
-        onAddUser: _addNewUserLocally,
+        onAddUser: _addNewUser,
+        onRefreshUsers: _fetchUserProfiles,
       ),
       MobileProjectsPortfolio(
         baseUrl: widget.baseUrl, 
         projects: _projects, 
         activeProject: _activeProject,
+        currentUser: _activeSessionUser,
         onActivate: (proj) {
           setState(() {
             _activeProject = proj;
@@ -1323,6 +1378,7 @@ class MobileHRHub extends StatefulWidget {
   final Map<String, String> currentUser;
   final List<Map<String, String>> userProfiles;
   final Function(Map<String, String>) onAddUser;
+  final VoidCallback onRefreshUsers;
 
   const MobileHRHub({
     super.key, 
@@ -1330,6 +1386,7 @@ class MobileHRHub extends StatefulWidget {
     required this.currentUser,
     required this.userProfiles,
     required this.onAddUser,
+    required this.onRefreshUsers,
   });
 
   @override
@@ -1529,6 +1586,44 @@ class _MobileHRHubState extends State<MobileHRHub> {
     );
   }
 
+  Future<void> _deleteEmployeeProfile(String name) async {
+    if (name == widget.currentUser['name']) {
+      ScaffoldMessenger.of(context).showToast('Cannot delete the logged-in user profile!');
+      return;
+    }
+    try {
+      final res = await http.delete(
+        Uri.parse('${widget.baseUrl}/api/employees?name=$name'),
+      );
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        widget.onRefreshUsers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showToast('Employee profile deleted successfully!');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting employee: $e');
+    }
+  }
+
+  Future<void> _deleteLeaveRequest(String id) async {
+    try {
+      final res = await http.delete(
+        Uri.parse('${widget.baseUrl}/api/leaves?id=$id'),
+      );
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        _loadLeaves();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showToast('Leave request removed!');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting leave: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1616,16 +1711,29 @@ class _MobileHRHubState extends State<MobileHRHub> {
               ),
               title: Text(u['name']!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               subtitle: Text('${u['role']} • ${u['email']}', style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500)),
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEEF2F6),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  (u['team'] ?? 'Engineering').toUpperCase(),
-                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Color(0xFF64748B)),
-                ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2F6),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      (u['team'] ?? 'Engineering').toUpperCase(),
+                      style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Color(0xFF64748B)),
+                    ),
+                  ),
+                  if ((widget.currentUser['role'] == 'Admin' || widget.currentUser['role'] == 'HR') && u['name'] != widget.currentUser['name']) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                      onPressed: () => _deleteEmployeeProfile(u['name']!),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
+                ],
               ),
             ),
           );
@@ -1756,6 +1864,12 @@ class _MobileHRHubState extends State<MobileHRHub> {
                           '${l['startDate']} to ${l['endDate']} (${l['daysCount']} days) • ${l['notes'] ?? ''}',
                           style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
                         ),
+                        trailing: (widget.currentUser['role'] == 'Admin' || widget.currentUser['role'] == 'HR' || l['employeeName'] == widget.currentUser['name'])
+                            ? IconButton(
+                                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                                onPressed: () => _deleteLeaveRequest(l['_id']),
+                              )
+                            : null,
                       ),
                     );
                   },
@@ -1775,11 +1889,14 @@ class MobileProjectsPortfolio extends StatefulWidget {
   final Function(dynamic) onAddProject;
   final VoidCallback onRefresh;
 
+  final Map<String, String> currentUser;
+
   const MobileProjectsPortfolio({
     super.key,
     required this.baseUrl,
     required this.projects,
     required this.activeProject,
+    required this.currentUser,
     required this.onActivate,
     required this.onAddProject,
     required this.onRefresh,
@@ -1790,6 +1907,23 @@ class MobileProjectsPortfolio extends StatefulWidget {
 }
 
 class _MobileProjectsPortfolioState extends State<MobileProjectsPortfolio> {
+  Future<void> _deleteProjectWorkspace(String id) async {
+    try {
+      final res = await http.delete(
+        Uri.parse('${widget.baseUrl}/api/projects?id=$id'),
+      );
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        widget.onRefresh();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showToast('Project workspace deleted!');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting project: $e');
+    }
+  }
+
   final _projNameController = TextEditingController();
   final _projCodeController = TextEditingController();
   final _projClientController = TextEditingController();
@@ -1967,20 +2101,33 @@ class _MobileProjectsPortfolioState extends State<MobileProjectsPortfolio> {
                         ],
                       ),
                     ),
-                    trailing: isActive
-                        ? const Chip(
-                            label: Text('ACTIVE', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
-                            backgroundColor: Color(0xFF10B981),
-                            padding: EdgeInsets.zero,
-                          )
-                        : OutlinedButton(
-                            onPressed: () => widget.onActivate(p),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            child: const Text('ACTIVATE', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5))),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        isActive
+                            ? const Chip(
+                                label: Text('SELECTED', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
+                                backgroundColor: Color(0xFF4F46E5),
+                                padding: EdgeInsets.zero,
+                              )
+                            : OutlinedButton(
+                                onPressed: () => widget.onActivate(p),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                child: const Text('SELECT', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5))),
+                              ),
+                        if (widget.currentUser['role'] == 'Admin' && !isActive) ...[
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                            onPressed: () => _deleteProjectWorkspace(p['_id']),
+                            visualDensity: VisualDensity.compact,
                           ),
+                        ],
+                      ],
+                    ),
                   ),
                 );
               },

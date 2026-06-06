@@ -139,6 +139,20 @@ export default function Home() {
     }
   };
 
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch('/api/employees');
+      const res = await response.json();
+      if (res.success) {
+        setUserProfiles(res.data);
+        return res.data;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  };
+
   const fetchNotifications = async (user) => {
     try {
       const response = await fetch(`/api/notifications?employeeName=${user}`);
@@ -187,20 +201,8 @@ export default function Home() {
     const init = async () => {
       setLoading(true);
       
-      // Load user profiles list
-      const savedProfiles = localStorage.getItem('company_user_profiles');
-      let profilesList = USER_PROFILES;
-      if (savedProfiles) {
-        try {
-          const parsed = JSON.parse(savedProfiles);
-          if (parsed && parsed.length > 0) {
-            setUserProfiles(parsed);
-            profilesList = parsed;
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+      // Load user profiles list from API
+      const profilesList = await fetchEmployees();
 
       // Check current session
       const savedSession = localStorage.getItem('company_current_session');
@@ -208,10 +210,19 @@ export default function Home() {
         try {
           const sessionUser = JSON.parse(savedSession);
           if (sessionUser) {
-            const freshProfile = profilesList.find(p => p.name === sessionUser.name) || sessionUser;
-            setCurrentUser(freshProfile);
-            setActiveUser(freshProfile.name);
-            setIsLoggedIn(true);
+            // Check if user still exists in database
+            const freshProfile = profilesList.find(p => p.name === sessionUser.name);
+            if (freshProfile) {
+              setCurrentUser(freshProfile);
+              setActiveUser(freshProfile.name);
+              setIsLoggedIn(true);
+            } else {
+              // User deleted, clear session
+              localStorage.removeItem('company_current_session');
+              setIsLoggedIn(false);
+              setCurrentUser(null);
+              setActiveUser('');
+            }
           }
         } catch (e) {
           console.error(e);
@@ -265,15 +276,15 @@ export default function Home() {
     setTimeout(() => {
       setMsalLoading(false);
       setShowMsalSim(false);
+      
       localStorage.setItem('company_current_session', JSON.stringify(profile));
       setCurrentUser(profile);
       setActiveUser(profile.name);
       setIsLoggedIn(true);
       fetchNotifications(profile.name);
-      setLoginPassword('');
-      setLoginError('');
+      
       showToast(`SSO Authenticated: ${profile.name}`, "success");
-    }, 1000);
+    }, 1200);
   };
 
   const handleLogout = () => {
@@ -288,11 +299,10 @@ export default function Home() {
   const handleResetSandbox = () => {
     if (confirm("Are you sure you want to reset all local browser cache and user profiles? This will restore the default Superadmin profile and log you out.")) {
       localStorage.removeItem('company_current_session');
-      localStorage.setItem('company_user_profiles', JSON.stringify(USER_PROFILES));
+      localStorage.removeItem('company_user_profiles');
       setIsLoggedIn(false);
       setCurrentUser(null);
       setActiveUser('');
-      setUserProfiles(USER_PROFILES);
       setShowProfileDropdown(false);
       showToast("Sandbox data reset successfully!", "info");
       window.location.reload();
@@ -1165,6 +1175,7 @@ export default function Home() {
                 currentUser={currentUser}
                 userProfiles={userProfiles}
                 setUserProfiles={setUserProfiles}
+                fetchEmployees={fetchEmployees}
                 showToast={showToast}
               />
             )}

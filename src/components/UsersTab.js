@@ -56,6 +56,7 @@ export default function UsersTab({
   currentUser,
   userProfiles = [],
   setUserProfiles,
+  fetchEmployees,
   showToast
 }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -106,7 +107,7 @@ export default function UsersTab({
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleAddUserSubmit = (e) => {
+  const handleAddUserSubmit = async (e) => {
     e.preventDefault();
     if (!newName.trim() || !newEmail.trim()) return;
 
@@ -115,30 +116,38 @@ export default function UsersTab({
       return;
     }
 
-    const updated = [
-      ...userProfiles,
-      {
-        name: newName.trim(),
-        role: newRole,
-        email: newEmail.trim(),
-        password: newPassword.trim() || 'user',
-        status: 'Active',
-        team: newTeam,
-        lastLogin: 'Never logged in'
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName.trim(),
+          role: newRole,
+          email: newEmail.trim(),
+          password: newPassword.trim() || 'user',
+          status: 'Active',
+          team: newTeam,
+          lastLogin: 'Never logged in'
+        })
+      });
+      const res = await response.json();
+      if (res.success) {
+        await fetchEmployees();
+        showToast(`User ${newName} successfully created`, "success");
+        // Reset Form
+        setNewName('');
+        setNewEmail('');
+        setNewRole('Employee');
+        setNewTeam('Engineering');
+        setNewPassword('user');
+        setShowAddModal(false);
+      } else {
+        showToast(res.error || "Failed to create user", "error");
       }
-    ];
-
-    setUserProfiles(updated);
-    localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-    showToast(`User ${newName} successfully created`, "success");
-
-    // Reset Form
-    setNewName('');
-    setNewEmail('');
-    setNewRole('Employee');
-    setNewTeam('Engineering');
-    setNewPassword('user');
-    setShowAddModal(false);
+    } catch (err) {
+      console.error(err);
+      showToast("Network error creating user", "error");
+    }
   };
 
   const handleSaveDrawerUser = (e) => {
@@ -150,24 +159,32 @@ export default function UsersTab({
     const roleChanged = originalUser && originalUser.role !== editingUser.role;
     const statusChanged = originalUser && originalUser.status !== editingUser.status;
 
-    const performUpdate = () => {
-      const updated = userProfiles.map(u => {
-        if (u.name === editingUser.name) {
-          return {
-            ...u,
+    const performUpdate = async () => {
+      try {
+        const response = await fetch('/api/employees', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            _id: editingUser._id,
+            name: editingUser.name,
             email: editingUser.email.trim(),
             role: editingUser.role,
             team: editingUser.team,
             status: editingUser.status
-          };
+          })
+        });
+        const res = await response.json();
+        if (res.success) {
+          await fetchEmployees();
+          showToast(`Profile changes saved for ${editingUser.name}`, "success");
+          setEditingUser(null);
+        } else {
+          showToast(res.error || "Failed to save profile changes", "error");
         }
-        return u;
-      });
-
-      setUserProfiles(updated);
-      localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-      showToast(`Profile changes saved for ${editingUser.name}`, "success");
-      setEditingUser(null);
+      } catch (err) {
+        console.error(err);
+        showToast("Network error saving profile changes", "error");
+      }
     };
 
     if (roleChanged || (statusChanged && editingUser.status === 'Inactive')) {
@@ -187,16 +204,28 @@ export default function UsersTab({
   const handleToggleStatus = (user) => {
     const newStatus = user.status === 'Active' ? 'Inactive' : 'Active';
     
-    const performToggle = () => {
-      const updated = userProfiles.map(u => {
-        if (u.name === user.name) {
-          return { ...u, status: newStatus };
+    const performToggle = async () => {
+      try {
+        const response = await fetch('/api/employees', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            _id: user._id,
+            name: user.name,
+            status: newStatus
+          })
+        });
+        const res = await response.json();
+        if (res.success) {
+          await fetchEmployees();
+          showToast(`User ${user.name} is now ${newStatus}`, "success");
+        } else {
+          showToast(res.error || "Failed to toggle status", "error");
         }
-        return u;
-      });
-      setUserProfiles(updated);
-      localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-      showToast(`User ${user.name} is now ${newStatus}`, "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Network error", "error");
+      }
     };
 
     if (newStatus === 'Inactive') {
@@ -218,16 +247,28 @@ export default function UsersTab({
       type: 'reset_pwd',
       title: 'Reset Account Password',
       message: `Are you sure you want to reset the password for ${user.name} to the system default "${defaultPassword}"?`,
-      action: () => {
-        const updated = userProfiles.map(u => {
-          if (u.name === user.name) {
-            return { ...u, password: defaultPassword };
+      action: async () => {
+        try {
+          const response = await fetch('/api/employees', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              _id: user._id,
+              name: user.name,
+              password: defaultPassword
+            })
+          });
+          const res = await response.json();
+          if (res.success) {
+            await fetchEmployees();
+            showToast(`Password reset successful for ${user.name}`, "success");
+          } else {
+            showToast(res.error || "Failed to reset password", "error");
           }
-          return u;
-        });
-        setUserProfiles(updated);
-        localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-        showToast(`Password reset successful for ${user.name}`, "success");
+        } catch (err) {
+          console.error(err);
+          showToast("Network error", "error");
+        }
       }
     });
   };
@@ -242,13 +283,24 @@ export default function UsersTab({
       type: 'delete',
       title: 'Delete User Account Permanently',
       message: `WARNING: This action is irreversible. All access logs, metadata association, and authentication credentials for "${user.name}" will be purged. Do you want to continue?`,
-      action: () => {
-        const updated = userProfiles.filter(u => u.name !== user.name);
-        setUserProfiles(updated);
-        localStorage.setItem('company_user_profiles', JSON.stringify(updated));
-        showToast(`User ${user.name} permanently removed from registry`, "success");
-        if (editingUser?.name === user.name) {
-          setEditingUser(null);
+      action: async () => {
+        try {
+          const response = await fetch(`/api/employees?id=${user._id}`, {
+            method: 'DELETE'
+          });
+          const res = await response.json();
+          if (res.success) {
+            await fetchEmployees();
+            showToast(`User ${user.name} permanently removed from registry`, "success");
+            if (editingUser?.name === user.name) {
+              setEditingUser(null);
+            }
+          } else {
+            showToast(res.error || "Failed to delete user", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Network error", "error");
         }
       }
     });

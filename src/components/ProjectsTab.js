@@ -389,11 +389,11 @@ export default function ProjectsTab({
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveProject(proj);
-                          showToast(`Switched active workspace to "${proj.name}"`, "success");
+                          showToast(`Switched workspace context to "${proj.name}"`, "success");
                         }}
                         className="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 dark:bg-indigo-950/45 dark:hover:bg-indigo-600 dark:hover:text-white font-extrabold px-2.5 py-1 rounded-xl transition-all cursor-pointer text-[9px] uppercase tracking-wide border border-indigo-100/50 dark:border-indigo-900/30"
                       >
-                        Activate
+                        Select Workspace
                       </button>
                     )}
                     
@@ -449,7 +449,7 @@ export default function ProjectsTab({
                         <div className="flex items-center gap-2">
                           <span className="truncate max-w-xs">{proj.name}</span>
                           {isActive && (
-                            <span className="text-[7.5px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wide">Active</span>
+                            <span className="text-[7.5px] bg-indigo-600 text-white dark:bg-indigo-950 dark:text-indigo-400 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wide">Current Workspace</span>
                           )}
                         </div>
                       </td>
@@ -484,11 +484,11 @@ export default function ProjectsTab({
                             <button
                               onClick={() => {
                                 setActiveProject(proj);
-                                showToast(`Switched active workspace to "${proj.name}"`, "success");
+                                showToast(`Switched workspace context to "${proj.name}"`, "success");
                               }}
                               className="text-[9px] font-extrabold uppercase px-2 py-1 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
                             >
-                              Activate
+                              Select Workspace
                             </button>
                           )}
                           
@@ -883,16 +883,16 @@ export default function ProjectsTab({
                 <button
                   onClick={() => {
                     setActiveProject(editingProject);
-                    showToast(`Switched active workspace to "${editingProject.name}"`, "success");
+                    showToast(`Switched workspace context to "${editingProject.name}"`, "success");
                   }}
                   className="rounded-xl border border-indigo-200 text-indigo-650 hover:bg-indigo-50 px-4 py-2.5 text-xs font-bold cursor-pointer"
                 >
-                  Activate Workspace
+                  Select Workspace
                 </button>
               ) : (
-                <div className="text-[10px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-955/20 border border-emerald-100/50 dark:border-emerald-950/20 px-3 py-1.5 rounded-xl uppercase tracking-wider flex items-center gap-1 leading-none">
+                <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 px-3 py-1.5 rounded-xl uppercase tracking-wider flex items-center gap-1 leading-none">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  Active Scope
+                  Current Workspace
                 </div>
               )}
 
