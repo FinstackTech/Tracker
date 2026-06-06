@@ -120,7 +120,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
+                        color: const Color(0xFF4F46E5).withOpacity(0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -148,7 +148,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               const Text(
                 'Mobile Companion Integration',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 13),
+                style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 32),
               TextField(
@@ -161,13 +161,14 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                   ),
                   prefixIcon: const Icon(Icons.lan_outlined),
                 ),
+                style: const TextStyle(fontWeight: FontWeight.w600),
                 keyboardType: TextInputType.url,
               ),
               if (_errorMessage.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage,
-                  style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -211,22 +212,32 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final List<Map<String, String>> _profiles = [
-    {'name': 'Superadmin', 'role': 'Admin', 'email': 'superadmin@company.com'},
-    {'name': 'Ilyas', 'role': 'Director', 'email': 'ilyas@company.com'},
-    {'name': 'Susanth', 'role': 'Lead Architect', 'email': 'susanth@company.com'},
-    {'name': 'Vishnu', 'role': 'Developer', 'email': 'vishnu@company.com'},
-    {'name': 'Tom', 'role': 'Product Manager', 'email': 'tom@company.com'},
-    {'name': 'HR Manager', 'role': 'HR', 'email': 'hr@company.com'},
-  ];
-
+  List<Map<String, String>> _profiles = [];
   late Map<String, String> _selectedProfile;
   bool _signingIn = false;
+  bool _loadingProfiles = true;
 
   @override
   void initState() {
     super.initState();
+    _loadUserProfiles();
+  }
+
+  void _loadUserProfiles() {
+    // In our mobile companion app we initialize with the default web user profiles list.
+    // Adding users in the HR Hub will append profiles here dynamically.
+    _profiles = [
+      {'name': 'Superadmin', 'role': 'Admin', 'email': 'superadmin@company.com', 'team': 'Operations'},
+      {'name': 'Ilyas', 'role': 'Director', 'email': 'ilyas@company.com', 'team': 'Engineering'},
+      {'name': 'Susanth', 'role': 'Lead Architect', 'email': 'susanth@company.com', 'team': 'Engineering'},
+      {'name': 'Vishnu', 'role': 'Developer', 'email': 'vishnu@company.com', 'team': 'Engineering'},
+      {'name': 'Tom', 'role': 'Product Manager', 'email': 'tom@company.com', 'team': 'Product'},
+      {'name': 'HR Manager', 'role': 'HR', 'email': 'hr@company.com', 'team': 'HR'},
+    ];
     _selectedProfile = _profiles[0];
+    setState(() {
+      _loadingProfiles = false;
+    });
   }
 
   void _performLogin() {
@@ -234,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _signingIn = true;
     });
     
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 600), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -242,6 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (context) => CockpitHomeScreen(
               baseUrl: widget.baseUrl,
               currentUser: _selectedProfile,
+              initialProfiles: _profiles,
             ),
           ),
         );
@@ -251,6 +263,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingProfiles) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Simulate Identity Sign-In', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
@@ -266,21 +282,21 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const Text(
                 'Identity Provider (OIDC)',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               const Text(
                 'Select a security profile to sign into the Finstack PPM network.',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFCBD5E1)),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<Map<String, String>>(
@@ -294,7 +310,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(prof['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                            Text('${prof['role']} • ${prof['email']}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                            const SizedBox(height: 2),
+                            Text('${prof['role']} • ${prof['email']}', style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       );
@@ -339,11 +356,13 @@ class _LoginScreenState extends State<LoginScreen> {
 class CockpitHomeScreen extends StatefulWidget {
   final String baseUrl;
   final Map<String, String> currentUser;
+  final List<Map<String, String>> initialProfiles;
 
   const CockpitHomeScreen({
     super.key,
     required this.baseUrl,
     required this.currentUser,
+    required this.initialProfiles,
   });
 
   @override
@@ -355,10 +374,14 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
   List<dynamic> _projects = [];
   dynamic _activeProject;
   bool _loadingProjects = true;
+  late List<Map<String, String>> _userProfiles;
+  late Map<String, String> _activeSessionUser;
 
   @override
   void initState() {
     super.initState();
+    _userProfiles = List<Map<String, String>>.from(widget.initialProfiles);
+    _activeSessionUser = widget.currentUser;
     _fetchProjects();
   }
 
@@ -373,7 +396,18 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
         setState(() {
           _projects = data['data'] ?? [];
           if (_projects.isNotEmpty) {
-            _activeProject = _projects[0];
+            // Find if previous active project still exists, else pick first
+            if (_activeProject != null) {
+              final matched = _projects.firstWhere(
+                (p) => p['_id'] == _activeProject['_id'],
+                orElse: () => _projects[0],
+              );
+              _activeProject = matched;
+            } else {
+              _activeProject = _projects[0];
+            }
+          } else {
+            _activeProject = null;
           }
         });
       }
@@ -386,54 +420,88 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
     }
   }
 
+  void _addNewProjectLocally(dynamic newProj) {
+    setState(() {
+      _projects.add(newProj);
+      _activeProject = newProj;
+    });
+  }
+
+  void _addNewUserLocally(Map<String, String> user) {
+    setState(() {
+      _userProfiles.add(user);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = [
       MobileBentoDashboard(baseUrl: widget.baseUrl, activeProject: _activeProject),
-      MobileTasksBoard(baseUrl: widget.baseUrl, activeProject: _activeProject, currentUser: widget.currentUser),
-      MobileDailyLogs(baseUrl: widget.baseUrl, activeProject: _activeProject, currentUser: widget.currentUser),
-      MobileIssuesTracker(baseUrl: widget.baseUrl, activeProject: _activeProject),
-      MobileLeavesPlanner(baseUrl: widget.baseUrl, currentUser: widget.currentUser),
+      MobileWorkBoard(baseUrl: widget.baseUrl, activeProject: _activeProject, currentUser: _activeSessionUser),
+      MobileDailyLogs(baseUrl: widget.baseUrl, activeProject: _activeProject, currentUser: _activeSessionUser),
+      MobileHRHub(
+        baseUrl: widget.baseUrl, 
+        currentUser: _activeSessionUser, 
+        userProfiles: _userProfiles,
+        onAddUser: _addNewUserLocally,
+      ),
+      MobileProjectsPortfolio(
+        baseUrl: widget.baseUrl, 
+        projects: _projects, 
+        activeProject: _activeProject,
+        onActivate: (proj) {
+          setState(() {
+            _activeProject = proj;
+          });
+        },
+        onAddProject: _addNewProjectLocally,
+        onRefresh: _fetchProjects,
+      ),
     ];
 
     return Scaffold(
       appBar: AppBar(
         title: _loadingProjects 
-          ? const Text('Loading Cockpit...', style: TextStyle(fontSize: 14))
-          : DropdownButtonHideUnderline(
-              child: DropdownButton<dynamic>(
-                value: _activeProject,
-                dropdownColor: Theme.of(context).cardColor,
-                alignment: Alignment.centerLeft,
-                items: _projects.map((proj) {
-                  return DropdownMenuItem<dynamic>(
-                    value: proj,
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEEF2F6),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(proj['code'] ?? '', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5))),
+          ? const Text('Loading Cockpit...', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
+          : _activeProject == null
+              ? const Text('Portfolio Registry', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
+              : DropdownButtonHideUnderline(
+                  child: DropdownButton<dynamic>(
+                    value: _activeProject,
+                    dropdownColor: Theme.of(context).cardColor,
+                    alignment: Alignment.centerLeft,
+                    items: _projects.map((proj) {
+                      return DropdownMenuItem<dynamic>(
+                        value: proj,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEEF2F6),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                proj['code'] ?? '', 
+                                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF4F46E5)),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(proj['name'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(proj['name'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  setState(() {
-                    _activeProject = val;
-                  });
-                },
-              ),
-            ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _activeProject = val;
+                      });
+                    },
+                  ),
+                ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
+            icon: const Icon(Icons.sync_rounded, size: 20),
             onPressed: () {
               _fetchProjects();
             },
@@ -444,15 +512,15 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
               radius: 14,
               backgroundColor: const Color(0xFF4F46E5),
               child: Text(
-                widget.currentUser['name']!.substring(0, 1).toUpperCase(),
+                _activeSessionUser['name']!.substring(0, 1).toUpperCase(),
                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
           )
         ],
       ),
-      body: _activeProject == null 
-        ? const Center(child: Text('Please select or create a project workspace.'))
+      body: _loadingProjects 
+        ? const Center(child: CircularProgressIndicator())
         : screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -463,19 +531,19 @@ class _CockpitHomeScreenState extends State<CockpitHomeScreen> {
           type: BottomNavigationBarType.fixed,
           selectedItemColor: const Color(0xFF4F46E5),
           unselectedItemColor: Colors.grey,
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
+          selectedFontSize: 9,
+          unselectedFontSize: 9,
           onTap: (idx) {
             setState(() {
               _currentIndex = idx;
             });
           },
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Bento'),
-            BottomNavigationBarItem(icon: Icon(Icons.check_box_outlined), label: 'Tasks'),
+            BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+            BottomNavigationBarItem(icon: Icon(Icons.check_box_outlined), label: 'Work Board'),
             BottomNavigationBarItem(icon: Icon(Icons.assignment_turned_in_outlined), label: 'Standup'),
-            BottomNavigationBarItem(icon: Icon(Icons.bug_report_outlined), label: 'Issues'),
-            BottomNavigationBarItem(icon: Icon(Icons.calendar_month_outlined), label: 'Leaves'),
+            BottomNavigationBarItem(icon: Icon(Icons.people_outline_rounded), label: 'HR Hub'),
+            BottomNavigationBarItem(icon: Icon(Icons.folder_open_outlined), label: 'Portfolio'),
           ],
         ),
       ),
@@ -515,7 +583,15 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
   }
 
   Future<void> _loadDashboardData() async {
-    if (widget.activeProject == null) return;
+    if (widget.activeProject == null) {
+      setState(() {
+        _totalTasks = 0;
+        _completedTasks = 0;
+        _openBugs = 0;
+        _completionRate = 0.0;
+      });
+      return;
+    }
     setState(() {
       _loading = true;
     });
@@ -558,24 +634,38 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (widget.activeProject == null) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text(
+            'Welcome! Initialize or select a Project Portfolio workspace to view metrics.',
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Bento Cell 1: Delivery Rate
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(18.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('DELIVERY METRIC PROGRESS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
-                  const SizedBox(height: 8),
+                  const Text('DELIVERY PROGRESS RATE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${_completionRate.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF4F46E5))),
-                      Text('$_completedTasks / $_totalTasks Tasks Done', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('${_completionRate.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF4F46E5))),
+                      Text('$_completedTasks / $_totalTasks Initiatives Done', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -593,6 +683,7 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
             ),
           ),
           const SizedBox(height: 12),
+          // Bento Row 2: Bugs & Tasks Count
           Row(
             children: [
               Expanded(
@@ -602,11 +693,11 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.bug_report, color: Colors.redAccent, size: 24),
+                        const Icon(Icons.bug_report_rounded, color: Colors.redAccent, size: 24),
                         const SizedBox(height: 12),
-                        const Text('Active Bugs', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const Text('Active Bugs', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text('$_openBugs Bugs', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1E293B))),
+                        Text('$_openBugs Bugs', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                       ],
                     ),
                   ),
@@ -620,11 +711,11 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF10B981), size: 24),
+                        const Icon(Icons.task_alt_rounded, color: Color(0xFF10B981), size: 24),
                         const SizedBox(height: 12),
-                        const Text('Scope Items', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const Text('Total Tasks', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text('$_totalTasks Items', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1E293B))),
+                        Text('$_totalTasks Items', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                       ],
                     ),
                   ),
@@ -633,19 +724,20 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
             ],
           ),
           const SizedBox(height: 12),
+          // Bento Cell 3: Cockpit Info
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(18.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('COCKPIT STATUS INFO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _buildStatusRow('Active Client', widget.activeProject['client'] ?? 'Internal'),
-                  const Divider(height: 16),
+                  const Divider(height: 20, color: Color(0xFFEEF2F6)),
                   _buildStatusRow('Delivery Mode', widget.activeProject['type'] == 'delivery' ? 'Implementation' : 'Maintenance'),
-                  const Divider(height: 16),
-                  _buildStatusRow('Status', (widget.activeProject['status'] ?? '').toString().toUpperCase()),
+                  const Divider(height: 20, color: Color(0xFFEEF2F6)),
+                  _buildStatusRow('Status', (widget.activeProject['status'] ?? 'Active').toString().toUpperCase()),
                 ],
               ),
             ),
@@ -659,19 +751,19 @@ class _MobileBentoDashboardState extends State<MobileBentoDashboard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600)),
         Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
       ],
     );
   }
 }
 
-class MobileTasksBoard extends StatefulWidget {
+class MobileWorkBoard extends StatefulWidget {
   final String baseUrl;
   final dynamic activeProject;
   final Map<String, String> currentUser;
 
-  const MobileTasksBoard({
+  const MobileWorkBoard({
     super.key,
     required this.baseUrl,
     required this.activeProject,
@@ -679,42 +771,56 @@ class MobileTasksBoard extends StatefulWidget {
   });
 
   @override
-  State<MobileTasksBoard> createState() => _MobileTasksBoardState();
+  State<MobileWorkBoard> createState() => _MobileWorkBoardState();
 }
 
-class _MobileTasksBoardState extends State<MobileTasksBoard> {
+class _MobileWorkBoardState extends State<MobileWorkBoard> {
+  int _activeSubTab = 0; // 0 for Tasks, 1 for Issues
   List<dynamic> _tasks = [];
+  List<dynamic> _issues = [];
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadTasks();
+    _loadData();
   }
 
   @override
-  void didUpdateWidget(covariant MobileTasksBoard oldWidget) {
+  void didUpdateWidget(covariant MobileWorkBoard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.activeProject != widget.activeProject) {
-      _loadTasks();
+      _loadData();
     }
   }
 
-  Future<void> _loadTasks() async {
-    if (widget.activeProject == null) return;
+  Future<void> _loadData() async {
+    if (widget.activeProject == null) {
+      setState(() {
+        _tasks = [];
+        _issues = [];
+      });
+      return;
+    }
     setState(() {
       _loading = true;
     });
     try {
-      final res = await http.get(Uri.parse('${widget.baseUrl}/api/tasks?projectId=${widget.activeProject['_id']}'));
-      final data = jsonDecode(res.body);
-      if (data['success'] == true) {
+      final projId = widget.activeProject['_id'];
+      final tasksRes = await http.get(Uri.parse('${widget.baseUrl}/api/tasks?projectId=$projId'));
+      final issuesRes = await http.get(Uri.parse('${widget.baseUrl}/api/issues?projectId=$projId'));
+
+      final tasksData = jsonDecode(tasksRes.body);
+      final issuesData = jsonDecode(issuesRes.body);
+
+      if (tasksData['success'] == true && issuesData['success'] == true) {
         setState(() {
-          _tasks = data['data'] ?? [];
+          _tasks = tasksData['data'] ?? [];
+          _issues = issuesData['data'] ?? [];
         });
       }
     } catch (e) {
-      debugPrint('Error loading tasks: $e');
+      debugPrint('Error loading workboard: $e');
     } finally {
       setState(() {
         _loading = false;
@@ -735,7 +841,7 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
       );
       final data = jsonDecode(res.body);
       if (data['success'] == true) {
-        _loadTasks();
+        _loadData();
       }
     } catch (e) {
       debugPrint('Error updating task: $e');
@@ -744,12 +850,83 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+    if (widget.activeProject == null) {
+      return const Center(child: Text('Please select a project to view tasks.'));
     }
 
+    return Column(
+      children: [
+        // Sub-tabs segment switcher
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _activeSubTab = 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _activeSubTab == 0 ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Tasks Board (${_tasks.length})',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: _activeSubTab == 0 ? const Color(0xFF4F46E5) : Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _activeSubTab = 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _activeSubTab == 1 ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Active Bugs (${_issues.length})',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: _activeSubTab == 1 ? const Color(0xFF4F46E5) : Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _activeSubTab == 0 
+                ? _buildTasksTab() 
+                : _buildIssuesTab(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTasksTab() {
     if (_tasks.isEmpty) {
-      return const Center(child: Text('No tasks created for this project yet.'));
+      return const Center(child: Text('No tasks created for this project workspace.', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)));
     }
 
     return ListView.builder(
@@ -759,7 +936,7 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
         final t = _tasks[idx];
         if (t['type'] == 'heading') {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
             child: Text(
               (t['title'] ?? '').toString().toUpperCase(),
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.indigo, letterSpacing: 1.5),
@@ -774,7 +951,7 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             leading: Icon(
-              isDone ? Icons.check_circle : Icons.circle_outlined,
+              isDone ? Icons.check_circle_rounded : Icons.circle_outlined,
               color: isDone ? const Color(0xFF10B981) : Colors.grey,
             ),
             title: Text(
@@ -786,31 +963,34 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
                 color: isDone ? Colors.grey : null,
               ),
             ),
-            subtitle: Row(
-              children: [
-                if (t['owner'] != null && t['owner'].toString().isNotEmpty) ...[
-                  Text('Owner: ${t['owner']}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                  const SizedBox(width: 8),
-                ],
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: t['blocked'] == true ? Colors.red.shade50 : Colors.indigo.shade50,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    t['blocked'] == true ? 'BLOCKED ⚠️' : (t['priority'] ?? 'medium').toString().toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      color: t['blocked'] == true ? Colors.red : const Color(0xFF4F46E5),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Row(
+                children: [
+                  if (t['owner'] != null && t['owner'].toString().isNotEmpty) ...[
+                    Text('Owner: ${t['owner']}', style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                  ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: t['blocked'] == true ? Colors.red.shade50 : Colors.indigo.shade50,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      t['blocked'] == true ? 'BLOCKED ⚠️' : (t['priority'] ?? 'medium').toString().toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        color: t['blocked'] == true ? Colors.red : const Color(0xFF4F46E5),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             trailing: PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, size: 20),
+              icon: const Icon(Icons.more_vert_rounded, size: 20),
               onSelected: (val) {
                 _updateTaskStatus(t['_id'], val);
               },
@@ -818,11 +998,83 @@ class _MobileTasksBoardState extends State<MobileTasksBoard> {
                 return [
                   const PopupMenuItem(value: 'not-started', child: Text('Not Started', style: TextStyle(fontSize: 12))),
                   const PopupMenuItem(value: 'in-progress', child: Text('In Progress', style: TextStyle(fontSize: 12))),
-                  const PopupMenuItem(value: 'in-sit', child: Text('In SIT', style: TextStyle(fontSize: 12))),
-                  const PopupMenuItem(value: 'in-uat', child: Text('In UAT', style: TextStyle(fontSize: 12))),
                   const PopupMenuItem(value: 'done', child: Text('Mark Done ✅', style: TextStyle(fontSize: 12))),
                 ];
               },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIssuesTab() {
+    if (_issues.isEmpty) {
+      return const Center(child: Text('All clear! Zero active bugs reported.', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(12.0),
+      itemCount: _issues.length,
+      itemBuilder: (context, idx) {
+        final issue = _issues[idx];
+        final priority = issue['priority'] ?? 'medium';
+        final status = issue['status'] ?? 'open';
+        
+        return Card(
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            title: Text(issue['title'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(issue['description'] ?? 'No description.', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: priority == 'critical' || priority == 'high' 
+                              ? Colors.red.shade50 
+                              : Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          priority.toString().toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 8, 
+                            fontWeight: FontWeight.bold,
+                            color: priority == 'critical' || priority == 'high' 
+                                ? Colors.red 
+                                : Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          status.toString().toUpperCase(),
+                          style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.blue),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (issue['assignee'] != null && issue['assignee'].toString().isNotEmpty)
+                        Text(
+                          'Assignee: ${issue['assignee']}',
+                          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -935,10 +1187,10 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                     decoration: const InputDecoration(
                       labelText: 'What did you accomplish today?',
                       hintText: 'e.g. Completed sanctions checker integration...',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.all(10),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                      contentPadding: EdgeInsets.all(12),
                     ),
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -948,11 +1200,11 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                           controller: _hoursController,
                           decoration: const InputDecoration(
                             labelText: 'Hours',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.all(10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            contentPadding: EdgeInsets.all(12),
                           ),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -961,10 +1213,10 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                           value: _status,
                           decoration: const InputDecoration(
                             labelText: 'Status',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                           ),
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
                           items: const [
                             DropdownMenuItem(value: 'completed', child: Text('Completed')),
                             DropdownMenuItem(value: 'in-progress', child: Text('In Progress')),
@@ -990,10 +1242,10 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                       decoration: const InputDecoration(
                         labelText: 'Describe Blockage Reason',
                         hintText: 'e.g. Waiting for SWIFT api credentials...',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.all(10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                        contentPadding: EdgeInsets.all(12),
                       ),
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -1002,7 +1254,8 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text('Post Standup Log', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
@@ -1042,7 +1295,7 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
                           children: [
                             Text(
                               '${l['employeeName']} • ${l['hoursSpent']} hrs spent • ${l['date']}',
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
                             ),
                             if (isBlocked && l['blockers'] != null && l['blockers'].toString().isNotEmpty)
                               Padding(
@@ -1064,149 +1317,37 @@ class _MobileDailyLogsState extends State<MobileDailyLogs> {
   }
 }
 
-class MobileIssuesTracker extends StatefulWidget {
-  final String baseUrl;
-  final dynamic activeProject;
-
-  const MobileIssuesTracker({super.key, required this.baseUrl, required this.activeProject});
-
-  @override
-  State<MobileIssuesTracker> createState() => _MobileIssuesTrackerState();
-}
-
-class _MobileIssuesTrackerState extends State<MobileIssuesTracker> {
-  List<dynamic> _issues = [];
-  bool _loading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadIssues();
-  }
-
-  @override
-  void didUpdateWidget(covariant MobileIssuesTracker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.activeProject != widget.activeProject) {
-      _loadIssues();
-    }
-  }
-
-  Future<void> _loadIssues() async {
-    if (widget.activeProject == null) return;
-    setState(() {
-      _loading = true;
-    });
-    try {
-      final res = await http.get(Uri.parse('${widget.baseUrl}/api/issues?projectId=${widget.activeProject['_id']}'));
-      final data = jsonDecode(res.body);
-      if (data['success'] == true) {
-        setState(() {
-          _issues = data['data'] ?? [];
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading issues: $e');
-    } finally {
-      setState(() {
-        _loading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_issues.isEmpty) {
-      return const Center(child: Text('All clear! Zero active bugs reported.'));
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(12.0),
-      itemCount: _issues.length,
-      itemBuilder: (context, idx) {
-        final issue = _issues[idx];
-        final priority = issue['priority'] ?? 'medium';
-        final status = issue['status'] ?? 'open';
-        
-        return Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            title: Text(issue['title'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 6.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(issue['description'] ?? 'No description provided.', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: priority == 'critical' || priority == 'high' 
-                              ? Colors.red.shade50 
-                              : Colors.amber.shade50,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          priority.toString().toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 8, 
-                            fontWeight: FontWeight.bold,
-                            color: priority == 'critical' || priority == 'high' 
-                                ? Colors.red 
-                                : Colors.amber.shade900,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          status.toString().toUpperCase(),
-                          style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.blue),
-                        ),
-                      ),
-                      const Spacer(),
-                      if (issue['assignee'] != null && issue['assignee'].toString().isNotEmpty)
-                        Text(
-                          'Assignee: ${issue['assignee']}',
-                          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class MobileLeavesPlanner extends StatefulWidget {
+// Unified HR & Employee Management Hub
+class MobileHRHub extends StatefulWidget {
   final String baseUrl;
   final Map<String, String> currentUser;
+  final List<Map<String, String>> userProfiles;
+  final Function(Map<String, String>) onAddUser;
 
-  const MobileLeavesPlanner({super.key, required this.baseUrl, required this.currentUser});
+  const MobileHRHub({
+    super.key, 
+    required this.baseUrl, 
+    required this.currentUser,
+    required this.userProfiles,
+    required this.onAddUser,
+  });
 
   @override
-  State<MobileLeavesPlanner> createState() => _MobileLeavesPlannerState();
+  State<MobileHRHub> createState() => _MobileHRHubState();
 }
 
-class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
+class _MobileHRHubState extends State<MobileHRHub> {
+  int _activeSegment = 0; // 0 for Team, 1 for Leaves
   List<dynamic> _leaves = [];
-  bool _loading = false;
+  bool _loadingLeaves = false;
+
+  // New Employee fields
+  final _empNameController = TextEditingController();
+  final _empEmailController = TextEditingController();
+  String _empRole = 'Employee';
+  String _empTeam = 'Engineering';
+
+  // New Leave fields
   final _startController = TextEditingController();
   final _endController = TextEditingController();
   final _notesController = TextEditingController();
@@ -1220,7 +1361,7 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
 
   Future<void> _loadLeaves() async {
     setState(() {
-      _loading = true;
+      _loadingLeaves = true;
     });
     try {
       final res = await http.get(Uri.parse('${widget.baseUrl}/api/leaves'));
@@ -1234,7 +1375,7 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
       debugPrint('Error loading leaves: $e');
     } finally {
       setState(() {
-        _loading = false;
+        _loadingLeaves = false;
       });
     }
   }
@@ -1261,7 +1402,7 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
         _notesController.clear();
         _loadLeaves();
         if (mounted) {
-          ScaffoldMessenger.of(context).showToast('Vacation request registered!');
+          ScaffoldMessenger.of(context).showToast('Leave request submitted!');
         }
       }
     } catch (e) {
@@ -1269,19 +1410,249 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
     }
   }
 
+  void _createEmployeeProfile() {
+    if (_empNameController.text.trim().isEmpty || _empEmailController.text.trim().isEmpty) return;
+    
+    final newUser = {
+      'name': _empNameController.text.trim(),
+      'role': _empRole,
+      'email': _empEmailController.text.trim(),
+      'team': _empTeam,
+    };
+    
+    widget.onAddUser(newUser);
+    
+    _empNameController.clear();
+    _empEmailController.clear();
+    
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showToast('New employee profile created successfully!');
+    }
+  }
+
+  void _showAddEmployeeDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                top: 20,
+                left: 20,
+                right: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('ADD NEW EMPLOYEE PROFILE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
+                        IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded))
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _empNameController,
+                      decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _empEmailController,
+                      decoration: const InputDecoration(labelText: 'Email Address', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: _empRole,
+                      decoration: const InputDecoration(labelText: 'Role Permission', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
+                      items: const [
+                        DropdownMenuItem(value: 'Admin', child: Text('Admin')),
+                        DropdownMenuItem(value: 'Project Manager', child: Text('Project Manager')),
+                        DropdownMenuItem(value: 'HR', child: Text('HR')),
+                        DropdownMenuItem(value: 'Developer', child: Text('Developer')),
+                        DropdownMenuItem(value: 'Employee', child: Text('Employee')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() => _empRole = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: _empTeam,
+                      decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
+                      items: const [
+                        DropdownMenuItem(value: 'Engineering', child: Text('Engineering')),
+                        DropdownMenuItem(value: 'Product', child: Text('Product')),
+                        DropdownMenuItem(value: 'HR', child: Text('HR')),
+                        DropdownMenuItem(value: 'Finance', child: Text('Finance')),
+                        DropdownMenuItem(value: 'Operations', child: Text('Operations')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() => _empTeam = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _createEmployeeProfile,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4F46E5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Create Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // HR Hub Navigation Swapping
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _activeSegment = 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _activeSegment == 0 ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Team Directory',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: _activeSegment == 0 ? const Color(0xFF4F46E5) : Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _activeSegment = 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _activeSegment == 1 ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Leaves Registry',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: _activeSegment == 1 ? const Color(0xFF4F46E5) : Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: _activeSegment == 0 ? _buildTeamTab() : _buildLeavesTab(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamTab() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        itemCount: widget.userProfiles.length,
+        itemBuilder: (context, idx) {
+          final u = widget.userProfiles[idx];
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFFEEF2F6),
+                child: Text(
+                  u['name']!.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold),
+                ),
+              ),
+              title: Text(u['name']!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              subtitle: Text('${u['role']} • ${u['email']}', style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500)),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2F6),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  (u['team'] ?? 'Engineering').toUpperCase(),
+                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Color(0xFF64748B)),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddEmployeeDialog,
+        backgroundColor: const Color(0xFF4F46E5),
+        foregroundColor: Colors.white,
+        mini: true,
+        child: const Icon(Icons.person_add_alt_1_rounded),
+      ),
+    );
+  }
+
+  Widget _buildLeavesTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('REQUEST CAPACITY LEAVE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
+                  const Text('REQUEST CAPACITY VACATION LEAVE', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -1291,10 +1662,10 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                           decoration: const InputDecoration(
                             labelText: 'Start Date',
                             hintText: 'YYYY-MM-DD',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                             contentPadding: EdgeInsets.all(10),
                           ),
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1304,10 +1675,10 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                           decoration: const InputDecoration(
                             labelText: 'End Date',
                             hintText: 'YYYY-MM-DD',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                             contentPadding: EdgeInsets.all(10),
                           ),
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -1317,10 +1688,10 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                     value: _leaveType,
                     decoration: const InputDecoration(
                       labelText: 'Type of Leave',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                     ),
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
                     items: const [
                       DropdownMenuItem(value: 'annual', child: Text('Annual Leave')),
                       DropdownMenuItem(value: 'sick', child: Text('Sick Leave')),
@@ -1340,11 +1711,11 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                     controller: _notesController,
                     decoration: const InputDecoration(
                       labelText: 'Notes / Reason',
-                      hintText: 'e.g. Summer family vacation block...',
-                      border: OutlineInputBorder(),
+                      hintText: 'e.g. Summer family vacation...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                       contentPadding: EdgeInsets.all(10),
                     ),
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -1352,9 +1723,10 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('Submit Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: const Text('Submit Request', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -1369,7 +1741,7 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
           ),
         ),
         Expanded(
-          child: _loading 
+          child: _loadingLeaves 
               ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
                   itemCount: _leaves.length,
@@ -1378,11 +1750,11 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       child: ListTile(
-                        leading: const Icon(Icons.flight_takeoff, color: Color(0xFF4F46E5)),
+                        leading: const Icon(Icons.flight_takeoff_rounded, color: Color(0xFF4F46E5)),
                         title: Text(l['employeeName'] ?? '', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         subtitle: Text(
                           '${l['startDate']} to ${l['endDate']} (${l['daysCount']} days) • ${l['notes'] ?? ''}',
-                          style: const TextStyle(fontSize: 10, color: Colors.grey),
+                          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
                         ),
                       ),
                     );
@@ -1394,15 +1766,246 @@ class _MobileLeavesPlannerState extends State<MobileLeavesPlanner> {
   }
 }
 
+// Portfolio & Project Management
+class MobileProjectsPortfolio extends StatefulWidget {
+  final String baseUrl;
+  final List<dynamic> projects;
+  final dynamic activeProject;
+  final Function(dynamic) onActivate;
+  final Function(dynamic) onAddProject;
+  final VoidCallback onRefresh;
+
+  const MobileProjectsPortfolio({
+    super.key,
+    required this.baseUrl,
+    required this.projects,
+    required this.activeProject,
+    required this.onActivate,
+    required this.onAddProject,
+    required this.onRefresh,
+  });
+
+  @override
+  State<MobileProjectsPortfolio> createState() => _MobileProjectsPortfolioState();
+}
+
+class _MobileProjectsPortfolioState extends State<MobileProjectsPortfolio> {
+  final _projNameController = TextEditingController();
+  final _projCodeController = TextEditingController();
+  final _projClientController = TextEditingController();
+  String _projType = 'delivery';
+  bool _savingProject = false;
+
+  Future<void> _createProjectWorkspace() async {
+    if (_projNameController.text.trim().isEmpty || _projCodeController.text.trim().isEmpty) return;
+    
+    setState(() {
+      _savingProject = true;
+    });
+
+    try {
+      final res = await http.post(
+        Uri.parse('${widget.baseUrl}/api/projects'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': _projNameController.text.trim(),
+          'code': _projCodeController.text.trim().toUpperCase(),
+          'client': _projClientController.text.trim(),
+          'type': _projType,
+        }),
+      );
+      final data = jsonDecode(res.body);
+      if (data['success'] == true) {
+        final newProj = data['data'];
+        widget.onAddProject(newProj);
+        _projNameController.clear();
+        _projCodeController.clear();
+        _projClientController.clear();
+        
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showToast('New Project workspace initialized successfully!');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error creating project: $e');
+    } finally {
+      setState(() {
+        _savingProject = false;
+      });
+    }
+  }
+
+  void _showAddProjectDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                top: 20,
+                left: 20,
+                right: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('INITIALIZE PROJECT PROFILE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.5)),
+                        IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded))
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _projNameController,
+                      decoration: const InputDecoration(labelText: 'Project Name', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _projCodeController,
+                      decoration: const InputDecoration(labelText: 'Project Code (e.g. DIB-CORE)', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _projClientController,
+                      decoration: const InputDecoration(labelText: 'Client Name', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: _projType,
+                      decoration: const InputDecoration(labelText: 'Focus Focus Type', border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+                      style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w600),
+                      items: const [
+                        DropdownMenuItem(value: 'delivery', child: Text('Active Project Delivery (Implementation)')),
+                        DropdownMenuItem(value: 'maintenance', child: Text('SLA Project Maintenance (Ongoing Support)')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() => _projType = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _savingProject ? null : _createProjectWorkspace,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4F46E5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _savingProject 
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Text('Create Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      }
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: widget.projects.isEmpty
+          ? const Center(child: Text('No projects found. Add your first project workspace profile.', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey)))
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              itemCount: widget.projects.length,
+              itemBuilder: (context, idx) {
+                final p = widget.projects[idx];
+                final isActive = widget.activeProject != null && widget.activeProject['_id'] == p['_id'];
+                
+                return Card(
+                  color: isActive ? const Color(0xFFEEF2F6).withOpacity(0.4) : Colors.white,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: CircleAvatar(
+                      backgroundColor: isActive ? const Color(0xFF4F46E5) : const Color(0xFFF1F5F9),
+                      child: Icon(
+                        Icons.folder_open_rounded, 
+                        color: isActive ? Colors.white : const Color(0xFF4F46E5),
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(p['name'] ?? '', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Code: ${p['code']} • Client: ${p['client'] ?? 'Internal'}', style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEF2F6),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              p['type'] == 'delivery' ? 'IMPLEMENTATION' : 'ONGOING SUPPORT',
+                              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Color(0xFF64748B)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    trailing: isActive
+                        ? const Chip(
+                            label: Text('ACTIVE', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white)),
+                            backgroundColor: Color(0xFF10B981),
+                            padding: EdgeInsets.zero,
+                          )
+                        : OutlinedButton(
+                            onPressed: () => widget.onActivate(p),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            child: const Text('ACTIVATE', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5))),
+                          ),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddProjectDialog,
+        backgroundColor: const Color(0xFF4F46E5),
+        foregroundColor: Colors.white,
+        mini: true,
+        child: const Icon(Icons.create_new_folder_rounded),
+      ),
+    );
+  }
+}
+
 extension ScaffoldMessengerExtension on ScaffoldMessengerState {
   void showToast(String message) {
     showSnackBar(
       SnackBar(
-        content: Text(message, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        content: Text(message, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
         backgroundColor: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
