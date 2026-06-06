@@ -269,7 +269,7 @@ async function runTests() {
       }
     }
 
-    // Clean up temporary Task, Epic, and Transaction
+    // Clean up temporary Task, Epic, Issue, Transaction, and Project
     console.log('\n🧹 Cleaning up temporary test records...');
     
     if (testTask) {
@@ -282,6 +282,24 @@ async function runTests() {
       const res = await fetch(`${BASE_URL}/api/epics?id=${testEpic._id}`, { method: 'DELETE' });
       const data = await res.json();
       report('DELETE /api/epics Cleanup', data.success);
+    }
+
+    if (testIssue) {
+      const res = await fetch(`${BASE_URL}/api/issues?id=${testIssue._id}`, { method: 'DELETE' });
+      const data = await res.json();
+      report('DELETE /api/issues/ Cleanup', data.success);
+    }
+
+    if (testTrans) {
+      const res = await fetch(`${BASE_URL}/api/financials?id=${testTrans._id}`, { method: 'DELETE' });
+      const data = await res.json();
+      report('DELETE /api/financials Cleanup', data.success);
+    }
+
+    if (testProject) {
+      const res = await fetch(`${BASE_URL}/api/projects?id=${testProject._id}`, { method: 'DELETE' });
+      const data = await res.json();
+      report('DELETE /api/projects Cleanup', data.success);
     }
 
     console.log('\n🌟 Integration testing validation sequence finished!\n');

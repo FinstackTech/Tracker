@@ -292,78 +292,73 @@ export default function DashboardTab({
       {/* ─── TASK ASSIGNMENT & ALERTS OVERVIEW ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         {/* KPI: Total Assigned */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-600" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{totalAssignedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-              <Users className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
+              <Users className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Across all members</p>
+          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Across all members</p>
         </div>
 
         {/* KPI: My Assigned */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 to-violet-500" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Assigned Tasks</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{myAssignedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
-              <User className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-955/30 dark:text-indigo-405">
+              <User className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold uppercase mt-3 tracking-wide">Assigned to {activeUser}</p>
+          <p className="text-[8px] text-indigo-550 dark:text-indigo-400 font-semibold uppercase mt-3 tracking-wide">Assigned to {activeUser}</p>
         </div>
 
         {/* KPI: In Progress */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-amber-400 to-orange-500" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">In Progress Tasks</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{inProgressTasks}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">In Progress Tasks</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{inProgressTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
-              <Activity className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50/55 text-amber-600 dark:bg-amber-955/20 dark:text-amber-400">
+              <Activity className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Active Dev / SIT / UAT</p>
+          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Active Dev / SIT / UAT</p>
         </div>
 
         {/* KPI: Blocked / Pending */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-rose-500 to-red-500" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Pending / Blocked</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending / Blocked</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{pendingOrBlockedTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400">
-              <AlertTriangle className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
+              <AlertTriangle className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-[9px] text-slate-400 font-bold uppercase mt-3 tracking-wide">Blocked or On Hold</p>
+          <p className="text-[8px] text-slate-400 font-semibold uppercase mt-3 tracking-wide">Blocked or On Hold</p>
         </div>
 
         {/* KPI: Due Alerts */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-pink-500 to-rose-500" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Due Date Alerts</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Due Date Alerts</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{dueDateAlertsCount}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-50 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400">
-              <Clock className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50/55 text-rose-600 dark:bg-rose-955/20 dark:text-rose-405">
+              <Clock className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-[9px] text-rose-600 dark:text-rose-450 font-bold uppercase mt-3 tracking-wide">Due in &lt;= 3 days / overdue</p>
+          <p className="text-[8px] text-rose-550 dark:text-rose-450 font-semibold uppercase mt-3 tracking-wide">{dueDateAlertsCount > 0 ? "⚠️ Overdue items exist" : "No immediate alerts"}</p>
         </div>
       </div>
 
@@ -371,85 +366,77 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* KPI: Progress */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 to-violet-500" />
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-indigo-500/5 blur-xl group-hover:bg-indigo-500/10 transition-all duration-300" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Project Delivery</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Project Delivery</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{completionPercentage}%</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
-              <CheckCircle className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-405">
+              <CheckCircle className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-4 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div className="h-full bg-indigo-600 transition-all duration-505" style={{ width: `${completionPercentage}%` }} />
+            <div className="h-full bg-indigo-650 transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
           </div>
-          <div className="mt-2 flex justify-between text-[9px] font-extrabold uppercase text-slate-400 tracking-wide">
+          <div className="mt-2 flex justify-between text-[8px] font-semibold uppercase text-slate-400 tracking-wide">
             <span>{completedTasks} Done</span>
             <span>{openTasks} Open</span>
           </div>
         </div>
 
         {/* KPI: Workload */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-sky-400 to-blue-500" />
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-sky-500/5 blur-xl group-hover:bg-sky-500/10 transition-all duration-300" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Open Backlog</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Open Backlog</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">{openTasks}</h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
-              <Activity className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50/50 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400">
+              <Activity className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-4 flex gap-4 text-[9px] font-extrabold uppercase text-slate-400 tracking-wide">
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-400" /> {inProgressTasks} In Dev</span>
-            <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /> {onHoldTasks} On Hold</span>
+          <div className="mt-4 flex gap-4 text-[8px] font-semibold uppercase text-slate-400 tracking-wide">
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {inProgressTasks} In Dev</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-300" /> {onHoldTasks} On Hold</span>
           </div>
         </div>
 
         {/* KPI: Financials Revenue */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-emerald-400 to-green-500" />
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-emerald-500/5 blur-xl group-hover:bg-emerald-500/10 transition-all duration-300" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Contract Value</span>
-              <h3 className="mt-1 font-sans text-2xl font-black text-slate-800 dark:text-white leading-tight">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Contract Value</span>
+              <h3 className="mt-1 font-sans text-xl font-bold text-slate-800 dark:text-white leading-tight">
                 ${totalContracted.toLocaleString()}
               </h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
-              <Landmark className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50/50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+              <Landmark className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-4 flex justify-between text-[9px] font-extrabold uppercase tracking-wide">
+          <div className="mt-4 flex justify-between text-[8px] font-semibold uppercase tracking-wide">
             <span className="text-emerald-600">Paid: ${invoicedAndPaid.toLocaleString()}</span>
             <span className="text-amber-600">Unpaid: ${outstandingRevenue.toLocaleString()}</span>
           </div>
         </div>
 
         {/* KPI: Profit Margin */}
-        <div className="apple-card p-5 relative overflow-hidden group hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-purple-400 to-pink-500" />
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-purple-500/5 blur-xl group-hover:bg-purple-500/10 transition-all duration-300" />
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 hover:shadow-md transition-all duration-150 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Net Margin</span>
-              <h3 className={`mt-1 font-sans text-2xl font-black leading-tight ${
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Net Margin</span>
+              <h3 className={`mt-1 font-sans text-xl font-bold leading-tight ${
                 projectMargin >= 0 ? 'text-slate-800 dark:text-white' : 'text-rose-600'
               }`}>
                 {marginPct}%
               </h3>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-900/40 dark:text-violet-405">
-              <TrendingUp className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50/50 text-violet-600 dark:bg-violet-900/45 dark:text-violet-405">
+              <TrendingUp className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-4 flex justify-between text-[9px] font-extrabold uppercase tracking-wide">
+          <div className="mt-4 flex justify-between text-[8px] font-semibold uppercase tracking-wide">
             <span className="text-slate-400">Costs: ${totalExpenses.toLocaleString()}</span>
             <span className={projectMargin >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-rose-500'}>
               Net: ${projectMargin.toLocaleString()}
@@ -463,7 +450,7 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Workload Effort Allocations */}
-        <div className="lg:col-span-2 apple-card p-5">
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
           <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider">
             Resource Workload & Effort (Man-Days)
           </h4>
@@ -497,7 +484,7 @@ export default function DashboardTab({
         </div>
 
         {/* Expense Allocations */}
-        <div className="apple-card p-5">
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
           <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-4 uppercase tracking-wider">
             Operational Cost Breakdown
           </h4>
@@ -555,7 +542,7 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Agile Sprint Burndown Gauge (SVG Circular progress ring redesign) */}
-        <div className="apple-card p-5 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
           <div>
             <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4 text-indigo-500" />
@@ -611,7 +598,7 @@ export default function DashboardTab({
         </div>
 
         {/* Bug Backlog Priority Chart */}
-        <div className="lg:col-span-2 apple-card p-5">
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
           <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
             <Activity className="h-4 w-4 text-rose-500" />
             Unresolved Bug Severity
@@ -650,7 +637,7 @@ export default function DashboardTab({
       </div>
 
       {/* ─── TEAM AVAILABILITY & MILESTONE SCHEDULER TIMELINE (Redesigned Calendar Grid) ─── */}
-      <div className="apple-card p-5">
+      <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80">
         <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <CalendarRange className="h-4.5 w-4.5 text-indigo-500" />
@@ -750,7 +737,7 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Notification Feed Widget */}
-        <div className="lg:col-span-1 apple-card p-5 flex flex-col justify-between">
+        <div className="lg:col-span-1 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
           <div>
             <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 mb-1 uppercase tracking-wider flex items-center gap-1.5">
               <Bell className="h-4.5 w-4.5 text-indigo-500" />
@@ -782,7 +769,7 @@ export default function DashboardTab({
         </div>
 
         {/* Report Export Center */}
-        <div className="lg:col-span-2 apple-card p-5 flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 flex flex-col justify-between">
           <div>
             <h4 className="text-xs font-black text-slate-850 dark:text-slate-105 mb-1 uppercase tracking-wider flex items-center gap-1.5">
               <Printer className="h-4.5 w-4.5 text-emerald-500" />

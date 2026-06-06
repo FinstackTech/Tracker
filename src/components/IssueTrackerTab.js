@@ -319,7 +319,7 @@ export default function IssueTrackerTab({
                       <div 
                         key={issue._id}
                         onClick={() => onSelectItem(issue, 'issue')}
-                        className="apple-card p-3.5 transition-all cursor-pointer group"
+                        className="bg-white border border-slate-200/60 rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] hover:shadow-md dark:bg-slate-900 dark:border-slate-800/80 transition-all cursor-pointer group"
                       >
                         {/* Issue Type Indicator */}
                         <div className="flex items-center gap-1.5 justify-between mb-1.5">
@@ -424,7 +424,7 @@ export default function IssueTrackerTab({
 
       {/* ─── LIST VIEW SPREADSHEET ─── */}
       {viewMode === 'list' && (
-        <div className="apple-card overflow-hidden">
+        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm dark:bg-slate-900 dark:border-slate-800/80">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -547,7 +547,7 @@ export default function IssueTrackerTab({
       {/* ─── FILE ISSUE MODAL ─── */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md apple-card p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider dark:text-white">
                 File Project Issue

@@ -509,7 +509,7 @@ export default function TaskTrackerTab({
 
       {/* ─── LIST TABLE VIEW ─── */}
       {viewMode === 'list' && (
-        <div className="apple-card overflow-hidden">
+        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm dark:bg-slate-900 dark:border-slate-800/80">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1000px] border-collapse text-left text-xs text-slate-600 dark:text-slate-300">
               <thead>
@@ -853,7 +853,7 @@ export default function TaskTrackerTab({
                     <div 
                       key={t._id}
                       onClick={() => onSelectItem(t, 'task')}
-                      className="apple-card p-3.5 transition-all cursor-pointer group"
+                      className="bg-white border border-slate-200/60 rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(99,102,241,0.01)] hover:shadow-md dark:bg-slate-900 dark:border-slate-800/80 transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-1.5 justify-between">
                         <div className="text-[9px] font-black uppercase text-indigo-500 truncate">
@@ -961,7 +961,7 @@ export default function TaskTrackerTab({
 
       {/* ─── MONTHLY CALENDAR VIEW ─── */}
       {viewMode === 'calendar' && (
-        <div className="apple-card p-5 select-none">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm dark:bg-slate-900 dark:border-slate-800/80 select-none">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-indigo-500" />

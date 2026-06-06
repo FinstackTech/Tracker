@@ -58,56 +58,6 @@ body {
 
 /* Finstack Reusable Classes */
 
-/* 1. Glassmorphic Apple Card */
-.apple-card {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-premium);
-  transition: var(--transition-smooth);
-}
-.dark .apple-card {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-.apple-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-  border-color: rgba(255, 255, 255, 0.6);
-}
-.dark .apple-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-}
-
-/* 2. Metrics Statistics Card */
-.metric-card {
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-premium);
-  transition: var(--transition-smooth);
-}
-.metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-}
-.dark .metric-card:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-}
-
-/* 3. Split Layout Dashboard */
-.dashboard-split {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-}
-@media (max-width: 1024px) {
-  .dashboard-split {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Backdrop Trade Route Animations */
 @keyframes dash {
   to {

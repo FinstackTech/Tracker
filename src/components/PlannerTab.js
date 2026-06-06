@@ -112,7 +112,7 @@ export default function PlannerTab({
   };
 
   return (
-    <div className="apple-card p-6 min-h-[500px] flex flex-col">
+    <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.01)] dark:bg-slate-900 dark:border-slate-800/80 min-h-[500px] flex flex-col">
       
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-150/40 pb-4 dark:border-slate-800/40">
