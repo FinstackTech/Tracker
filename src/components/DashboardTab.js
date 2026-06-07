@@ -398,6 +398,9 @@ export default function DashboardTab({
               <Clock className="h-5 w-5" />
             </div>
           </div>
+          <div className="text-[8.5px] font-bold text-slate-400 mt-1.5 leading-snug">
+            Logging for: <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{activeProject ? `${activeProject.code} - ${activeProject.name}` : 'None (select workspace)'}</span>
+          </div>
           <form onSubmit={handlePostQuickStandup} className="space-y-2 mt-2">
             <textarea placeholder="Completed task?" value={quickStandupTask} onChange={e => setQuickStandupTask(e.target.value)} rows="1" className="w-full rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-[9px] outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-950/50 dark:text-slate-350 font-semibold" required />
             <div className="grid grid-cols-2 gap-1.5">

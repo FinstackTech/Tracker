@@ -411,7 +411,7 @@ export default function Home() {
       const res = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _id: itemId, ...updatedFields })
+        body: JSON.stringify({ _id: itemId, actor: activeUser, ...updatedFields })
       });
       const data = await res.json();
       
@@ -472,7 +472,8 @@ export default function Home() {
       code: projCode.toUpperCase().replace(/\s+/g, '-'),
       client: projClient || "Internal",
       type: projType,
-      status: "active"
+      status: "active",
+      actor: activeUser
     };
 
     try {
@@ -1185,6 +1186,7 @@ export default function Home() {
                 activeUser={activeUser} 
                 activeProject={activeProject}
                 currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
                 showToast={showToast}
               />
             )}

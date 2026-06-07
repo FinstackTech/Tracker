@@ -22,12 +22,28 @@
   --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --animate-spin-slow: spin 10s linear infinite;
+  
+  /* Custom palette bindings to resolve non-standard Tailwind values */
+  --color-indigo-650: #4f46e5;
+  --color-indigo-755: #3730a3;
+  --color-indigo-655: #4338ca;
+  --color-indigo-405: #a5b4fc;
+  --color-indigo-450: #818cf8;
+  --color-indigo-455: #6366f1;
+  --color-slate-805: #0f172a;
+  --color-slate-850: #1e293b;
+  --color-slate-855: #334155;
+  --color-slate-650: #475569;
+  --color-slate-455: #64748b;
+  --color-slate-450: #94a3b8;
+  --color-slate-205: #cbd5e1;
+  --color-slate-202: #e2e8f0;
 }
 
 @media (prefers-color-scheme: dark) {

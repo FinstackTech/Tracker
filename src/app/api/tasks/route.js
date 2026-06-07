@@ -24,7 +24,24 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const task = await Task.create(body);
+    const { actor, ...taskData } = body;
+    const task = await Task.create(taskData);
+
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      await routeActionNotification({
+        actor: actor || body.owner || 'System',
+        actionType: 'create',
+        module: 'task',
+        projectId: task.projectId,
+        itemId: task._id,
+        itemTitle: task.title,
+        details: task
+      });
+    } catch (e) {
+      console.error("Failed to route task create notification:", e);
+    }
+
     return NextResponse.json({ success: true, data: task });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
@@ -82,6 +99,26 @@ export async function PUT(request) {
 
     const task = await Task.findByIdAndUpdate(_id, updateData, { new: true }).populate('epicId');
 
+    // Trigger notification routing
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      const actionType = updateData.status !== undefined && updateData.status !== currentTask.status
+        ? 'status_change'
+        : 'update';
+
+      await routeActionNotification({
+        actor: changeActor,
+        actionType: actionType,
+        module: 'task',
+        projectId: task.projectId,
+        itemId: task._id,
+        itemTitle: task.title,
+        details: updateData
+      });
+    } catch (e) {
+      console.error("Failed to route task update notification:", e);
+    }
+
     // Dispatch webhook alert if task is done
     if (updateData.status === 'done' && currentTask.status !== 'done') {
       await dispatchAlert({
@@ -108,14 +145,32 @@ export async function DELETE(request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const actor = searchParams.get('actor') || "User";
     
     if (!id) {
       return NextResponse.json({ success: false, error: "Task ID is required for delete" }, { status: 400 });
     }
     
-    const task = await Task.findByIdAndDelete(id);
+    const task = await Task.findById(id);
     if (!task) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+    }
+
+    await Task.findByIdAndDelete(id);
+
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      await routeActionNotification({
+        actor: actor,
+        actionType: 'delete',
+        module: 'task',
+        projectId: task.projectId,
+        itemId: task._id,
+        itemTitle: task.title,
+        details: task
+      });
+    } catch (e) {
+      console.error("Failed to route task delete notification:", e);
     }
     
     return NextResponse.json({ success: true, data: task });

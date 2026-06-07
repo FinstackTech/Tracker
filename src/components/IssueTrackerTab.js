@@ -113,7 +113,8 @@ export default function IssueTrackerTab({
       storyPoints: Number(newStoryPoints),
       dueDate: newDueDate,
       epicId: newEpicId || null,
-      blocked: newBlocked
+      blocked: newBlocked,
+      actor: activeUser
     };
 
     try {
@@ -148,7 +149,7 @@ export default function IssueTrackerTab({
       await fetch('/api/issues', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _id: issueId, status: newStatus })
+        body: JSON.stringify({ _id: issueId, status: newStatus, actor: activeUser })
       });
     } catch (e) {
       console.error(e);
@@ -158,7 +159,7 @@ export default function IssueTrackerTab({
   const handleDeleteIssue = async (issueId) => {
     if (!confirm("Delete this issue?")) return;
     try {
-      const response = await fetch(`/api/issues?id=${issueId}`, {
+      const response = await fetch(`/api/issues?id=${issueId}&actor=${encodeURIComponent(activeUser || '')}`, {
         method: 'DELETE'
       });
       const res = await response.json();

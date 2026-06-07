@@ -24,7 +24,23 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const issue = await Issue.create(body);
+    const { actor, ...issueData } = body;
+    const issue = await Issue.create(issueData);
+
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      await routeActionNotification({
+        actor: actor || issue.reporter || 'System',
+        actionType: 'create',
+        module: 'issue',
+        projectId: issue.projectId,
+        itemId: issue._id,
+        itemTitle: issue.title,
+        details: issue
+      });
+    } catch (e) {
+      console.error("Failed to route issue create notification:", e);
+    }
     
     // Dispatch webhook alert if bug is critical
     if (issue.priority === 'critical') {
@@ -96,6 +112,26 @@ export async function PUT(request) {
     }
 
     const issue = await Issue.findByIdAndUpdate(_id, updateData, { new: true }).populate('epicId');
+
+    // Trigger notification routing
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      const actionType = updateData.status !== undefined && updateData.status !== currentIssue.status
+        ? 'status_change'
+        : 'update';
+
+      await routeActionNotification({
+        actor: changeActor,
+        actionType: actionType,
+        module: 'issue',
+        projectId: issue.projectId,
+        itemId: issue._id,
+        itemTitle: issue.title,
+        details: updateData
+      });
+    } catch (e) {
+      console.error("Failed to route issue update notification:", e);
+    }
     
     // Dispatch webhook alert if priority was changed to critical
     if (updateData.priority === 'critical') {
@@ -136,12 +172,34 @@ export async function DELETE(request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const actor = searchParams.get('actor') || "User";
     
     if (!id) {
       return NextResponse.json({ success: false, error: "Issue ID is required" }, { status: 400 });
     }
     
+    const issue = await Issue.findById(id);
+    if (!issue) {
+      return NextResponse.json({ success: false, error: "Issue not found" }, { status: 404 });
+    }
+
     await Issue.findByIdAndDelete(id);
+
+    try {
+      const { routeActionNotification } = require('@/lib/notificationRouter');
+      await routeActionNotification({
+        actor: actor,
+        actionType: 'delete',
+        module: 'issue',
+        projectId: issue.projectId,
+        itemId: issue._id,
+        itemTitle: issue.title,
+        details: issue
+      });
+    } catch (e) {
+      console.error("Failed to route issue delete notification:", e);
+    }
+
     return NextResponse.json({ success: true, message: "Issue deleted successfully" });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });

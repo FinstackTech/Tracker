@@ -48,10 +48,31 @@ export default function SettingsTab({
   activeUser, 
   activeProject, 
   currentUser,
+  setCurrentUser,
   showToast
 }) {
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'Head';
   
+  // Personal notification preferences
+  const [bellPref, setBellPref] = useState(true);
+  const [emailPref, setEmailPref] = useState(true);
+  const [teamsPref, setTeamsPref] = useState(false);
+  const [pushPref, setPushPref] = useState(false);
+  const [personalTeamsWebhook, setPersonalTeamsWebhook] = useState('');
+  const [personalPushToken, setPersonalPushToken] = useState('');
+  const [savingPersonal, setSavingPersonal] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setBellPref(currentUser.notificationPreferences?.bell !== false);
+      setEmailPref(currentUser.notificationPreferences?.email !== false);
+      setTeamsPref(!!currentUser.notificationPreferences?.teams);
+      setPushPref(!!currentUser.notificationPreferences?.push);
+      setPersonalTeamsWebhook(currentUser.teamsWebhookUrl || '');
+      setPersonalPushToken(currentUser.mobilePushToken || '');
+    }
+  }, [currentUser]);
+
   const [msTeamsUrl, setMsTeamsUrl] = useState('');
   const [slackUrl, setSlackUrl] = useState('');
   const [discordUrl, setDiscordUrl] = useState('');
@@ -69,6 +90,49 @@ export default function SettingsTab({
   
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+
+  const handleSavePersonalPrefs = async (e) => {
+    if (e) e.preventDefault();
+    setSavingPersonal(true);
+    try {
+      const payload = {
+        _id: currentUser?._id,
+        notificationPreferences: {
+          bell: bellPref,
+          email: emailPref,
+          teams: teamsPref,
+          push: pushPref
+        },
+        teamsWebhookUrl: personalTeamsWebhook,
+        mobilePushToken: personalPushToken
+      };
+      
+      const response = await fetch('/api/employees', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const res = await response.json();
+      if (res.success && res.data) {
+        if (setCurrentUser) {
+          setCurrentUser(res.data);
+        }
+        localStorage.setItem('company_current_session', JSON.stringify(res.data));
+        if (showToast) {
+          showToast("Personal notification preferences saved successfully!", "success");
+        } else {
+          alert("Preferences updated!");
+        }
+      } else {
+        if (showToast) showToast(res.error || "Failed to update preferences", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      if (showToast) showToast("Error saving preferences", "error");
+    } finally {
+      setSavingPersonal(false);
+    }
+  };
 
   // Fetch current integration settings
   const fetchSettings = async () => {
@@ -184,6 +248,127 @@ export default function SettingsTab({
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
       
+      {/* ─── PERSONAL NOTIFICATION PREFERENCES CARD ─── */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80 animate-all">
+        <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4 dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-500 animate-all">
+              <Bell className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">
+                My Notification Preferences
+              </h4>
+              <p className="text-[10px] text-slate-405 mt-0.5">Control how and where you receive system action alerts</p>
+            </div>
+          </div>
+          <span className="text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100/40 dark:border-emerald-900/30">
+            Active Profile: {activeUser}
+          </span>
+        </div>
+
+        <form onSubmit={handleSavePersonalPrefs} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* System Bell */}
+            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-950/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={bellPref}
+                onChange={e => setBellPref(e.target.checked)}
+                className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 cursor-pointer"
+              />
+              <div>
+                <div className="text-xs font-bold text-slate-750 dark:text-slate-200">System Bell Notifications</div>
+                <div className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">Display real-time alerts under the header's notification bell.</div>
+              </div>
+            </label>
+
+            {/* Email / Outlook */}
+            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-950/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={emailPref}
+                onChange={e => setEmailPref(e.target.checked)}
+                className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 cursor-pointer"
+              />
+              <div>
+                <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Email & Outlook Sync</div>
+                <div className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">Receive action notifications on your registered Outlook email.</div>
+              </div>
+            </label>
+
+            {/* Microsoft Teams */}
+            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-950/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={teamsPref}
+                onChange={e => setTeamsPref(e.target.checked)}
+                className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 cursor-pointer"
+              />
+              <div>
+                <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Microsoft Teams Delivery</div>
+                <div className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">Route your action feeds directly to a personal Teams channel webhook.</div>
+              </div>
+            </label>
+
+            {/* Mobile Push */}
+            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/20 dark:border-slate-850 dark:bg-slate-950/20 hover:bg-slate-50/60 dark:hover:bg-slate-950/50 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={pushPref}
+                onChange={e => setPushPref(e.target.checked)}
+                className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 mt-0.5 cursor-pointer"
+              />
+              <div>
+                <div className="text-xs font-bold text-slate-750 dark:text-slate-200">Mobile Push Alerts</div>
+                <div className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">Push alerts instantly to your connected iOS / Android mobile application.</div>
+              </div>
+            </label>
+
+          </div>
+
+          {/* Conditional Teams Webhook Input */}
+          {teamsPref && (
+            <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-150 p-3.5 rounded-xl bg-slate-50/50 border border-slate-150 dark:bg-slate-950/20 dark:border-slate-800">
+              <label className="block text-[9px] font-black uppercase text-slate-400 tracking-wider">My Personal Teams Webhook URL</label>
+              <input
+                type="url"
+                required
+                placeholder="https://company.webhook.office.com/webhookb2/..."
+                value={personalTeamsWebhook}
+                onChange={e => setPersonalTeamsWebhook(e.target.value)}
+                className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-350 font-semibold"
+              />
+            </div>
+          )}
+
+          {/* Conditional Mobile Push Token Input */}
+          {pushPref && (
+            <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-150 p-3.5 rounded-xl bg-slate-50/50 border border-slate-150 dark:bg-slate-950/20 dark:border-slate-800">
+              <label className="block text-[9px] font-black uppercase text-slate-400 tracking-wider">Device Registration Push Token</label>
+              <input
+                type="text"
+                placeholder="e.g. apns-device-token-hex-key-string"
+                value={personalPushToken}
+                onChange={e => setPersonalPushToken(e.target.value)}
+                className="w-full rounded-xl border border-slate-205 bg-white px-3.5 py-2 text-xs outline-none focus:border-indigo-500 dark:border-slate-850 dark:bg-slate-900 dark:text-slate-355 font-semibold"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              disabled={savingPersonal}
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-755 px-5 py-2.5 text-xs font-bold text-white shadow-md cursor-pointer select-none transition-colors border-0"
+            >
+              {savingPersonal ? 'Saving...' : 'Save My Preferences'}
+            </button>
+          </div>
+        </form>
+      </div>
+
       {/* ─── WEBHOOK CONFIGURATION FORM ─── */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_2px_8px_rgba(99,102,241,0.02)] dark:bg-slate-900 dark:border-slate-805/80">
         

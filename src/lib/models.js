@@ -166,7 +166,15 @@ const EmployeeSchema = new mongoose.Schema({
   password: { type: String, default: 'user' },
   team: { type: String, default: 'Engineering' },
   status: { type: String, default: 'Active' },
-  lastLogin: { type: String, default: '' }
+  lastLogin: { type: String, default: '' },
+  notificationPreferences: {
+    bell: { type: Boolean, default: true },
+    email: { type: Boolean, default: true },
+    teams: { type: Boolean, default: false },
+    push: { type: Boolean, default: false }
+  },
+  teamsWebhookUrl: { type: String, default: '' },
+  mobilePushToken: { type: String, default: '' }
 }, { timestamps: true });
 
 // ─── 10. DOCUMENT / ATTACHMENT VAULT SCHEMA ───

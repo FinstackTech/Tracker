@@ -90,7 +90,8 @@ export default function TaskTrackerTab({
       manDays: 0,
       timeline: "TBD",
       dueDate: dateString,
-      notes: ""
+      notes: "",
+      actor: currentUser?.name
     };
 
     try {
@@ -204,7 +205,7 @@ export default function TaskTrackerTab({
       await fetch('/api/tasks', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ _id: taskId, ...fields })
+        body: JSON.stringify({ _id: taskId, actor: currentUser?.name, ...fields })
       });
     } catch (e) {
       console.error(e);
@@ -221,7 +222,8 @@ export default function TaskTrackerTab({
       status: "not-started",
       manDays: 0,
       timeline: "TBD",
-      notes: ""
+      notes: "",
+      actor: currentUser?.name
     };
 
     try {
@@ -242,7 +244,7 @@ export default function TaskTrackerTab({
   const handleDeleteTask = async (taskId) => {
     if (!confirm("Are you sure you want to delete this task?")) return;
     try {
-      const response = await fetch(`/api/tasks?id=${taskId}`, {
+      const response = await fetch(`/api/tasks?id=${taskId}&actor=${encodeURIComponent(currentUser?.name || '')}`, {
         method: 'DELETE'
       });
       const res = await response.json();
